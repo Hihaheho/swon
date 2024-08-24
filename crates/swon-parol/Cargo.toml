@@ -1,0 +1,7 @@
+[package]
+name = "swon-parol"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+parol = "0.31"

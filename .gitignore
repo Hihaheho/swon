@@ -2,10 +2,13 @@
 !*/
 
 /target
-Cargo.lock
 
 !.gitignore
 !README.md
+!docs/**/*.md
 
 !crates/**/*.rs
 !Cargo.toml
+!Cargo.lock
+
+!crates/swon-parol/swon.par

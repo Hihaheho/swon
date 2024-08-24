@@ -1,0 +1,8 @@
+[package]
+name = "swon-parol-gen"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+parol.workspace = true

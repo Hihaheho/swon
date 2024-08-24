@@ -1,3 +1,14 @@
 [workspace]
 
+resolver = "2"
 members = ["crates/*"]
+
+[workspace.dependencies]
+parol = "0.31"
+parol_runtime = "0.24"
+serde = "1"
+parol-macros = "0.2.0"
+
+# For faster parser generation
+[profile.dev.package.parol]
+opt-level = 3

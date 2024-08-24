@@ -1,0 +1,42 @@
+%start Swon
+%title "SWON"
+%grammar_type 'LL(k)'
+%line_comment "#"
+
+%scanner String {
+  %auto_ws_off
+  %auto_newline_off
+}
+
+%%
+
+// no bindings after any sections
+Swon: { Binding } { SectionHeader Swon };
+
+Binding: Keys (ValueBinding | SectionBinding | TextBinding) ;
+  ValueBinding: '='^ Value ;
+  SectionBinding: '{'^ Swon '}'^ ;
+  TextBinding: ':'^ Text ;
+  Text: /todo/ ;
+
+SectionHeader: '@'^ Keys ;
+  Keys: Key { '.'^ Key } ;
+  ArrayMarker: '['^ [ Integer ] ']'^ ;
+  Key: (Ident | ExtensionNameSpace | String) [ ArrayMarker ] ;
+  Ident: /\p{XID_Start}\p{XID_Continue}*/ ;
+  // extension name must always be valid ident, not quoted ident
+  ExtensionNameSpace: '$'^ Ident ;
+
+Value: Object | Array | Integer | Boolean | Null | String ;
+  Object: '{'^ { Key '=' Value [','^] } '}'^ ;
+  Array: '['^ { Value [','^] } ']'^ ;
+  Integer: /\d[\d_]*/ ;
+  Boolean: 'true' | 'false' ;
+  Null: 'null' ;
+
+String: Quote^ %sc(String) { Escaped | Unicode4 | Unicode8 | Char } Quote^ %sc() [ '\'^ String ] ;
+  Quote: <String, INITIAL>/"/;
+  Escaped: <String>/\\[\\nrt\"0]/;
+  Unicode4: <String>/\\u[0-9a-fA-F]{4}/;
+  Unicode8: <String>/\\U[0-9a-fA-F]{8}/;
+  Char: <String>/\p{Letter}\p{Mark}\p{Number}\p{Punctuation}\p{Symbol}\p{Space_Separator}/;
