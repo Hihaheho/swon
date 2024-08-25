@@ -20,8 +20,8 @@ Swon: { Binding } { Section };
 
 Binding: Keys Bindings Newline ;
   Bindings: ValueBinding | SectionBinding | TextBinding ;
-  ValueBinding: '='^ [Newline] %push(ValueContext) Value %pop();
-  SectionBinding: '{'^ Newline Swon Newline '}'^ ;
+  ValueBinding: Bind^ [Newline] %push(ValueContext) Value %pop();
+  SectionBinding: Begin^ Newline Swon Newline End^ ;
   TextBinding: ':'^ [Newline] Text ;
   Text: /todo/ ;
 
@@ -35,15 +35,15 @@ SectionHeader: '@'^ Keys Newline ;
   ExtensionNameSpace: '$'^ Ident ;
 
 Value: Object | Array | Integer | Boolean | Null | String ;
-  Object: Begin^ { Key '='^ Value [','^] } End^ ;
-  Array: ArrayBegin^ { Value [','^] } ArrayEnd^ ;
+  Object: Begin^ { Key Bind^ Value Comma^ } End^ ;
+  Array: ArrayBegin^ { Value Comma^ } ArrayEnd^ ;
   Integer: <INITIAL, ValueContext>/\d[\d_]*/ ;
   Boolean: True | False ;
   True: <INITIAL, ValueContext>'true';
   False: <INITIAL, ValueContext>'false';
   Null: <INITIAL, ValueContext>'null' ;
 
-String: Quote^ %push(String) { Char } Quote^ %pop() [ "\\"^ String ] ;
+String: Quote^ %push(String) { Char } Quote^ %pop() [ Continue^ String ] ;
   Char: Escaped | Unicode4 | Unicode8 | Nonescaped ;
   Quote: <String, INITIAL>/"/;
   Escaped: <String>/\\[\\nrt\"0]/;
@@ -53,6 +53,9 @@ String: Quote^ %push(String) { Char } Quote^ %pop() [ "\\"^ String ] ;
 
 Newline: /\r\n|\r|\n/ ;
 Begin: <INITIAL, ValueContext>'{';
-End: <ValueContext, INITIAL>'}' ;
+End: <INITIAL, ValueContext>'}' ;
 ArrayBegin: <INITIAL, ValueContext>'[';
-ArrayEnd: <ValueContext, INITIAL>']' ;
+ArrayEnd: <INITIAL, ValueContext>']' ;
+Bind: <INITIAL, ValueContext>'=';
+Comma: <INITIAL, ValueContext>',' ;
+Continue: <INITIAL, ValueContext>'\\' ;

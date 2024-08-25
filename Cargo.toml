@@ -4,8 +4,8 @@ resolver = "2"
 members = ["crates/*"]
 
 [workspace.dependencies]
-parol = "0.31"
-parol_runtime = "0.24"
+parol_runtime = { version = "0.24", features = ["auto_generation"] }
+parol = { git = "https://github.com/ryo33/parol.git", rev = "090d08e22b9519d65ff9a5ce29d84b52ea678976" }
 serde = "1"
 parol-macros = "0.2.0"
 

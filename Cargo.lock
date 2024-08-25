@@ -490,8 +490,7 @@ checksum = "caff54706df99d2a78a5a4e3455ff45448d81ef1bb63c22cd14052ca0e993a3f"
 [[package]]
 name = "parol"
 version = "0.31.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4035f08652ee59c6fdfb8a30788a90e55b6af9341a2e2d009126b9ae9846df54"
+source = "git+https://github.com/ryo33/parol.git?rev=090d08e22b9519d65ff9a5ce29d84b52ea678976#090d08e22b9519d65ff9a5ce29d84b52ea678976"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -505,8 +504,8 @@ dependencies = [
  "lalry",
  "num_cpus",
  "owo-colors",
- "parol-macros",
- "parol_runtime",
+ "parol-macros 0.2.0 (git+https://github.com/ryo33/parol.git?rev=090d08e22b9519d65ff9a5ce29d84b52ea678976)",
+ "parol_runtime 0.24.1 (git+https://github.com/ryo33/parol.git?rev=090d08e22b9519d65ff9a5ce29d84b52ea678976)",
  "petgraph",
  "rand",
  "rand_regex",
@@ -531,6 +530,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bdd646301a99589f85ed580e3807ee2f7aa6529b900fd703f5a14716b7426b28"
 
 [[package]]
+name = "parol-macros"
+version = "0.2.0"
+source = "git+https://github.com/ryo33/parol.git?rev=090d08e22b9519d65ff9a5ce29d84b52ea678976#090d08e22b9519d65ff9a5ce29d84b52ea678976"
+
+[[package]]
 name = "parol_runtime"
 version = "0.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -542,7 +546,26 @@ dependencies = [
  "function_name",
  "log",
  "once_cell",
- "parol-macros",
+ "parol-macros 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "petgraph",
+ "regex-automata",
+ "syntree",
+ "syntree_layout",
+ "thiserror",
+]
+
+[[package]]
+name = "parol_runtime"
+version = "0.24.1"
+source = "git+https://github.com/ryo33/parol.git?rev=090d08e22b9519d65ff9a5ce29d84b52ea678976#090d08e22b9519d65ff9a5ce29d84b52ea678976"
+dependencies = [
+ "anyhow",
+ "codespan-reporting",
+ "derive_builder",
+ "function_name",
+ "log",
+ "once_cell",
+ "parol-macros 0.2.0 (git+https://github.com/ryo33/parol.git?rev=090d08e22b9519d65ff9a5ce29d84b52ea678976)",
  "petgraph",
  "regex-automata",
  "syntree",
@@ -724,9 +747,9 @@ checksum = "f3cb5ba0dc43242ce17de99c180e96db90b235b8a9fdc9543c96d2209116bd9f"
 
 [[package]]
 name = "serde"
-version = "1.0.208"
+version = "1.0.209"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cff085d2cb684faa248efb494c39b68e522822ac0de72ccf08109abde717cfb2"
+checksum = "99fce0ffe7310761ca6bf9faf5115afbc19688edd00171d81b1bb1b116c63e09"
 dependencies = [
  "serde_derive",
 ]
@@ -737,9 +760,9 @@ version = "0.1.0"
 
 [[package]]
 name = "serde_derive"
-version = "1.0.208"
+version = "1.0.209"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24008e81ff7613ed8e5ba0cfaf24e2c2f1e5b8a0495711e44fcd4882fca62bcf"
+checksum = "a5831b979fd7b5439637af1752d535ff49f4860c0f341d1baeb6faf0f4242170"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -784,7 +807,7 @@ version = "0.1.0"
 name = "swon-parol"
 version = "0.1.0"
 dependencies = [
- "parol",
+ "parol_runtime 0.24.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
