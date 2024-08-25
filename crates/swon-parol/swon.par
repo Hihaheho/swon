@@ -3,40 +3,56 @@
 %grammar_type 'LL(k)'
 %line_comment "#"
 
+%auto_newline_off
+
 %scanner String {
   %auto_ws_off
-  %auto_newline_off
+}
+
+%scanner ValueContext {
 }
 
 %%
 
 // no bindings after any sections
-Swon: { Binding } { SectionHeader Swon };
+Swon: { Binding } { Section };
+  Section: SectionHeader Swon Newline;
 
-Binding: Keys (ValueBinding | SectionBinding | TextBinding) ;
-  ValueBinding: '='^ Value ;
-  SectionBinding: '{'^ Swon '}'^ ;
-  TextBinding: ':'^ Text ;
+Binding: Keys Bindings Newline ;
+  Bindings: ValueBinding | SectionBinding | TextBinding ;
+  ValueBinding: '='^ [Newline] %push(ValueContext) Value %pop();
+  SectionBinding: '{'^ Newline Swon Newline '}'^ ;
+  TextBinding: ':'^ [Newline] Text ;
   Text: /todo/ ;
 
-SectionHeader: '@'^ Keys ;
+SectionHeader: '@'^ Keys Newline ;
   Keys: Key { '.'^ Key } ;
-  ArrayMarker: '['^ [ Integer ] ']'^ ;
-  Key: (Ident | ExtensionNameSpace | String) [ ArrayMarker ] ;
+  Key: KeyBase [ ArrayMarker ] ;
+  ArrayMarker: ArrayBegin^ [ Integer ] ArrayEnd^ ;
+  KeyBase: Ident | ExtensionNameSpace | String ;
   Ident: /\p{XID_Start}\p{XID_Continue}*/ ;
   // extension name must always be valid ident, not quoted ident
   ExtensionNameSpace: '$'^ Ident ;
 
 Value: Object | Array | Integer | Boolean | Null | String ;
-  Object: '{'^ { Key '=' Value [','^] } '}'^ ;
-  Array: '['^ { Value [','^] } ']'^ ;
-  Integer: /\d[\d_]*/ ;
-  Boolean: 'true' | 'false' ;
-  Null: 'null' ;
+  Object: Begin^ { Key '='^ Value [','^] } End^ ;
+  Array: ArrayBegin^ { Value [','^] } ArrayEnd^ ;
+  Integer: <INITIAL, ValueContext>/\d[\d_]*/ ;
+  Boolean: True | False ;
+  True: <INITIAL, ValueContext>'true';
+  False: <INITIAL, ValueContext>'false';
+  Null: <INITIAL, ValueContext>'null' ;
 
-String: Quote^ %sc(String) { Escaped | Unicode4 | Unicode8 | Char } Quote^ %sc() [ '\'^ String ] ;
+String: Quote^ %push(String) { Char } Quote^ %pop() [ "\\"^ String ] ;
+  Char: Escaped | Unicode4 | Unicode8 | Nonescaped ;
   Quote: <String, INITIAL>/"/;
   Escaped: <String>/\\[\\nrt\"0]/;
   Unicode4: <String>/\\u[0-9a-fA-F]{4}/;
   Unicode8: <String>/\\U[0-9a-fA-F]{8}/;
-  Char: <String>/\p{Letter}\p{Mark}\p{Number}\p{Punctuation}\p{Symbol}\p{Space_Separator}/;
+  Nonescaped: <String>/\p{Letter}\p{Mark}\p{Number}\p{Punctuation}\p{Symbol}\p{Space_Separator}/;
+
+Newline: /\r\n|\r|\n/ ;
+Begin: <INITIAL, ValueContext>'{';
+End: <ValueContext, INITIAL>'}' ;
+ArrayBegin: <INITIAL, ValueContext>'[';
+ArrayEnd: <ValueContext, INITIAL>']' ;
