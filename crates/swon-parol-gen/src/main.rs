@@ -9,8 +9,9 @@ fn main() {
         .enable_auto_generation()
         .trim_parse_tree()
         .range()
-        // .minimize_boxed_types()
-        .max_lookahead(1)
+        .minimize_boxed_types()
+        // 2 for trailing comma
+        .max_lookahead(2)
         .unwrap()
         .generate_parser()
         .unwrap();

@@ -1,61 +1,59 @@
 %start Swon
 %title "SWON"
-%grammar_type 'LL(k)'
+%grammar_type 'LALR(1)'
 %line_comment "#"
 
 %auto_newline_off
 
-%scanner String {
-  %auto_ws_off
-}
-
-%scanner ValueContext {
+// Allow newline within array or object
+%on Begin, ArrayBegin %enter Value
+%scanner Value {
+  %on End, ArrayEnd %enter INITIAL
 }
 
 %%
 
 // no bindings after any sections
-Swon: { Binding } { Section };
-  Section: SectionHeader Swon Newline;
+Swon: { Binding } { Section } ;
+  Section: SectionHeader Swon Newline ;
 
 Binding: Keys Bindings Newline ;
   Bindings: ValueBinding | SectionBinding | TextBinding ;
-  ValueBinding: Bind^ [Newline] %push(ValueContext) Value %pop();
-  SectionBinding: Begin^ Newline Swon Newline End^ ;
-  TextBinding: ':'^ [Newline] Text ;
+  ValueBinding: Bind [Newline] Value;
+  SectionBinding: Begin Newline Swon Newline End ;
+  TextBinding: TextStart [Newline] Text ;
   Text: /todo/ ;
 
-SectionHeader: '@'^ Keys Newline ;
-  Keys: Key { '.'^ Key } ;
+SectionHeader: At Keys Newline ;
+  Keys: Key { Dot Key } ;
   Key: KeyBase [ ArrayMarker ] ;
-  ArrayMarker: ArrayBegin^ [ Integer ] ArrayEnd^ ;
+  ArrayMarker: ArrayBegin [ Integer ] ArrayEnd ;
   KeyBase: Ident | ExtensionNameSpace | String ;
   Ident: /\p{XID_Start}\p{XID_Continue}*/ ;
   // extension name must always be valid ident, not quoted ident
-  ExtensionNameSpace: '$'^ Ident ;
+  ExtensionNameSpace: Ext Ident ;
 
-Value: Object | Array | Integer | Boolean | Null | String ;
-  Object: Begin^ { Key Bind^ Value Comma^ } End^ ;
-  Array: ArrayBegin^ { Value Comma^ } ArrayEnd^ ;
-  Integer: <INITIAL, ValueContext>/\d[\d_]*/ ;
+Value: Object | Array | Integer | Boolean | Null | StringContinues ;
+  Object: Begin { Key Bind Value [ Comma ] } End ;
+  Array: ArrayBegin { Value [ Comma ] } ArrayEnd ;
+  Integer: <INITIAL, Value>/\d[\d_]*/ ;
   Boolean: True | False ;
-  True: <INITIAL, ValueContext>'true';
-  False: <INITIAL, ValueContext>'false';
-  Null: <INITIAL, ValueContext>'null' ;
+  True: <INITIAL, Value>'true' ;
+  False: <INITIAL, Value>'false';
+  Null: <INITIAL, Value>'null' ;
 
-String: Quote^ %push(String) { Char } Quote^ %pop() [ Continue^ String ] ;
-  Char: Escaped | Unicode4 | Unicode8 | Nonescaped ;
-  Quote: <String, INITIAL>/"/;
-  Escaped: <String>/\\[\\nrt\"0]/;
-  Unicode4: <String>/\\u[0-9a-fA-F]{4}/;
-  Unicode8: <String>/\\U[0-9a-fA-F]{8}/;
-  Nonescaped: <String>/\p{Letter}\p{Mark}\p{Number}\p{Punctuation}\p{Symbol}\p{Space_Separator}/;
+StringContinues: String { Continue Newline String } ;
+String: /"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"/;
 
 Newline: /\r\n|\r|\n/ ;
-Begin: <INITIAL, ValueContext>'{';
-End: <INITIAL, ValueContext>'}' ;
-ArrayBegin: <INITIAL, ValueContext>'[';
-ArrayEnd: <INITIAL, ValueContext>']' ;
-Bind: <INITIAL, ValueContext>'=';
-Comma: <INITIAL, ValueContext>',' ;
-Continue: <INITIAL, ValueContext>'\\' ;
+At: '@' ;
+Ext: '$' ;
+Dot: <INITIAL, Value>'.' ;
+Begin: <INITIAL, Value>'{' ;
+End: <INITIAL, Value>'}' ;
+ArrayBegin: <INITIAL, Value>'[' ;
+ArrayEnd: <INITIAL, Value>']' ;
+Bind: <INITIAL, Value>'=' ;
+Comma: <INITIAL, Value>',' ;
+Continue: <INITIAL, Value>'\\' ;
+TextStart: <INITIAL, Value> ":" ;

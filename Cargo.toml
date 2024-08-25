@@ -7,7 +7,9 @@ members = ["crates/*"]
 parol_runtime = { version = "0.24", features = ["auto_generation"] }
 parol = { git = "https://github.com/ryo33/parol.git", rev = "090d08e22b9519d65ff9a5ce29d84b52ea678976" }
 serde = "1"
+serde_json = "1"
 parol-macros = "0.2.0"
+anyhow = "1"
 
 # For faster parser generation
 [profile.dev.package.parol]

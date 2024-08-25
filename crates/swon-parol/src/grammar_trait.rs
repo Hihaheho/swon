@@ -135,43 +135,33 @@ pub trait GrammarTrait<'t> {
         Ok(())
     }
 
+    /// Semantic action for non-terminal 'StringContinues'
+    fn string_continues(&mut self, _arg: &StringContinues<'t>) -> Result<()> {
+        Ok(())
+    }
+
     /// Semantic action for non-terminal 'String'
     fn string(&mut self, _arg: &String<'t>) -> Result<()> {
         Ok(())
     }
 
-    /// Semantic action for non-terminal 'Char'
-    fn char(&mut self, _arg: &Char<'t>) -> Result<()> {
-        Ok(())
-    }
-
-    /// Semantic action for non-terminal 'Quote'
-    fn quote(&mut self, _arg: &Quote<'t>) -> Result<()> {
-        Ok(())
-    }
-
-    /// Semantic action for non-terminal 'Escaped'
-    fn escaped(&mut self, _arg: &Escaped<'t>) -> Result<()> {
-        Ok(())
-    }
-
-    /// Semantic action for non-terminal 'Unicode4'
-    fn unicode4(&mut self, _arg: &Unicode4<'t>) -> Result<()> {
-        Ok(())
-    }
-
-    /// Semantic action for non-terminal 'Unicode8'
-    fn unicode8(&mut self, _arg: &Unicode8<'t>) -> Result<()> {
-        Ok(())
-    }
-
-    /// Semantic action for non-terminal 'Nonescaped'
-    fn nonescaped(&mut self, _arg: &Nonescaped<'t>) -> Result<()> {
-        Ok(())
-    }
-
     /// Semantic action for non-terminal 'Newline'
     fn newline(&mut self, _arg: &Newline<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'At'
+    fn at(&mut self, _arg: &At<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'Ext'
+    fn ext(&mut self, _arg: &Ext<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'Dot'
+    fn dot(&mut self, _arg: &Dot<'t>) -> Result<()> {
         Ok(())
     }
 
@@ -210,6 +200,11 @@ pub trait GrammarTrait<'t> {
         Ok(())
     }
 
+    /// Semantic action for non-terminal 'TextStart'
+    fn text_start(&mut self, _arg: &TextStart<'t>) -> Result<()> {
+        Ok(())
+    }
+
     /// This method provides skipped language comments.
     /// If you need comments please provide your own implementation of this method.
     fn on_comment_parsed(&mut self, _token: Token<'t>) {}
@@ -229,7 +224,7 @@ pub trait GrammarTrait<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct BindingsValueBinding<'t> {
-    pub value_binding: Box<ValueBinding<'t>>,
+    pub value_binding: ValueBinding<'t>,
 }
 
 impl<'t> ToSpan for BindingsValueBinding<'t> {
@@ -247,7 +242,7 @@ impl<'t> ToSpan for BindingsValueBinding<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct BindingsSectionBinding<'t> {
-    pub section_binding: Box<SectionBinding<'t>>,
+    pub section_binding: SectionBinding<'t>,
 }
 
 impl<'t> ToSpan for BindingsSectionBinding<'t> {
@@ -265,7 +260,7 @@ impl<'t> ToSpan for BindingsSectionBinding<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct BindingsTextBinding<'t> {
-    pub text_binding: Box<TextBinding<'t>>,
+    pub text_binding: TextBinding<'t>,
 }
 
 impl<'t> ToSpan for BindingsTextBinding<'t> {
@@ -283,7 +278,7 @@ impl<'t> ToSpan for BindingsTextBinding<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct KeyBaseIdent<'t> {
-    pub ident: Box<Ident<'t>>,
+    pub ident: Ident<'t>,
 }
 
 impl<'t> ToSpan for KeyBaseIdent<'t> {
@@ -301,7 +296,7 @@ impl<'t> ToSpan for KeyBaseIdent<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct KeyBaseExtensionNameSpace<'t> {
-    pub extension_name_space: Box<ExtensionNameSpace<'t>>,
+    pub extension_name_space: ExtensionNameSpace<'t>,
 }
 
 impl<'t> ToSpan for KeyBaseExtensionNameSpace<'t> {
@@ -319,7 +314,7 @@ impl<'t> ToSpan for KeyBaseExtensionNameSpace<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct KeyBaseString<'t> {
-    pub string: Box<String<'t>>,
+    pub string: String<'t>,
 }
 
 impl<'t> ToSpan for KeyBaseString<'t> {
@@ -337,7 +332,7 @@ impl<'t> ToSpan for KeyBaseString<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct ValueObject<'t> {
-    pub object: Box<Object<'t>>,
+    pub object: Object<'t>,
 }
 
 impl<'t> ToSpan for ValueObject<'t> {
@@ -355,7 +350,7 @@ impl<'t> ToSpan for ValueObject<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct ValueArray<'t> {
-    pub array: Box<Array<'t>>,
+    pub array: Array<'t>,
 }
 
 impl<'t> ToSpan for ValueArray<'t> {
@@ -373,7 +368,7 @@ impl<'t> ToSpan for ValueArray<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct ValueInteger<'t> {
-    pub integer: Box<Integer<'t>>,
+    pub integer: Integer<'t>,
 }
 
 impl<'t> ToSpan for ValueInteger<'t> {
@@ -391,7 +386,7 @@ impl<'t> ToSpan for ValueInteger<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct ValueBoolean<'t> {
-    pub boolean: Box<Boolean<'t>>,
+    pub boolean: Boolean<'t>,
 }
 
 impl<'t> ToSpan for ValueBoolean<'t> {
@@ -409,7 +404,7 @@ impl<'t> ToSpan for ValueBoolean<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct ValueNull<'t> {
-    pub null: Box<Null<'t>>,
+    pub null: Null<'t>,
 }
 
 impl<'t> ToSpan for ValueNull<'t> {
@@ -421,23 +416,23 @@ impl<'t> ToSpan for ValueNull<'t> {
 ///
 /// Type derived for production 38
 ///
-/// `Value: String;`
+/// `Value: StringContinues;`
 ///
 #[allow(dead_code)]
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
-pub struct ValueString<'t> {
-    pub string: Box<String<'t>>,
+pub struct ValueStringContinues<'t> {
+    pub string_continues: StringContinues<'t>,
 }
 
-impl<'t> ToSpan for ValueString<'t> {
+impl<'t> ToSpan for ValueStringContinues<'t> {
     fn span(&self) -> Span {
-        self.string.span()
+        self.string_continues.span()
     }
 }
 
 ///
-/// Type derived for production 46
+/// Type derived for production 50
 ///
 /// `Boolean: True;`
 ///
@@ -445,7 +440,7 @@ impl<'t> ToSpan for ValueString<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct BooleanTrue<'t> {
-    pub r#true: Box<True<'t>>,
+    pub r#true: True<'t>,
 }
 
 impl<'t> ToSpan for BooleanTrue<'t> {
@@ -455,7 +450,7 @@ impl<'t> ToSpan for BooleanTrue<'t> {
 }
 
 ///
-/// Type derived for production 47
+/// Type derived for production 51
 ///
 /// `Boolean: False;`
 ///
@@ -463,84 +458,12 @@ impl<'t> ToSpan for BooleanTrue<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct BooleanFalse<'t> {
-    pub r#false: Box<False<'t>>,
+    pub r#false: False<'t>,
 }
 
 impl<'t> ToSpan for BooleanFalse<'t> {
     fn span(&self) -> Span {
         self.r#false.span()
-    }
-}
-
-///
-/// Type derived for production 56
-///
-/// `Char: Escaped;`
-///
-#[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
-pub struct CharEscaped<'t> {
-    pub escaped: Box<Escaped<'t>>,
-}
-
-impl<'t> ToSpan for CharEscaped<'t> {
-    fn span(&self) -> Span {
-        self.escaped.span()
-    }
-}
-
-///
-/// Type derived for production 57
-///
-/// `Char: Unicode4;`
-///
-#[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
-pub struct CharUnicode4<'t> {
-    pub unicode4: Box<Unicode4<'t>>,
-}
-
-impl<'t> ToSpan for CharUnicode4<'t> {
-    fn span(&self) -> Span {
-        self.unicode4.span()
-    }
-}
-
-///
-/// Type derived for production 58
-///
-/// `Char: Unicode8;`
-///
-#[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
-pub struct CharUnicode8<'t> {
-    pub unicode8: Box<Unicode8<'t>>,
-}
-
-impl<'t> ToSpan for CharUnicode8<'t> {
-    fn span(&self) -> Span {
-        self.unicode8.span()
-    }
-}
-
-///
-/// Type derived for production 59
-///
-/// `Char: Nonescaped;`
-///
-#[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
-pub struct CharNonescaped<'t> {
-    pub nonescaped: Box<Nonescaped<'t>>,
-}
-
-impl<'t> ToSpan for CharNonescaped<'t> {
-    fn span(&self) -> Span {
-        self.nonescaped.span()
     }
 }
 
@@ -556,15 +479,20 @@ impl<'t> ToSpan for CharNonescaped<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct Array<'t> {
+    pub array_begin: ArrayBegin<'t>,
     pub array_list: Vec<ArrayList<'t>>,
+    pub array_end: ArrayEnd<'t>,
 }
 
 impl<'t> ToSpan for Array<'t> {
     fn span(&self) -> Span {
-        self.array_list
-            .first()
-            .map_or(Span::default(), |f| f.span())
+        self.array_begin.span()
+            + self
+                .array_list
+                .first()
+                .map_or(Span::default(), |f| f.span())
             + self.array_list.last().map_or(Span::default(), |l| l.span())
+            + self.array_end.span()
     }
 }
 
@@ -607,12 +535,17 @@ impl<'t> ToSpan for ArrayEnd<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct ArrayList<'t> {
-    pub value: Box<Value<'t>>,
+    pub value: Value<'t>,
+    pub array_opt: Option<ArrayOpt<'t>>,
 }
 
 impl<'t> ToSpan for ArrayList<'t> {
     fn span(&self) -> Span {
         self.value.span()
+            + self
+                .array_opt
+                .as_ref()
+                .map_or(Span::default(), |o| o.span())
     }
 }
 
@@ -623,14 +556,19 @@ impl<'t> ToSpan for ArrayList<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct ArrayMarker<'t> {
+    pub array_begin: ArrayBegin<'t>,
     pub array_marker_opt: Option<ArrayMarkerOpt<'t>>,
+    pub array_end: ArrayEnd<'t>,
 }
 
 impl<'t> ToSpan for ArrayMarker<'t> {
     fn span(&self) -> Span {
-        self.array_marker_opt
-            .as_ref()
-            .map_or(Span::default(), |o| o.span())
+        self.array_begin.span()
+            + self
+                .array_marker_opt
+                .as_ref()
+                .map_or(Span::default(), |o| o.span())
+            + self.array_end.span()
     }
 }
 
@@ -641,12 +579,44 @@ impl<'t> ToSpan for ArrayMarker<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct ArrayMarkerOpt<'t> {
-    pub integer: Box<Integer<'t>>,
+    pub integer: Integer<'t>,
 }
 
 impl<'t> ToSpan for ArrayMarkerOpt<'t> {
     fn span(&self) -> Span {
         self.integer.span()
+    }
+}
+
+///
+/// Type derived for non-terminal ArrayOpt
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct ArrayOpt<'t> {
+    pub comma: Comma<'t>,
+}
+
+impl<'t> ToSpan for ArrayOpt<'t> {
+    fn span(&self) -> Span {
+        self.comma.span()
+    }
+}
+
+///
+/// Type derived for non-terminal At
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct At<'t> {
+    pub at: Token<'t>, /* @ */
+}
+
+impl<'t> ToSpan for At<'t> {
+    fn span(&self) -> Span {
+        self.at.span()
     }
 }
 
@@ -689,9 +659,9 @@ impl<'t> ToSpan for Bind<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct Binding<'t> {
-    pub keys: Box<Keys<'t>>,
-    pub bindings: Box<Bindings<'t>>,
-    pub newline: Box<Newline<'t>>,
+    pub keys: Keys<'t>,
+    pub bindings: Bindings<'t>,
+    pub newline: Newline<'t>,
 }
 
 impl<'t> ToSpan for Binding<'t> {
@@ -741,29 +711,6 @@ impl<'t> ToSpan for Boolean<'t> {
 }
 
 ///
-/// Type derived for non-terminal Char
-///
-#[allow(dead_code)]
-#[derive(Debug, Clone)]
-pub enum Char<'t> {
-    Escaped(CharEscaped<'t>),
-    Unicode4(CharUnicode4<'t>),
-    Unicode8(CharUnicode8<'t>),
-    Nonescaped(CharNonescaped<'t>),
-}
-
-impl<'t> ToSpan for Char<'t> {
-    fn span(&self) -> Span {
-        match self {
-            Char::Escaped(v) => v.span(),
-            Char::Unicode4(v) => v.span(),
-            Char::Unicode8(v) => v.span(),
-            Char::Nonescaped(v) => v.span(),
-        }
-    }
-}
-
-///
 /// Type derived for non-terminal Comma
 ///
 #[allow(dead_code)]
@@ -796,6 +743,22 @@ impl<'t> ToSpan for Continue<'t> {
 }
 
 ///
+/// Type derived for non-terminal Dot
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct Dot<'t> {
+    pub dot: Token<'t>, /* . */
+}
+
+impl<'t> ToSpan for Dot<'t> {
+    fn span(&self) -> Span {
+        self.dot.span()
+    }
+}
+
+///
 /// Type derived for non-terminal End
 ///
 #[allow(dead_code)]
@@ -812,18 +775,18 @@ impl<'t> ToSpan for End<'t> {
 }
 
 ///
-/// Type derived for non-terminal Escaped
+/// Type derived for non-terminal Ext
 ///
 #[allow(dead_code)]
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
-pub struct Escaped<'t> {
-    pub escaped: Token<'t>, /* \\[\\nrt\"0] */
+pub struct Ext<'t> {
+    pub ext: Token<'t>, /* $ */
 }
 
-impl<'t> ToSpan for Escaped<'t> {
+impl<'t> ToSpan for Ext<'t> {
     fn span(&self) -> Span {
-        self.escaped.span()
+        self.ext.span()
     }
 }
 
@@ -834,12 +797,13 @@ impl<'t> ToSpan for Escaped<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct ExtensionNameSpace<'t> {
-    pub ident: Box<Ident<'t>>,
+    pub ext: Ext<'t>,
+    pub ident: Ident<'t>,
 }
 
 impl<'t> ToSpan for ExtensionNameSpace<'t> {
     fn span(&self) -> Span {
-        self.ident.span()
+        self.ext.span() + self.ident.span()
     }
 }
 
@@ -898,7 +862,7 @@ impl<'t> ToSpan for Integer<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct Key<'t> {
-    pub key_base: Box<KeyBase<'t>>,
+    pub key_base: KeyBase<'t>,
     pub key_opt: Option<KeyOpt<'t>>,
 }
 
@@ -936,7 +900,7 @@ impl<'t> ToSpan for KeyBase<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct KeyOpt<'t> {
-    pub array_marker: Box<ArrayMarker<'t>>,
+    pub array_marker: ArrayMarker<'t>,
 }
 
 impl<'t> ToSpan for KeyOpt<'t> {
@@ -952,7 +916,7 @@ impl<'t> ToSpan for KeyOpt<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct Keys<'t> {
-    pub key: Box<Key<'t>>,
+    pub key: Key<'t>,
     pub keys_list: Vec<KeysList<'t>>,
 }
 
@@ -971,12 +935,13 @@ impl<'t> ToSpan for Keys<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct KeysList<'t> {
-    pub key: Box<Key<'t>>,
+    pub dot: Dot<'t>,
+    pub key: Key<'t>,
 }
 
 impl<'t> ToSpan for KeysList<'t> {
     fn span(&self) -> Span {
-        self.key.span()
+        self.dot.span() + self.key.span()
     }
 }
 
@@ -993,22 +958,6 @@ pub struct Newline<'t> {
 impl<'t> ToSpan for Newline<'t> {
     fn span(&self) -> Span {
         self.newline.span()
-    }
-}
-
-///
-/// Type derived for non-terminal Nonescaped
-///
-#[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
-pub struct Nonescaped<'t> {
-    pub nonescaped: Token<'t>, /* \p{Letter}\p{Mark}\p{Number}\p{Punctuation}\p{Symbol}\p{Space_Separator} */
-}
-
-impl<'t> ToSpan for Nonescaped<'t> {
-    fn span(&self) -> Span {
-        self.nonescaped.span()
     }
 }
 
@@ -1035,18 +984,23 @@ impl<'t> ToSpan for Null<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct Object<'t> {
+    pub begin: Begin<'t>,
     pub object_list: Vec<ObjectList<'t>>,
+    pub end: End<'t>,
 }
 
 impl<'t> ToSpan for Object<'t> {
     fn span(&self) -> Span {
-        self.object_list
-            .first()
-            .map_or(Span::default(), |f| f.span())
+        self.begin.span()
+            + self
+                .object_list
+                .first()
+                .map_or(Span::default(), |f| f.span())
             + self
                 .object_list
                 .last()
                 .map_or(Span::default(), |l| l.span())
+            + self.end.span()
     }
 }
 
@@ -1057,29 +1011,37 @@ impl<'t> ToSpan for Object<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct ObjectList<'t> {
-    pub key: Box<Key<'t>>,
-    pub value: Box<Value<'t>>,
+    pub key: Key<'t>,
+    pub bind: Bind<'t>,
+    pub value: Value<'t>,
+    pub object_opt: Option<ObjectOpt<'t>>,
 }
 
 impl<'t> ToSpan for ObjectList<'t> {
     fn span(&self) -> Span {
-        self.key.span() + self.value.span()
+        self.key.span()
+            + self.bind.span()
+            + self.value.span()
+            + self
+                .object_opt
+                .as_ref()
+                .map_or(Span::default(), |o| o.span())
     }
 }
 
 ///
-/// Type derived for non-terminal Quote
+/// Type derived for non-terminal ObjectOpt
 ///
 #[allow(dead_code)]
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
-pub struct Quote<'t> {
-    pub quote: Token<'t>, /* " */
+pub struct ObjectOpt<'t> {
+    pub comma: Comma<'t>,
 }
 
-impl<'t> ToSpan for Quote<'t> {
+impl<'t> ToSpan for ObjectOpt<'t> {
     fn span(&self) -> Span {
-        self.quote.span()
+        self.comma.span()
     }
 }
 
@@ -1090,9 +1052,9 @@ impl<'t> ToSpan for Quote<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct Section<'t> {
-    pub section_header: Box<SectionHeader<'t>>,
-    pub swon: Box<Swon<'t>>,
-    pub newline: Box<Newline<'t>>,
+    pub section_header: SectionHeader<'t>,
+    pub swon: Swon<'t>,
+    pub newline: Newline<'t>,
 }
 
 impl<'t> ToSpan for Section<'t> {
@@ -1108,14 +1070,20 @@ impl<'t> ToSpan for Section<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct SectionBinding<'t> {
-    pub newline: Box<Newline<'t>>,
-    pub swon: Box<Swon<'t>>,
-    pub newline0: Box<Newline<'t>>,
+    pub begin: Begin<'t>,
+    pub newline: Newline<'t>,
+    pub swon: Swon<'t>,
+    pub newline0: Newline<'t>,
+    pub end: End<'t>,
 }
 
 impl<'t> ToSpan for SectionBinding<'t> {
     fn span(&self) -> Span {
-        self.newline.span() + self.swon.span() + self.newline0.span()
+        self.begin.span()
+            + self.newline.span()
+            + self.swon.span()
+            + self.newline0.span()
+            + self.end.span()
     }
 }
 
@@ -1126,13 +1094,14 @@ impl<'t> ToSpan for SectionBinding<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct SectionHeader<'t> {
-    pub keys: Box<Keys<'t>>,
-    pub newline: Box<Newline<'t>>,
+    pub at: At<'t>,
+    pub keys: Keys<'t>,
+    pub newline: Newline<'t>,
 }
 
 impl<'t> ToSpan for SectionHeader<'t> {
     fn span(&self) -> Span {
-        self.keys.span() + self.newline.span()
+        self.at.span() + self.keys.span() + self.newline.span()
     }
 }
 
@@ -1143,55 +1112,55 @@ impl<'t> ToSpan for SectionHeader<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct String<'t> {
-    pub string_list: Vec<StringList<'t>>,
-    pub string_opt: Option<StringOpt<'t>>,
+    pub string: Token<'t>, /* "(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*" */
 }
 
 impl<'t> ToSpan for String<'t> {
     fn span(&self) -> Span {
-        self.string_list
-            .first()
-            .map_or(Span::default(), |f| f.span())
-            + self
-                .string_list
-                .last()
-                .map_or(Span::default(), |l| l.span())
-            + self
-                .string_opt
-                .as_ref()
-                .map_or(Span::default(), |o| o.span())
+        self.string.span()
     }
 }
 
 ///
-/// Type derived for non-terminal StringList
+/// Type derived for non-terminal StringContinues
 ///
 #[allow(dead_code)]
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
-pub struct StringList<'t> {
-    pub char: Box<Char<'t>>,
+pub struct StringContinues<'t> {
+    pub string: String<'t>,
+    pub string_continues_list: Vec<StringContinuesList<'t>>,
 }
 
-impl<'t> ToSpan for StringList<'t> {
-    fn span(&self) -> Span {
-        self.char.span()
-    }
-}
-
-///
-/// Type derived for non-terminal StringOpt
-///
-#[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
-pub struct StringOpt<'t> {
-    pub string: Box<String<'t>>,
-}
-
-impl<'t> ToSpan for StringOpt<'t> {
+impl<'t> ToSpan for StringContinues<'t> {
     fn span(&self) -> Span {
         self.string.span()
+            + self
+                .string_continues_list
+                .first()
+                .map_or(Span::default(), |f| f.span())
+            + self
+                .string_continues_list
+                .last()
+                .map_or(Span::default(), |l| l.span())
+    }
+}
+
+///
+/// Type derived for non-terminal StringContinuesList
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct StringContinuesList<'t> {
+    pub r#continue: Continue<'t>,
+    pub newline: Newline<'t>,
+    pub string: String<'t>,
+}
+
+impl<'t> ToSpan for StringContinuesList<'t> {
+    fn span(&self) -> Span {
+        self.r#continue.span() + self.newline.span() + self.string.span()
     }
 }
 
@@ -1225,7 +1194,7 @@ impl<'t> ToSpan for Swon<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct SwonList<'t> {
-    pub binding: Box<Binding<'t>>,
+    pub binding: Binding<'t>,
 }
 
 impl<'t> ToSpan for SwonList<'t> {
@@ -1241,7 +1210,7 @@ impl<'t> ToSpan for SwonList<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct SwonList0<'t> {
-    pub section: Box<Section<'t>>,
+    pub section: Section<'t>,
 }
 
 impl<'t> ToSpan for SwonList0<'t> {
@@ -1273,15 +1242,18 @@ impl<'t> ToSpan for Text<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct TextBinding<'t> {
+    pub text_start: TextStart<'t>,
     pub text_binding_opt: Option<TextBindingOpt<'t>>,
-    pub text: Box<Text<'t>>,
+    pub text: Text<'t>,
 }
 
 impl<'t> ToSpan for TextBinding<'t> {
     fn span(&self) -> Span {
-        self.text_binding_opt
-            .as_ref()
-            .map_or(Span::default(), |o| o.span())
+        self.text_start.span()
+            + self
+                .text_binding_opt
+                .as_ref()
+                .map_or(Span::default(), |o| o.span())
             + self.text.span()
     }
 }
@@ -1293,12 +1265,28 @@ impl<'t> ToSpan for TextBinding<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct TextBindingOpt<'t> {
-    pub newline: Box<Newline<'t>>,
+    pub newline: Newline<'t>,
 }
 
 impl<'t> ToSpan for TextBindingOpt<'t> {
     fn span(&self) -> Span {
         self.newline.span()
+    }
+}
+
+///
+/// Type derived for non-terminal TextStart
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct TextStart<'t> {
+    pub text_start: Token<'t>, /* : */
+}
+
+impl<'t> ToSpan for TextStart<'t> {
+    fn span(&self) -> Span {
+        self.text_start.span()
     }
 }
 
@@ -1319,38 +1307,6 @@ impl<'t> ToSpan for True<'t> {
 }
 
 ///
-/// Type derived for non-terminal Unicode4
-///
-#[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
-pub struct Unicode4<'t> {
-    pub unicode4: Token<'t>, /* \\u[0-9a-fA-F]{4} */
-}
-
-impl<'t> ToSpan for Unicode4<'t> {
-    fn span(&self) -> Span {
-        self.unicode4.span()
-    }
-}
-
-///
-/// Type derived for non-terminal Unicode8
-///
-#[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
-pub struct Unicode8<'t> {
-    pub unicode8: Token<'t>, /* \\U[0-9a-fA-F]{8} */
-}
-
-impl<'t> ToSpan for Unicode8<'t> {
-    fn span(&self) -> Span {
-        self.unicode8.span()
-    }
-}
-
-///
 /// Type derived for non-terminal Value
 ///
 #[allow(dead_code)]
@@ -1361,7 +1317,7 @@ pub enum Value<'t> {
     Integer(ValueInteger<'t>),
     Boolean(ValueBoolean<'t>),
     Null(ValueNull<'t>),
-    String(ValueString<'t>),
+    StringContinues(ValueStringContinues<'t>),
 }
 
 impl<'t> ToSpan for Value<'t> {
@@ -1372,7 +1328,7 @@ impl<'t> ToSpan for Value<'t> {
             Value::Integer(v) => v.span(),
             Value::Boolean(v) => v.span(),
             Value::Null(v) => v.span(),
-            Value::String(v) => v.span(),
+            Value::StringContinues(v) => v.span(),
         }
     }
 }
@@ -1384,15 +1340,18 @@ impl<'t> ToSpan for Value<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct ValueBinding<'t> {
+    pub bind: Bind<'t>,
     pub value_binding_opt: Option<ValueBindingOpt<'t>>,
-    pub value: Box<Value<'t>>,
+    pub value: Value<'t>,
 }
 
 impl<'t> ToSpan for ValueBinding<'t> {
     fn span(&self) -> Span {
-        self.value_binding_opt
-            .as_ref()
-            .map_or(Span::default(), |o| o.span())
+        self.bind.span()
+            + self
+                .value_binding_opt
+                .as_ref()
+                .map_or(Span::default(), |o| o.span())
             + self.value.span()
     }
 }
@@ -1404,7 +1363,7 @@ impl<'t> ToSpan for ValueBinding<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct ValueBindingOpt<'t> {
-    pub newline: Box<Newline<'t>>,
+    pub newline: Newline<'t>,
 }
 
 impl<'t> ToSpan for ValueBindingOpt<'t> {
@@ -1427,16 +1386,18 @@ pub enum ASTType<'t> {
     ArrayList(Vec<ArrayList<'t>>),
     ArrayMarker(ArrayMarker<'t>),
     ArrayMarkerOpt(Option<ArrayMarkerOpt<'t>>),
+    ArrayOpt(Option<ArrayOpt<'t>>),
+    At(At<'t>),
     Begin(Begin<'t>),
     Bind(Bind<'t>),
     Binding(Binding<'t>),
     Bindings(Bindings<'t>),
     Boolean(Boolean<'t>),
-    Char(Char<'t>),
     Comma(Comma<'t>),
     Continue(Continue<'t>),
+    Dot(Dot<'t>),
     End(End<'t>),
-    Escaped(Escaped<'t>),
+    Ext(Ext<'t>),
     ExtensionNameSpace(ExtensionNameSpace<'t>),
     False(False<'t>),
     Ident(Ident<'t>),
@@ -1447,26 +1408,24 @@ pub enum ASTType<'t> {
     Keys(Keys<'t>),
     KeysList(Vec<KeysList<'t>>),
     Newline(Newline<'t>),
-    Nonescaped(Nonescaped<'t>),
     Null(Null<'t>),
     Object(Object<'t>),
     ObjectList(Vec<ObjectList<'t>>),
-    Quote(Quote<'t>),
+    ObjectOpt(Option<ObjectOpt<'t>>),
     Section(Section<'t>),
     SectionBinding(SectionBinding<'t>),
     SectionHeader(SectionHeader<'t>),
     String(String<'t>),
-    StringList(Vec<StringList<'t>>),
-    StringOpt(Option<StringOpt<'t>>),
+    StringContinues(StringContinues<'t>),
+    StringContinuesList(Vec<StringContinuesList<'t>>),
     Swon(Swon<'t>),
     SwonList(Vec<SwonList<'t>>),
     SwonList0(Vec<SwonList0<'t>>),
     Text(Text<'t>),
     TextBinding(TextBinding<'t>),
     TextBindingOpt(Option<TextBindingOpt<'t>>),
+    TextStart(TextStart<'t>),
     True(True<'t>),
-    Unicode4(Unicode4<'t>),
-    Unicode8(Unicode8<'t>),
     Value(Value<'t>),
     ValueBinding(ValueBinding<'t>),
     ValueBindingOpt(Option<ValueBindingOpt<'t>>),
@@ -1483,16 +1442,18 @@ impl<'t> ToSpan for ASTType<'t> {
             }
             ASTType::ArrayMarker(v) => v.span(),
             ASTType::ArrayMarkerOpt(o) => o.as_ref().map_or(Span::default(), |o| o.span()),
+            ASTType::ArrayOpt(o) => o.as_ref().map_or(Span::default(), |o| o.span()),
+            ASTType::At(v) => v.span(),
             ASTType::Begin(v) => v.span(),
             ASTType::Bind(v) => v.span(),
             ASTType::Binding(v) => v.span(),
             ASTType::Bindings(v) => v.span(),
             ASTType::Boolean(v) => v.span(),
-            ASTType::Char(v) => v.span(),
             ASTType::Comma(v) => v.span(),
             ASTType::Continue(v) => v.span(),
+            ASTType::Dot(v) => v.span(),
             ASTType::End(v) => v.span(),
-            ASTType::Escaped(v) => v.span(),
+            ASTType::Ext(v) => v.span(),
             ASTType::ExtensionNameSpace(v) => v.span(),
             ASTType::False(v) => v.span(),
             ASTType::Ident(v) => v.span(),
@@ -1506,23 +1467,22 @@ impl<'t> ToSpan for ASTType<'t> {
                     + v.last().map_or(Span::default(), |l| l.span())
             }
             ASTType::Newline(v) => v.span(),
-            ASTType::Nonescaped(v) => v.span(),
             ASTType::Null(v) => v.span(),
             ASTType::Object(v) => v.span(),
             ASTType::ObjectList(v) => {
                 v.first().map_or(Span::default(), |f| f.span())
                     + v.last().map_or(Span::default(), |l| l.span())
             }
-            ASTType::Quote(v) => v.span(),
+            ASTType::ObjectOpt(o) => o.as_ref().map_or(Span::default(), |o| o.span()),
             ASTType::Section(v) => v.span(),
             ASTType::SectionBinding(v) => v.span(),
             ASTType::SectionHeader(v) => v.span(),
             ASTType::String(v) => v.span(),
-            ASTType::StringList(v) => {
+            ASTType::StringContinues(v) => v.span(),
+            ASTType::StringContinuesList(v) => {
                 v.first().map_or(Span::default(), |f| f.span())
                     + v.last().map_or(Span::default(), |l| l.span())
             }
-            ASTType::StringOpt(o) => o.as_ref().map_or(Span::default(), |o| o.span()),
             ASTType::Swon(v) => v.span(),
             ASTType::SwonList(v) => {
                 v.first().map_or(Span::default(), |f| f.span())
@@ -1535,9 +1495,8 @@ impl<'t> ToSpan for ASTType<'t> {
             ASTType::Text(v) => v.span(),
             ASTType::TextBinding(v) => v.span(),
             ASTType::TextBindingOpt(o) => o.as_ref().map_or(Span::default(), |o| o.span()),
+            ASTType::TextStart(v) => v.span(),
             ASTType::True(v) => v.span(),
-            ASTType::Unicode4(v) => v.span(),
-            ASTType::Unicode8(v) => v.span(),
             ASTType::Value(v) => v.span(),
             ASTType::ValueBinding(v) => v.span(),
             ASTType::ValueBindingOpt(o) => o.as_ref().map_or(Span::default(), |o| o.span()),
@@ -1616,8 +1575,8 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let swon_list0 = pop_and_reverse_item!(self, swon_list0, SwonList0, context);
-        let swon_list = pop_and_reverse_item!(self, swon_list, SwonList, context);
+        let swon_list0 = pop_item!(self, swon_list0, SwonList0, context);
+        let swon_list = pop_item!(self, swon_list, SwonList, context);
         let swon_built = Swon {
             swon_list,
             swon_list0,
@@ -1630,21 +1589,19 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 1:
     ///
-    /// `SwonList0 /* Vec<T>::Push */: Section SwonList0;`
+    /// `SwonList0 /* Vec<T>::Push */: SwonList0 Section;`
     ///
     #[parol_runtime::function_name::named]
     fn swon_list0_0(
         &mut self,
-        _section: &ParseTreeType<'t>,
         _swon_list0: &ParseTreeType<'t>,
+        _section: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let mut swon_list0 = pop_item!(self, swon_list0, SwonList0, context);
         let section = pop_item!(self, section, Section, context);
-        let swon_list0_0_built = SwonList0 {
-            section: Box::new(section),
-        };
+        let mut swon_list0 = pop_item!(self, swon_list0, SwonList0, context);
+        let swon_list0_0_built = SwonList0 { section };
         // Add an element to the vector
         swon_list0.push(swon_list0_0_built);
         self.push(ASTType::SwonList0(swon_list0), context);
@@ -1666,21 +1623,19 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 3:
     ///
-    /// `SwonList /* Vec<T>::Push */: Binding SwonList;`
+    /// `SwonList /* Vec<T>::Push */: SwonList Binding;`
     ///
     #[parol_runtime::function_name::named]
     fn swon_list_0(
         &mut self,
-        _binding: &ParseTreeType<'t>,
         _swon_list: &ParseTreeType<'t>,
+        _binding: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let mut swon_list = pop_item!(self, swon_list, SwonList, context);
         let binding = pop_item!(self, binding, Binding, context);
-        let swon_list_0_built = SwonList {
-            binding: Box::new(binding),
-        };
+        let mut swon_list = pop_item!(self, swon_list, SwonList, context);
+        let swon_list_0_built = SwonList { binding };
         // Add an element to the vector
         swon_list.push(swon_list_0_built);
         self.push(ASTType::SwonList(swon_list), context);
@@ -1717,9 +1672,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let swon = pop_item!(self, swon, Swon, context);
         let section_header = pop_item!(self, section_header, SectionHeader, context);
         let section_built = Section {
-            section_header: Box::new(section_header),
-            swon: Box::new(swon),
-            newline: Box::new(newline),
+            section_header,
+            swon,
+            newline,
         };
         // Calling user action here
         self.user_grammar.section(&section_built)?;
@@ -1744,9 +1699,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let bindings = pop_item!(self, bindings, Bindings, context);
         let keys = pop_item!(self, keys, Keys, context);
         let binding_built = Binding {
-            keys: Box::new(keys),
-            bindings: Box::new(bindings),
-            newline: Box::new(newline),
+            keys,
+            bindings,
+            newline,
         };
         // Calling user action here
         self.user_grammar.binding(&binding_built)?;
@@ -1763,9 +1718,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let value_binding = pop_item!(self, value_binding, ValueBinding, context);
-        let bindings_0_built = BindingsValueBinding {
-            value_binding: Box::new(value_binding),
-        };
+        let bindings_0_built = BindingsValueBinding { value_binding };
         let bindings_0_built = Bindings::ValueBinding(bindings_0_built);
         // Calling user action here
         self.user_grammar.bindings(&bindings_0_built)?;
@@ -1782,9 +1735,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let section_binding = pop_item!(self, section_binding, SectionBinding, context);
-        let bindings_1_built = BindingsSectionBinding {
-            section_binding: Box::new(section_binding),
-        };
+        let bindings_1_built = BindingsSectionBinding { section_binding };
         let bindings_1_built = Bindings::SectionBinding(bindings_1_built);
         // Calling user action here
         self.user_grammar.bindings(&bindings_1_built)?;
@@ -1801,9 +1752,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let text_binding = pop_item!(self, text_binding, TextBinding, context);
-        let bindings_2_built = BindingsTextBinding {
-            text_binding: Box::new(text_binding),
-        };
+        let bindings_2_built = BindingsTextBinding { text_binding };
         let bindings_2_built = Bindings::TextBinding(bindings_2_built);
         // Calling user action here
         self.user_grammar.bindings(&bindings_2_built)?;
@@ -1813,7 +1762,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 10:
     ///
-    /// `ValueBinding: Bind^ /* Clipped */ ValueBindingOpt /* Option */ %push(ValueContext) Value %pop();`
+    /// `ValueBinding: Bind ValueBindingOpt /* Option */ Value;`
     ///
     #[parol_runtime::function_name::named]
     fn value_binding(
@@ -1826,10 +1775,11 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         trace!("{}", self.trace_item_stack(context));
         let value = pop_item!(self, value, Value, context);
         let value_binding_opt = pop_item!(self, value_binding_opt, ValueBindingOpt, context);
-        self.pop(context);
+        let bind = pop_item!(self, bind, Bind, context);
         let value_binding_built = ValueBinding {
+            bind,
             value_binding_opt,
-            value: Box::new(value),
+            value,
         };
         // Calling user action here
         self.user_grammar.value_binding(&value_binding_built)?;
@@ -1846,9 +1796,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let newline = pop_item!(self, newline, Newline, context);
-        let value_binding_opt_0_built = ValueBindingOpt {
-            newline: Box::new(newline),
-        };
+        let value_binding_opt_0_built = ValueBindingOpt { newline };
         self.push(
             ASTType::ValueBindingOpt(Some(value_binding_opt_0_built)),
             context,
@@ -1870,7 +1818,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 13:
     ///
-    /// `SectionBinding: Begin^ /* Clipped */ Newline Swon Newline End^ /* Clipped */;`
+    /// `SectionBinding: Begin Newline Swon Newline End;`
     ///
     #[parol_runtime::function_name::named]
     fn section_binding(
@@ -1883,15 +1831,17 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        self.pop(context);
+        let end = pop_item!(self, end, End, context);
         let newline0 = pop_item!(self, newline0, Newline, context);
         let swon = pop_item!(self, swon, Swon, context);
         let newline = pop_item!(self, newline, Newline, context);
-        self.pop(context);
+        let begin = pop_item!(self, begin, Begin, context);
         let section_binding_built = SectionBinding {
-            newline: Box::new(newline),
-            swon: Box::new(swon),
-            newline0: Box::new(newline0),
+            begin,
+            newline,
+            swon,
+            newline0,
+            end,
         };
         // Calling user action here
         self.user_grammar.section_binding(&section_binding_built)?;
@@ -1901,12 +1851,12 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 14:
     ///
-    /// `TextBinding: ':'^ /* Clipped */ TextBindingOpt /* Option */ Text;`
+    /// `TextBinding: TextStart TextBindingOpt /* Option */ Text;`
     ///
     #[parol_runtime::function_name::named]
     fn text_binding(
         &mut self,
-        _colon: &ParseTreeType<'t>,
+        _text_start: &ParseTreeType<'t>,
         _text_binding_opt: &ParseTreeType<'t>,
         _text: &ParseTreeType<'t>,
     ) -> Result<()> {
@@ -1914,9 +1864,11 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         trace!("{}", self.trace_item_stack(context));
         let text = pop_item!(self, text, Text, context);
         let text_binding_opt = pop_item!(self, text_binding_opt, TextBindingOpt, context);
+        let text_start = pop_item!(self, text_start, TextStart, context);
         let text_binding_built = TextBinding {
+            text_start,
             text_binding_opt,
-            text: Box::new(text),
+            text,
         };
         // Calling user action here
         self.user_grammar.text_binding(&text_binding_built)?;
@@ -1933,9 +1885,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let newline = pop_item!(self, newline, Newline, context);
-        let text_binding_opt_0_built = TextBindingOpt {
-            newline: Box::new(newline),
-        };
+        let text_binding_opt_0_built = TextBindingOpt { newline };
         self.push(
             ASTType::TextBindingOpt(Some(text_binding_opt_0_built)),
             context,
@@ -1973,7 +1923,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 18:
     ///
-    /// `SectionHeader: '@'^ /* Clipped */ Keys Newline;`
+    /// `SectionHeader: At Keys Newline;`
     ///
     #[parol_runtime::function_name::named]
     fn section_header(
@@ -1986,10 +1936,8 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         trace!("{}", self.trace_item_stack(context));
         let newline = pop_item!(self, newline, Newline, context);
         let keys = pop_item!(self, keys, Keys, context);
-        let section_header_built = SectionHeader {
-            keys: Box::new(keys),
-            newline: Box::new(newline),
-        };
+        let at = pop_item!(self, at, At, context);
+        let section_header_built = SectionHeader { at, keys, newline };
         // Calling user action here
         self.user_grammar.section_header(&section_header_built)?;
         self.push(ASTType::SectionHeader(section_header_built), context);
@@ -2004,12 +1952,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
     fn keys(&mut self, _key: &ParseTreeType<'t>, _keys_list: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let keys_list = pop_and_reverse_item!(self, keys_list, KeysList, context);
+        let keys_list = pop_item!(self, keys_list, KeysList, context);
         let key = pop_item!(self, key, Key, context);
-        let keys_built = Keys {
-            key: Box::new(key),
-            keys_list,
-        };
+        let keys_built = Keys { key, keys_list };
         // Calling user action here
         self.user_grammar.keys(&keys_built)?;
         self.push(ASTType::Keys(keys_built), context);
@@ -2018,20 +1963,21 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 20:
     ///
-    /// `KeysList /* Vec<T>::Push */: '.'^ /* Clipped */ Key KeysList;`
+    /// `KeysList /* Vec<T>::Push */: KeysList Dot Key;`
     ///
     #[parol_runtime::function_name::named]
     fn keys_list_0(
         &mut self,
+        _keys_list: &ParseTreeType<'t>,
         _dot: &ParseTreeType<'t>,
         _key: &ParseTreeType<'t>,
-        _keys_list: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let mut keys_list = pop_item!(self, keys_list, KeysList, context);
         let key = pop_item!(self, key, Key, context);
-        let keys_list_0_built = KeysList { key: Box::new(key) };
+        let dot = pop_item!(self, dot, Dot, context);
+        let mut keys_list = pop_item!(self, keys_list, KeysList, context);
+        let keys_list_0_built = KeysList { key, dot };
         // Add an element to the vector
         keys_list.push(keys_list_0_built);
         self.push(ASTType::KeysList(keys_list), context);
@@ -2061,10 +2007,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         trace!("{}", self.trace_item_stack(context));
         let key_opt = pop_item!(self, key_opt, KeyOpt, context);
         let key_base = pop_item!(self, key_base, KeyBase, context);
-        let key_built = Key {
-            key_base: Box::new(key_base),
-            key_opt,
-        };
+        let key_built = Key { key_base, key_opt };
         // Calling user action here
         self.user_grammar.key(&key_built)?;
         self.push(ASTType::Key(key_built), context);
@@ -2080,9 +2023,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let array_marker = pop_item!(self, array_marker, ArrayMarker, context);
-        let key_opt_0_built = KeyOpt {
-            array_marker: Box::new(array_marker),
-        };
+        let key_opt_0_built = KeyOpt { array_marker };
         self.push(ASTType::KeyOpt(Some(key_opt_0_built)), context);
         Ok(())
     }
@@ -2101,7 +2042,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 25:
     ///
-    /// `ArrayMarker: ArrayBegin^ /* Clipped */ ArrayMarkerOpt /* Option */ ArrayEnd^ /* Clipped */;`
+    /// `ArrayMarker: ArrayBegin ArrayMarkerOpt /* Option */ ArrayEnd;`
     ///
     #[parol_runtime::function_name::named]
     fn array_marker(
@@ -2112,10 +2053,14 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        self.pop(context);
+        let array_end = pop_item!(self, array_end, ArrayEnd, context);
         let array_marker_opt = pop_item!(self, array_marker_opt, ArrayMarkerOpt, context);
-        self.pop(context);
-        let array_marker_built = ArrayMarker { array_marker_opt };
+        let array_begin = pop_item!(self, array_begin, ArrayBegin, context);
+        let array_marker_built = ArrayMarker {
+            array_begin,
+            array_marker_opt,
+            array_end,
+        };
         // Calling user action here
         self.user_grammar.array_marker(&array_marker_built)?;
         self.push(ASTType::ArrayMarker(array_marker_built), context);
@@ -2131,9 +2076,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let integer = pop_item!(self, integer, Integer, context);
-        let array_marker_opt_0_built = ArrayMarkerOpt {
-            integer: Box::new(integer),
-        };
+        let array_marker_opt_0_built = ArrayMarkerOpt { integer };
         self.push(
             ASTType::ArrayMarkerOpt(Some(array_marker_opt_0_built)),
             context,
@@ -2162,9 +2105,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let ident = pop_item!(self, ident, Ident, context);
-        let key_base_0_built = KeyBaseIdent {
-            ident: Box::new(ident),
-        };
+        let key_base_0_built = KeyBaseIdent { ident };
         let key_base_0_built = KeyBase::Ident(key_base_0_built);
         // Calling user action here
         self.user_grammar.key_base(&key_base_0_built)?;
@@ -2183,7 +2124,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let extension_name_space =
             pop_item!(self, extension_name_space, ExtensionNameSpace, context);
         let key_base_1_built = KeyBaseExtensionNameSpace {
-            extension_name_space: Box::new(extension_name_space),
+            extension_name_space,
         };
         let key_base_1_built = KeyBase::ExtensionNameSpace(key_base_1_built);
         // Calling user action here
@@ -2201,9 +2142,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let string = pop_item!(self, string, String, context);
-        let key_base_2_built = KeyBaseString {
-            string: Box::new(string),
-        };
+        let key_base_2_built = KeyBaseString { string };
         let key_base_2_built = KeyBase::String(key_base_2_built);
         // Calling user action here
         self.user_grammar.key_base(&key_base_2_built)?;
@@ -2229,20 +2168,19 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 32:
     ///
-    /// `ExtensionNameSpace: '$'^ /* Clipped */ Ident;`
+    /// `ExtensionNameSpace: Ext Ident;`
     ///
     #[parol_runtime::function_name::named]
     fn extension_name_space(
         &mut self,
-        _dollar: &ParseTreeType<'t>,
+        _ext: &ParseTreeType<'t>,
         _ident: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let ident = pop_item!(self, ident, Ident, context);
-        let extension_name_space_built = ExtensionNameSpace {
-            ident: Box::new(ident),
-        };
+        let ext = pop_item!(self, ext, Ext, context);
+        let extension_name_space_built = ExtensionNameSpace { ext, ident };
         // Calling user action here
         self.user_grammar
             .extension_name_space(&extension_name_space_built)?;
@@ -2262,9 +2200,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let object = pop_item!(self, object, Object, context);
-        let value_0_built = ValueObject {
-            object: Box::new(object),
-        };
+        let value_0_built = ValueObject { object };
         let value_0_built = Value::Object(value_0_built);
         // Calling user action here
         self.user_grammar.value(&value_0_built)?;
@@ -2281,9 +2217,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let array = pop_item!(self, array, Array, context);
-        let value_1_built = ValueArray {
-            array: Box::new(array),
-        };
+        let value_1_built = ValueArray { array };
         let value_1_built = Value::Array(value_1_built);
         // Calling user action here
         self.user_grammar.value(&value_1_built)?;
@@ -2300,9 +2234,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let integer = pop_item!(self, integer, Integer, context);
-        let value_2_built = ValueInteger {
-            integer: Box::new(integer),
-        };
+        let value_2_built = ValueInteger { integer };
         let value_2_built = Value::Integer(value_2_built);
         // Calling user action here
         self.user_grammar.value(&value_2_built)?;
@@ -2319,9 +2251,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let boolean = pop_item!(self, boolean, Boolean, context);
-        let value_3_built = ValueBoolean {
-            boolean: Box::new(boolean),
-        };
+        let value_3_built = ValueBoolean { boolean };
         let value_3_built = Value::Boolean(value_3_built);
         // Calling user action here
         self.user_grammar.value(&value_3_built)?;
@@ -2338,9 +2268,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let null = pop_item!(self, null, Null, context);
-        let value_4_built = ValueNull {
-            null: Box::new(null),
-        };
+        let value_4_built = ValueNull { null };
         let value_4_built = Value::Null(value_4_built);
         // Calling user action here
         self.user_grammar.value(&value_4_built)?;
@@ -2350,17 +2278,15 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 38:
     ///
-    /// `Value: String;`
+    /// `Value: StringContinues;`
     ///
     #[parol_runtime::function_name::named]
-    fn value_5(&mut self, _string: &ParseTreeType<'t>) -> Result<()> {
+    fn value_5(&mut self, _string_continues: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let string = pop_item!(self, string, String, context);
-        let value_5_built = ValueString {
-            string: Box::new(string),
-        };
-        let value_5_built = Value::String(value_5_built);
+        let string_continues = pop_item!(self, string_continues, StringContinues, context);
+        let value_5_built = ValueStringContinues { string_continues };
+        let value_5_built = Value::StringContinues(value_5_built);
         // Calling user action here
         self.user_grammar.value(&value_5_built)?;
         self.push(ASTType::Value(value_5_built), context);
@@ -2369,7 +2295,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 39:
     ///
-    /// `Object: Begin^ /* Clipped */ ObjectList /* Vec */ End^ /* Clipped */;`
+    /// `Object: Begin ObjectList /* Vec */ End;`
     ///
     #[parol_runtime::function_name::named]
     fn object(
@@ -2380,10 +2306,14 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        self.pop(context);
-        let object_list = pop_and_reverse_item!(self, object_list, ObjectList, context);
-        self.pop(context);
-        let object_built = Object { object_list };
+        let end = pop_item!(self, end, End, context);
+        let object_list = pop_item!(self, object_list, ObjectList, context);
+        let begin = pop_item!(self, begin, Begin, context);
+        let object_built = Object {
+            begin,
+            object_list,
+            end,
+        };
         // Calling user action here
         self.user_grammar.object(&object_built)?;
         self.push(ASTType::Object(object_built), context);
@@ -2392,27 +2322,29 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 40:
     ///
-    /// `ObjectList /* Vec<T>::Push */: Key Bind^ /* Clipped */ Value Comma^ /* Clipped */ ObjectList;`
+    /// `ObjectList /* Vec<T>::Push */: ObjectList Key Bind Value ObjectOpt /* Option */;`
     ///
     #[parol_runtime::function_name::named]
     fn object_list_0(
         &mut self,
+        _object_list: &ParseTreeType<'t>,
         _key: &ParseTreeType<'t>,
         _bind: &ParseTreeType<'t>,
         _value: &ParseTreeType<'t>,
-        _comma: &ParseTreeType<'t>,
-        _object_list: &ParseTreeType<'t>,
+        _object_opt: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let mut object_list = pop_item!(self, object_list, ObjectList, context);
-        self.pop(context);
+        let object_opt = pop_item!(self, object_opt, ObjectOpt, context);
         let value = pop_item!(self, value, Value, context);
-        self.pop(context);
+        let bind = pop_item!(self, bind, Bind, context);
         let key = pop_item!(self, key, Key, context);
+        let mut object_list = pop_item!(self, object_list, ObjectList, context);
         let object_list_0_built = ObjectList {
-            value: Box::new(value),
-            key: Box::new(key),
+            object_opt,
+            value,
+            bind,
+            key,
         };
         // Add an element to the vector
         object_list.push(object_list_0_built);
@@ -2435,7 +2367,33 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 42:
     ///
-    /// `Array: ArrayBegin^ /* Clipped */ ArrayList /* Vec */ ArrayEnd^ /* Clipped */;`
+    /// `ObjectOpt /* Option<T>::Some */: Comma;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn object_opt_0(&mut self, _comma: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let comma = pop_item!(self, comma, Comma, context);
+        let object_opt_0_built = ObjectOpt { comma };
+        self.push(ASTType::ObjectOpt(Some(object_opt_0_built)), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 43:
+    ///
+    /// `ObjectOpt /* Option<T>::None */: ;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn object_opt_1(&mut self) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        self.push(ASTType::ObjectOpt(None), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 44:
+    ///
+    /// `Array: ArrayBegin ArrayList /* Vec */ ArrayEnd;`
     ///
     #[parol_runtime::function_name::named]
     fn array(
@@ -2446,42 +2404,44 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        self.pop(context);
-        let array_list = pop_and_reverse_item!(self, array_list, ArrayList, context);
-        self.pop(context);
-        let array_built = Array { array_list };
+        let array_end = pop_item!(self, array_end, ArrayEnd, context);
+        let array_list = pop_item!(self, array_list, ArrayList, context);
+        let array_begin = pop_item!(self, array_begin, ArrayBegin, context);
+        let array_built = Array {
+            array_begin,
+            array_list,
+            array_end,
+        };
         // Calling user action here
         self.user_grammar.array(&array_built)?;
         self.push(ASTType::Array(array_built), context);
         Ok(())
     }
 
-    /// Semantic action for production 43:
+    /// Semantic action for production 45:
     ///
-    /// `ArrayList /* Vec<T>::Push */: Value Comma^ /* Clipped */ ArrayList;`
+    /// `ArrayList /* Vec<T>::Push */: ArrayList Value ArrayOpt /* Option */;`
     ///
     #[parol_runtime::function_name::named]
     fn array_list_0(
         &mut self,
-        _value: &ParseTreeType<'t>,
-        _comma: &ParseTreeType<'t>,
         _array_list: &ParseTreeType<'t>,
+        _value: &ParseTreeType<'t>,
+        _array_opt: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let mut array_list = pop_item!(self, array_list, ArrayList, context);
-        self.pop(context);
+        let array_opt = pop_item!(self, array_opt, ArrayOpt, context);
         let value = pop_item!(self, value, Value, context);
-        let array_list_0_built = ArrayList {
-            value: Box::new(value),
-        };
+        let mut array_list = pop_item!(self, array_list, ArrayList, context);
+        let array_list_0_built = ArrayList { array_opt, value };
         // Add an element to the vector
         array_list.push(array_list_0_built);
         self.push(ASTType::ArrayList(array_list), context);
         Ok(())
     }
 
-    /// Semantic action for production 44:
+    /// Semantic action for production 46:
     ///
     /// `ArrayList /* Vec<T>::New */: ;`
     ///
@@ -2494,9 +2454,35 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 45:
+    /// Semantic action for production 47:
     ///
-    /// `Integer: <INITIAL, ValueContext>/\d[\d_]*/;`
+    /// `ArrayOpt /* Option<T>::Some */: Comma;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn array_opt_0(&mut self, _comma: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let comma = pop_item!(self, comma, Comma, context);
+        let array_opt_0_built = ArrayOpt { comma };
+        self.push(ASTType::ArrayOpt(Some(array_opt_0_built)), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 48:
+    ///
+    /// `ArrayOpt /* Option<T>::None */: ;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn array_opt_1(&mut self) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        self.push(ASTType::ArrayOpt(None), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 49:
+    ///
+    /// `Integer: <INITIAL, Value>/\d[\d_]*/;`
     ///
     #[parol_runtime::function_name::named]
     fn integer(&mut self, integer: &ParseTreeType<'t>) -> Result<()> {
@@ -2510,7 +2496,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 46:
+    /// Semantic action for production 50:
     ///
     /// `Boolean: True;`
     ///
@@ -2519,9 +2505,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let r#true = pop_item!(self, r#true, True, context);
-        let boolean_0_built = BooleanTrue {
-            r#true: Box::new(r#true),
-        };
+        let boolean_0_built = BooleanTrue { r#true };
         let boolean_0_built = Boolean::True(boolean_0_built);
         // Calling user action here
         self.user_grammar.boolean(&boolean_0_built)?;
@@ -2529,7 +2513,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 47:
+    /// Semantic action for production 51:
     ///
     /// `Boolean: False;`
     ///
@@ -2538,9 +2522,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let r#false = pop_item!(self, r#false, False, context);
-        let boolean_1_built = BooleanFalse {
-            r#false: Box::new(r#false),
-        };
+        let boolean_1_built = BooleanFalse { r#false };
         let boolean_1_built = Boolean::False(boolean_1_built);
         // Calling user action here
         self.user_grammar.boolean(&boolean_1_built)?;
@@ -2548,9 +2530,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 48:
+    /// Semantic action for production 52:
     ///
-    /// `True: <INITIAL, ValueContext>'true';`
+    /// `True: <INITIAL, Value>'true';`
     ///
     #[parol_runtime::function_name::named]
     fn r#true(&mut self, r#true: &ParseTreeType<'t>) -> Result<()> {
@@ -2564,9 +2546,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 49:
+    /// Semantic action for production 53:
     ///
-    /// `False: <INITIAL, ValueContext>'false';`
+    /// `False: <INITIAL, Value>'false';`
     ///
     #[parol_runtime::function_name::named]
     fn r#false(&mut self, r#false: &ParseTreeType<'t>) -> Result<()> {
@@ -2580,9 +2562,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 50:
+    /// Semantic action for production 54:
     ///
-    /// `Null: <INITIAL, ValueContext>'null';`
+    /// `Null: <INITIAL, Value>'null';`
     ///
     #[parol_runtime::function_name::named]
     fn null(&mut self, null: &ParseTreeType<'t>) -> Result<()> {
@@ -2596,260 +2578,95 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 51:
+    /// Semantic action for production 55:
     ///
-    /// `String: Quote^ /* Clipped */ %push(String) StringList /* Vec */ Quote^ /* Clipped */ %pop() StringOpt /* Option */;`
+    /// `StringContinues: String StringContinuesList /* Vec */;`
     ///
     #[parol_runtime::function_name::named]
-    fn string(
+    fn string_continues(
         &mut self,
-        _quote: &ParseTreeType<'t>,
-        _string_list: &ParseTreeType<'t>,
-        _quote0: &ParseTreeType<'t>,
-        _string_opt: &ParseTreeType<'t>,
+        _string: &ParseTreeType<'t>,
+        _string_continues_list: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let string_opt = pop_item!(self, string_opt, StringOpt, context);
-        self.pop(context);
-        let string_list = pop_and_reverse_item!(self, string_list, StringList, context);
-        self.pop(context);
-        let string_built = String {
-            string_list,
-            string_opt,
+        let string_continues_list =
+            pop_item!(self, string_continues_list, StringContinuesList, context);
+        let string = pop_item!(self, string, String, context);
+        let string_continues_built = StringContinues {
+            string,
+            string_continues_list,
         };
+        // Calling user action here
+        self.user_grammar
+            .string_continues(&string_continues_built)?;
+        self.push(ASTType::StringContinues(string_continues_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 56:
+    ///
+    /// `StringContinuesList /* Vec<T>::Push */: StringContinuesList Continue Newline String;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn string_continues_list_0(
+        &mut self,
+        _string_continues_list: &ParseTreeType<'t>,
+        _continue: &ParseTreeType<'t>,
+        _newline: &ParseTreeType<'t>,
+        _string: &ParseTreeType<'t>,
+    ) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let string = pop_item!(self, string, String, context);
+        let newline = pop_item!(self, newline, Newline, context);
+        let r#continue = pop_item!(self, r#continue, Continue, context);
+        let mut string_continues_list =
+            pop_item!(self, string_continues_list, StringContinuesList, context);
+        let string_continues_list_0_built = StringContinuesList {
+            string,
+            newline,
+            r#continue,
+        };
+        // Add an element to the vector
+        string_continues_list.push(string_continues_list_0_built);
+        self.push(ASTType::StringContinuesList(string_continues_list), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 57:
+    ///
+    /// `StringContinuesList /* Vec<T>::New */: ;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn string_continues_list_1(&mut self) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let string_continues_list_1_built = Vec::new();
+        self.push(
+            ASTType::StringContinuesList(string_continues_list_1_built),
+            context,
+        );
+        Ok(())
+    }
+
+    /// Semantic action for production 58:
+    ///
+    /// `String: /"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"/;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn string(&mut self, string: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let string = string.token()?.clone();
+        let string_built = String { string };
         // Calling user action here
         self.user_grammar.string(&string_built)?;
         self.push(ASTType::String(string_built), context);
         Ok(())
     }
 
-    /// Semantic action for production 52:
-    ///
-    /// `StringList /* Vec<T>::Push */: Char StringList;`
-    ///
-    #[parol_runtime::function_name::named]
-    fn string_list_0(
-        &mut self,
-        _char: &ParseTreeType<'t>,
-        _string_list: &ParseTreeType<'t>,
-    ) -> Result<()> {
-        let context = function_name!();
-        trace!("{}", self.trace_item_stack(context));
-        let mut string_list = pop_item!(self, string_list, StringList, context);
-        let char = pop_item!(self, char, Char, context);
-        let string_list_0_built = StringList {
-            char: Box::new(char),
-        };
-        // Add an element to the vector
-        string_list.push(string_list_0_built);
-        self.push(ASTType::StringList(string_list), context);
-        Ok(())
-    }
-
-    /// Semantic action for production 53:
-    ///
-    /// `StringList /* Vec<T>::New */: ;`
-    ///
-    #[parol_runtime::function_name::named]
-    fn string_list_1(&mut self) -> Result<()> {
-        let context = function_name!();
-        trace!("{}", self.trace_item_stack(context));
-        let string_list_1_built = Vec::new();
-        self.push(ASTType::StringList(string_list_1_built), context);
-        Ok(())
-    }
-
-    /// Semantic action for production 54:
-    ///
-    /// `StringOpt /* Option<T>::Some */: Continue^ /* Clipped */ String;`
-    ///
-    #[parol_runtime::function_name::named]
-    fn string_opt_0(
-        &mut self,
-        _continue: &ParseTreeType<'t>,
-        _string: &ParseTreeType<'t>,
-    ) -> Result<()> {
-        let context = function_name!();
-        trace!("{}", self.trace_item_stack(context));
-        let string = pop_item!(self, string, String, context);
-        self.pop(context);
-        let string_opt_0_built = StringOpt {
-            string: Box::new(string),
-        };
-        self.push(ASTType::StringOpt(Some(string_opt_0_built)), context);
-        Ok(())
-    }
-
-    /// Semantic action for production 55:
-    ///
-    /// `StringOpt /* Option<T>::None */: ;`
-    ///
-    #[parol_runtime::function_name::named]
-    fn string_opt_1(&mut self) -> Result<()> {
-        let context = function_name!();
-        trace!("{}", self.trace_item_stack(context));
-        self.push(ASTType::StringOpt(None), context);
-        Ok(())
-    }
-
-    /// Semantic action for production 56:
-    ///
-    /// `Char: Escaped;`
-    ///
-    #[parol_runtime::function_name::named]
-    fn char_0(&mut self, _escaped: &ParseTreeType<'t>) -> Result<()> {
-        let context = function_name!();
-        trace!("{}", self.trace_item_stack(context));
-        let escaped = pop_item!(self, escaped, Escaped, context);
-        let char_0_built = CharEscaped {
-            escaped: Box::new(escaped),
-        };
-        let char_0_built = Char::Escaped(char_0_built);
-        // Calling user action here
-        self.user_grammar.char(&char_0_built)?;
-        self.push(ASTType::Char(char_0_built), context);
-        Ok(())
-    }
-
-    /// Semantic action for production 57:
-    ///
-    /// `Char: Unicode4;`
-    ///
-    #[parol_runtime::function_name::named]
-    fn char_1(&mut self, _unicode4: &ParseTreeType<'t>) -> Result<()> {
-        let context = function_name!();
-        trace!("{}", self.trace_item_stack(context));
-        let unicode4 = pop_item!(self, unicode4, Unicode4, context);
-        let char_1_built = CharUnicode4 {
-            unicode4: Box::new(unicode4),
-        };
-        let char_1_built = Char::Unicode4(char_1_built);
-        // Calling user action here
-        self.user_grammar.char(&char_1_built)?;
-        self.push(ASTType::Char(char_1_built), context);
-        Ok(())
-    }
-
-    /// Semantic action for production 58:
-    ///
-    /// `Char: Unicode8;`
-    ///
-    #[parol_runtime::function_name::named]
-    fn char_2(&mut self, _unicode8: &ParseTreeType<'t>) -> Result<()> {
-        let context = function_name!();
-        trace!("{}", self.trace_item_stack(context));
-        let unicode8 = pop_item!(self, unicode8, Unicode8, context);
-        let char_2_built = CharUnicode8 {
-            unicode8: Box::new(unicode8),
-        };
-        let char_2_built = Char::Unicode8(char_2_built);
-        // Calling user action here
-        self.user_grammar.char(&char_2_built)?;
-        self.push(ASTType::Char(char_2_built), context);
-        Ok(())
-    }
-
     /// Semantic action for production 59:
-    ///
-    /// `Char: Nonescaped;`
-    ///
-    #[parol_runtime::function_name::named]
-    fn char_3(&mut self, _nonescaped: &ParseTreeType<'t>) -> Result<()> {
-        let context = function_name!();
-        trace!("{}", self.trace_item_stack(context));
-        let nonescaped = pop_item!(self, nonescaped, Nonescaped, context);
-        let char_3_built = CharNonescaped {
-            nonescaped: Box::new(nonescaped),
-        };
-        let char_3_built = Char::Nonescaped(char_3_built);
-        // Calling user action here
-        self.user_grammar.char(&char_3_built)?;
-        self.push(ASTType::Char(char_3_built), context);
-        Ok(())
-    }
-
-    /// Semantic action for production 60:
-    ///
-    /// `Quote: <INITIAL, String>/"/;`
-    ///
-    #[parol_runtime::function_name::named]
-    fn quote(&mut self, quote: &ParseTreeType<'t>) -> Result<()> {
-        let context = function_name!();
-        trace!("{}", self.trace_item_stack(context));
-        let quote = quote.token()?.clone();
-        let quote_built = Quote { quote };
-        // Calling user action here
-        self.user_grammar.quote(&quote_built)?;
-        self.push(ASTType::Quote(quote_built), context);
-        Ok(())
-    }
-
-    /// Semantic action for production 61:
-    ///
-    /// `Escaped: <String>/\\[\\nrt\"0]/;`
-    ///
-    #[parol_runtime::function_name::named]
-    fn escaped(&mut self, escaped: &ParseTreeType<'t>) -> Result<()> {
-        let context = function_name!();
-        trace!("{}", self.trace_item_stack(context));
-        let escaped = escaped.token()?.clone();
-        let escaped_built = Escaped { escaped };
-        // Calling user action here
-        self.user_grammar.escaped(&escaped_built)?;
-        self.push(ASTType::Escaped(escaped_built), context);
-        Ok(())
-    }
-
-    /// Semantic action for production 62:
-    ///
-    /// `Unicode4: <String>/\\u[0-9a-fA-F]{4}/;`
-    ///
-    #[parol_runtime::function_name::named]
-    fn unicode4(&mut self, unicode4: &ParseTreeType<'t>) -> Result<()> {
-        let context = function_name!();
-        trace!("{}", self.trace_item_stack(context));
-        let unicode4 = unicode4.token()?.clone();
-        let unicode4_built = Unicode4 { unicode4 };
-        // Calling user action here
-        self.user_grammar.unicode4(&unicode4_built)?;
-        self.push(ASTType::Unicode4(unicode4_built), context);
-        Ok(())
-    }
-
-    /// Semantic action for production 63:
-    ///
-    /// `Unicode8: <String>/\\U[0-9a-fA-F]{8}/;`
-    ///
-    #[parol_runtime::function_name::named]
-    fn unicode8(&mut self, unicode8: &ParseTreeType<'t>) -> Result<()> {
-        let context = function_name!();
-        trace!("{}", self.trace_item_stack(context));
-        let unicode8 = unicode8.token()?.clone();
-        let unicode8_built = Unicode8 { unicode8 };
-        // Calling user action here
-        self.user_grammar.unicode8(&unicode8_built)?;
-        self.push(ASTType::Unicode8(unicode8_built), context);
-        Ok(())
-    }
-
-    /// Semantic action for production 64:
-    ///
-    /// `Nonescaped: <String>/\p{Letter}\p{Mark}\p{Number}\p{Punctuation}\p{Symbol}\p{Space_Separator}/;`
-    ///
-    #[parol_runtime::function_name::named]
-    fn nonescaped(&mut self, nonescaped: &ParseTreeType<'t>) -> Result<()> {
-        let context = function_name!();
-        trace!("{}", self.trace_item_stack(context));
-        let nonescaped = nonescaped.token()?.clone();
-        let nonescaped_built = Nonescaped { nonescaped };
-        // Calling user action here
-        self.user_grammar.nonescaped(&nonescaped_built)?;
-        self.push(ASTType::Nonescaped(nonescaped_built), context);
-        Ok(())
-    }
-
-    /// Semantic action for production 65:
     ///
     /// `Newline: /\r\n|\r|\n/;`
     ///
@@ -2865,9 +2682,57 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 66:
+    /// Semantic action for production 60:
     ///
-    /// `Begin: <INITIAL, ValueContext>'{';`
+    /// `At: '@';`
+    ///
+    #[parol_runtime::function_name::named]
+    fn at(&mut self, at: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let at = at.token()?.clone();
+        let at_built = At { at };
+        // Calling user action here
+        self.user_grammar.at(&at_built)?;
+        self.push(ASTType::At(at_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 61:
+    ///
+    /// `Ext: '$';`
+    ///
+    #[parol_runtime::function_name::named]
+    fn ext(&mut self, ext: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let ext = ext.token()?.clone();
+        let ext_built = Ext { ext };
+        // Calling user action here
+        self.user_grammar.ext(&ext_built)?;
+        self.push(ASTType::Ext(ext_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 62:
+    ///
+    /// `Dot: <INITIAL, Value>'.';`
+    ///
+    #[parol_runtime::function_name::named]
+    fn dot(&mut self, dot: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let dot = dot.token()?.clone();
+        let dot_built = Dot { dot };
+        // Calling user action here
+        self.user_grammar.dot(&dot_built)?;
+        self.push(ASTType::Dot(dot_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 63:
+    ///
+    /// `Begin: <INITIAL, Value>'{';`
     ///
     #[parol_runtime::function_name::named]
     fn begin(&mut self, begin: &ParseTreeType<'t>) -> Result<()> {
@@ -2881,9 +2746,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 67:
+    /// Semantic action for production 64:
     ///
-    /// `End: <INITIAL, ValueContext>'}';`
+    /// `End: <INITIAL, Value>'}';`
     ///
     #[parol_runtime::function_name::named]
     fn end(&mut self, end: &ParseTreeType<'t>) -> Result<()> {
@@ -2897,9 +2762,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 68:
+    /// Semantic action for production 65:
     ///
-    /// `ArrayBegin: <INITIAL, ValueContext>'[';`
+    /// `ArrayBegin: <INITIAL, Value>'[';`
     ///
     #[parol_runtime::function_name::named]
     fn array_begin(&mut self, array_begin: &ParseTreeType<'t>) -> Result<()> {
@@ -2913,9 +2778,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 69:
+    /// Semantic action for production 66:
     ///
-    /// `ArrayEnd: <INITIAL, ValueContext>']';`
+    /// `ArrayEnd: <INITIAL, Value>']';`
     ///
     #[parol_runtime::function_name::named]
     fn array_end(&mut self, array_end: &ParseTreeType<'t>) -> Result<()> {
@@ -2929,9 +2794,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 70:
+    /// Semantic action for production 67:
     ///
-    /// `Bind: <INITIAL, ValueContext>'=';`
+    /// `Bind: <INITIAL, Value>'=';`
     ///
     #[parol_runtime::function_name::named]
     fn bind(&mut self, bind: &ParseTreeType<'t>) -> Result<()> {
@@ -2945,9 +2810,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 71:
+    /// Semantic action for production 68:
     ///
-    /// `Comma: <INITIAL, ValueContext>',';`
+    /// `Comma: <INITIAL, Value>',';`
     ///
     #[parol_runtime::function_name::named]
     fn comma(&mut self, comma: &ParseTreeType<'t>) -> Result<()> {
@@ -2961,9 +2826,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 72:
+    /// Semantic action for production 69:
     ///
-    /// `Continue: <INITIAL, ValueContext>'\\';`
+    /// `Continue: <INITIAL, Value>'\\';`
     ///
     #[parol_runtime::function_name::named]
     fn r#continue(&mut self, r#continue: &ParseTreeType<'t>) -> Result<()> {
@@ -2974,6 +2839,22 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         // Calling user action here
         self.user_grammar.r#continue(&r#continue_built)?;
         self.push(ASTType::Continue(r#continue_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 70:
+    ///
+    /// `TextStart: <INITIAL, Value>":";`
+    ///
+    #[parol_runtime::function_name::named]
+    fn text_start(&mut self, text_start: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let text_start = text_start.token()?.clone();
+        let text_start_built = TextStart { text_start };
+        // Calling user action here
+        self.user_grammar.text_start(&text_start_built)?;
+        self.push(ASTType::TextStart(text_start_built), context);
         Ok(())
     }
 }
@@ -3042,37 +2923,37 @@ impl<'t> UserActionsTrait<'t> for GrammarAuto<'t, '_> {
                 &children[4],
             ),
             41 => self.object_list_1(),
-            42 => self.array(&children[0], &children[1], &children[2]),
-            43 => self.array_list_0(&children[0], &children[1], &children[2]),
-            44 => self.array_list_1(),
-            45 => self.integer(&children[0]),
-            46 => self.boolean_0(&children[0]),
-            47 => self.boolean_1(&children[0]),
-            48 => self.r#true(&children[0]),
-            49 => self.r#false(&children[0]),
-            50 => self.null(&children[0]),
-            51 => self.string(&children[0], &children[1], &children[2], &children[3]),
-            52 => self.string_list_0(&children[0], &children[1]),
-            53 => self.string_list_1(),
-            54 => self.string_opt_0(&children[0], &children[1]),
-            55 => self.string_opt_1(),
-            56 => self.char_0(&children[0]),
-            57 => self.char_1(&children[0]),
-            58 => self.char_2(&children[0]),
-            59 => self.char_3(&children[0]),
-            60 => self.quote(&children[0]),
-            61 => self.escaped(&children[0]),
-            62 => self.unicode4(&children[0]),
-            63 => self.unicode8(&children[0]),
-            64 => self.nonescaped(&children[0]),
-            65 => self.newline(&children[0]),
-            66 => self.begin(&children[0]),
-            67 => self.end(&children[0]),
-            68 => self.array_begin(&children[0]),
-            69 => self.array_end(&children[0]),
-            70 => self.bind(&children[0]),
-            71 => self.comma(&children[0]),
-            72 => self.r#continue(&children[0]),
+            42 => self.object_opt_0(&children[0]),
+            43 => self.object_opt_1(),
+            44 => self.array(&children[0], &children[1], &children[2]),
+            45 => self.array_list_0(&children[0], &children[1], &children[2]),
+            46 => self.array_list_1(),
+            47 => self.array_opt_0(&children[0]),
+            48 => self.array_opt_1(),
+            49 => self.integer(&children[0]),
+            50 => self.boolean_0(&children[0]),
+            51 => self.boolean_1(&children[0]),
+            52 => self.r#true(&children[0]),
+            53 => self.r#false(&children[0]),
+            54 => self.null(&children[0]),
+            55 => self.string_continues(&children[0], &children[1]),
+            56 => {
+                self.string_continues_list_0(&children[0], &children[1], &children[2], &children[3])
+            }
+            57 => self.string_continues_list_1(),
+            58 => self.string(&children[0]),
+            59 => self.newline(&children[0]),
+            60 => self.at(&children[0]),
+            61 => self.ext(&children[0]),
+            62 => self.dot(&children[0]),
+            63 => self.begin(&children[0]),
+            64 => self.end(&children[0]),
+            65 => self.array_begin(&children[0]),
+            66 => self.array_end(&children[0]),
+            67 => self.bind(&children[0]),
+            68 => self.comma(&children[0]),
+            69 => self.r#continue(&children[0]),
+            70 => self.text_start(&children[0]),
             _ => Err(ParserError::InternalError(format!(
                 "Unhandled production number: {}",
                 prod_num

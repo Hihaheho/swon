@@ -11,7 +11,9 @@
 - `boolean`
 - `array`
 - `object`
+- `enum`
 - `variant`
+- `tuple`
 - `unit`
 - `null`
 

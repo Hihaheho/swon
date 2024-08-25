@@ -1,0 +1,10 @@
+node_modules
+out
+
+!package-lock.json
+!package.json
+!tsconfig.json
+!src/**/*.ts
+
+!language-configuration.json
+!swon.tmLanguage.json
