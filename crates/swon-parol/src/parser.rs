@@ -4,10 +4,9 @@
 // lost after next build.
 // ---------------------------------------------------------
 
-use parol_runtime::lr_parser::{LR1State, LRAction, LRParseTable, LRParser, LRProduction};
 use parol_runtime::once_cell::sync::Lazy;
 #[allow(unused_imports)]
-use parol_runtime::parser::{ParseTreeType, ParseType, Production, Trans};
+use parol_runtime::parser::{LLKParser, LookaheadDFA, ParseTreeType, ParseType, Production, Trans};
 use parol_runtime::{ParolError, ParseTree, TerminalIndex};
 use parol_runtime::{ScannerConfig, TokenStream, Tokenizer};
 use std::path::Path;
@@ -19,7 +18,7 @@ use parol_runtime::lexer::tokenizer::{
     ERROR_TOKEN, NEW_LINE_TOKEN, UNMATCHABLE_TOKEN, WHITESPACE_TOKEN,
 };
 
-pub const TERMINALS: &[&str; 25] = &[
+pub const TERMINALS: &[&str; 24] = &[
     /*  0 */ UNMATCHABLE_TOKEN,
     /*  1 */ UNMATCHABLE_TOKEN,
     /*  2 */ UNMATCHABLE_TOKEN,
@@ -32,23 +31,22 @@ pub const TERMINALS: &[&str; 25] = &[
     /*  9 */ r"false",
     /* 10 */ r"null",
     /* 11 */
-    r#""(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*""#,
-    /* 12 */ r"\r\n|\r|\n",
-    /* 13 */ r"@",
-    /* 14 */ r"\$",
-    /* 15 */ r"\.",
-    /* 16 */ r"\{",
-    /* 17 */ r"\}",
-    /* 18 */ r"\[",
-    /* 19 */ r"\]",
-    /* 20 */ r"=",
-    /* 21 */ r",",
-    /* 22 */ r"\\\\",
-    /* 23 */ r":",
-    /* 24 */ ERROR_TOKEN,
+    r#""(\\[nrt\\"0]|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*""#,
+    /* 12 */ r"@",
+    /* 13 */ r"\$",
+    /* 14 */ r"\.",
+    /* 15 */ r"\{",
+    /* 16 */ r"\}",
+    /* 17 */ r"\[",
+    /* 18 */ r"\]",
+    /* 19 */ r"=",
+    /* 20 */ r",",
+    /* 21 */ r"\\\\",
+    /* 22 */ r":",
+    /* 23 */ ERROR_TOKEN,
 ];
 
-pub const TERMINAL_NAMES: &[&str; 25] = &[
+pub const TERMINAL_NAMES: &[&str; 24] = &[
     /*  0 */ "EndOfInput",
     /*  1 */ "Newline",
     /*  2 */ "Whitespace",
@@ -61,26 +59,25 @@ pub const TERMINAL_NAMES: &[&str; 25] = &[
     /*  9 */ "False",
     /* 10 */ "Null",
     /* 11 */ "String",
-    /* 12 */ "Newline0",
-    /* 13 */ "At",
-    /* 14 */ "Ext",
-    /* 15 */ "Dot",
-    /* 16 */ "Begin",
-    /* 17 */ "End",
-    /* 18 */ "ArrayBegin",
-    /* 19 */ "ArrayEnd",
-    /* 20 */ "Bind",
-    /* 21 */ "Comma",
-    /* 22 */ "Continue",
-    /* 23 */ "TextStart",
-    /* 24 */ "Error",
+    /* 12 */ "At",
+    /* 13 */ "Ext",
+    /* 14 */ "Dot",
+    /* 15 */ "Begin",
+    /* 16 */ "End",
+    /* 17 */ "ArrayBegin",
+    /* 18 */ "ArrayEnd",
+    /* 19 */ "Bind",
+    /* 20 */ "Comma",
+    /* 21 */ "Continue",
+    /* 22 */ "TextStart",
+    /* 23 */ "Error",
 ];
 
 /* SCANNER_0: "INITIAL" */
-const SCANNER_0: (&[&str; 5], &[TerminalIndex; 19]) = (
+const SCANNER_0: (&[&str; 5], &[TerminalIndex; 18]) = (
     &[
         /*  0 */ UNMATCHABLE_TOKEN,
-        /*  1 */ UNMATCHABLE_TOKEN,
+        /*  1 */ NEW_LINE_TOKEN,
         /*  2 */ WHITESPACE_TOKEN,
         /*  3 */ r"(#.*(\r\n|\r|\n|$))",
         /*  4 */ UNMATCHABLE_TOKEN,
@@ -93,48 +90,23 @@ const SCANNER_0: (&[&str; 5], &[TerminalIndex; 19]) = (
         9,  /* False */
         10, /* Null */
         11, /* String */
-        12, /* Newline0 */
-        13, /* At */
-        14, /* Ext */
-        15, /* Dot */
-        16, /* Begin */
-        17, /* End */
-        18, /* ArrayBegin */
-        19, /* ArrayEnd */
-        20, /* Bind */
-        21, /* Comma */
-        22, /* Continue */
-        23, /* TextStart */
+        12, /* At */
+        13, /* Ext */
+        14, /* Dot */
+        15, /* Begin */
+        16, /* End */
+        17, /* ArrayBegin */
+        18, /* ArrayEnd */
+        19, /* Bind */
+        20, /* Comma */
+        21, /* Continue */
+        22, /* TextStart */
     ],
 );
 
-/* SCANNER_1: "Value" */
-const SCANNER_1: (&[&str; 5], &[TerminalIndex; 13]) = (
-    &[
-        /*  0 */ UNMATCHABLE_TOKEN,
-        /*  1 */ NEW_LINE_TOKEN,
-        /*  2 */ WHITESPACE_TOKEN,
-        /*  3 */ UNMATCHABLE_TOKEN,
-        /*  4 */ UNMATCHABLE_TOKEN,
-    ],
-    &[
-        7,  /* Integer */
-        8,  /* True */
-        9,  /* False */
-        10, /* Null */
-        15, /* Dot */
-        16, /* Begin */
-        17, /* End */
-        18, /* ArrayBegin */
-        19, /* ArrayEnd */
-        20, /* Bind */
-        21, /* Comma */
-        22, /* Continue */
-        23, /* TextStart */
-    ],
-);
+const MAX_K: usize = 1;
 
-pub const NON_TERMINALS: &[&str; 49] = &[
+pub const NON_TERMINALS: &[&str; 46] = &[
     /*  0 */ "Array",
     /*  1 */ "ArrayBegin",
     /*  2 */ "ArrayEnd",
@@ -162,1498 +134,747 @@ pub const NON_TERMINALS: &[&str; 49] = &[
     /* 24 */ "KeyOpt",
     /* 25 */ "Keys",
     /* 26 */ "KeysList",
-    /* 27 */ "Newline",
-    /* 28 */ "Null",
-    /* 29 */ "Object",
-    /* 30 */ "ObjectList",
-    /* 31 */ "ObjectOpt",
-    /* 32 */ "Section",
-    /* 33 */ "SectionBinding",
-    /* 34 */ "SectionHeader",
-    /* 35 */ "String",
-    /* 36 */ "StringContinues",
-    /* 37 */ "StringContinuesList",
-    /* 38 */ "Swon",
-    /* 39 */ "SwonList",
-    /* 40 */ "SwonList0",
-    /* 41 */ "Text",
-    /* 42 */ "TextBinding",
-    /* 43 */ "TextBindingOpt",
-    /* 44 */ "TextStart",
-    /* 45 */ "True",
-    /* 46 */ "Value",
-    /* 47 */ "ValueBinding",
-    /* 48 */ "ValueBindingOpt",
+    /* 27 */ "Null",
+    /* 28 */ "Object",
+    /* 29 */ "ObjectList",
+    /* 30 */ "ObjectOpt",
+    /* 31 */ "Section",
+    /* 32 */ "SectionBinding",
+    /* 33 */ "SectionList",
+    /* 34 */ "String",
+    /* 35 */ "StringContinues",
+    /* 36 */ "StringContinuesList",
+    /* 37 */ "Swon",
+    /* 38 */ "SwonList",
+    /* 39 */ "SwonList0",
+    /* 40 */ "Text",
+    /* 41 */ "TextBinding",
+    /* 42 */ "TextStart",
+    /* 43 */ "True",
+    /* 44 */ "Value",
+    /* 45 */ "ValueBinding",
 ];
 
-static PARSE_TABLE: LRParseTable = LRParseTable {
-    actions: &[
-        /* 0 */ LRAction::Shift(2),
-        /* 1 */ LRAction::Shift(3),
-        /* 2 */ LRAction::Shift(4),
-        /* 3 */ LRAction::Shift(16),
-        /* 4 */ LRAction::Shift(20),
-        /* 5 */ LRAction::Shift(21),
-        /* 6 */ LRAction::Shift(22),
-        /* 7 */ LRAction::Shift(30),
-        /* 8 */ LRAction::Shift(34),
-        /* 9 */ LRAction::Shift(36),
-        /* 10 */ LRAction::Shift(39),
-        /* 11 */ LRAction::Shift(49),
-        /* 12 */ LRAction::Shift(52),
-        /* 13 */ LRAction::Shift(53),
-        /* 14 */ LRAction::Shift(54),
-        /* 15 */ LRAction::Shift(67),
-        /* 16 */ LRAction::Shift(75),
-        /* 17 */ LRAction::Shift(81),
-        /* 18 */ LRAction::Shift(83),
-        /* 19 */ LRAction::Reduce(0 /* Array */, 44),
-        /* 20 */ LRAction::Reduce(1 /* ArrayBegin */, 65),
-        /* 21 */ LRAction::Reduce(2 /* ArrayEnd */, 66),
-        /* 22 */ LRAction::Reduce(3 /* ArrayList */, 45),
-        /* 23 */ LRAction::Reduce(3 /* ArrayList */, 46),
-        /* 24 */ LRAction::Reduce(4 /* ArrayMarker */, 25),
-        /* 25 */ LRAction::Reduce(5 /* ArrayMarkerOpt */, 26),
-        /* 26 */ LRAction::Reduce(5 /* ArrayMarkerOpt */, 27),
-        /* 27 */ LRAction::Reduce(6 /* ArrayOpt */, 47),
-        /* 28 */ LRAction::Reduce(6 /* ArrayOpt */, 48),
-        /* 29 */ LRAction::Reduce(7 /* At */, 60),
-        /* 30 */ LRAction::Reduce(8 /* Begin */, 63),
-        /* 31 */ LRAction::Reduce(9 /* Bind */, 67),
-        /* 32 */ LRAction::Reduce(10 /* Binding */, 6),
-        /* 33 */ LRAction::Reduce(11 /* Bindings */, 7),
-        /* 34 */ LRAction::Reduce(11 /* Bindings */, 8),
-        /* 35 */ LRAction::Reduce(11 /* Bindings */, 9),
-        /* 36 */ LRAction::Reduce(12 /* Boolean */, 50),
-        /* 37 */ LRAction::Reduce(12 /* Boolean */, 51),
-        /* 38 */ LRAction::Reduce(13 /* Comma */, 68),
-        /* 39 */ LRAction::Reduce(14 /* Continue */, 69),
-        /* 40 */ LRAction::Reduce(15 /* Dot */, 62),
-        /* 41 */ LRAction::Reduce(16 /* End */, 64),
-        /* 42 */ LRAction::Reduce(17 /* Ext */, 61),
-        /* 43 */ LRAction::Reduce(18 /* ExtensionNameSpace */, 32),
-        /* 44 */ LRAction::Reduce(19 /* False */, 53),
-        /* 45 */ LRAction::Reduce(20 /* Ident */, 31),
-        /* 46 */ LRAction::Reduce(21 /* Integer */, 49),
-        /* 47 */ LRAction::Reduce(22 /* Key */, 22),
-        /* 48 */ LRAction::Reduce(23 /* KeyBase */, 28),
-        /* 49 */ LRAction::Reduce(23 /* KeyBase */, 29),
-        /* 50 */ LRAction::Reduce(23 /* KeyBase */, 30),
-        /* 51 */ LRAction::Reduce(24 /* KeyOpt */, 23),
-        /* 52 */ LRAction::Reduce(24 /* KeyOpt */, 24),
-        /* 53 */ LRAction::Reduce(25 /* Keys */, 19),
-        /* 54 */ LRAction::Reduce(26 /* KeysList */, 20),
-        /* 55 */ LRAction::Reduce(26 /* KeysList */, 21),
-        /* 56 */ LRAction::Reduce(27 /* Newline */, 59),
-        /* 57 */ LRAction::Reduce(28 /* Null */, 54),
-        /* 58 */ LRAction::Reduce(29 /* Object */, 39),
-        /* 59 */ LRAction::Reduce(30 /* ObjectList */, 40),
-        /* 60 */ LRAction::Reduce(30 /* ObjectList */, 41),
-        /* 61 */ LRAction::Reduce(31 /* ObjectOpt */, 42),
-        /* 62 */ LRAction::Reduce(31 /* ObjectOpt */, 43),
-        /* 63 */ LRAction::Reduce(32 /* Section */, 5),
-        /* 64 */ LRAction::Reduce(33 /* SectionBinding */, 13),
-        /* 65 */ LRAction::Reduce(34 /* SectionHeader */, 18),
-        /* 66 */ LRAction::Reduce(35 /* String */, 58),
-        /* 67 */ LRAction::Reduce(36 /* StringContinues */, 55),
-        /* 68 */ LRAction::Reduce(37 /* StringContinuesList */, 56),
-        /* 69 */ LRAction::Reduce(37 /* StringContinuesList */, 57),
-        /* 70 */ LRAction::Reduce(38 /* Swon */, 0),
-        /* 71 */ LRAction::Reduce(39 /* SwonList */, 3),
-        /* 72 */ LRAction::Reduce(39 /* SwonList */, 4),
-        /* 73 */ LRAction::Reduce(40 /* SwonList0 */, 1),
-        /* 74 */ LRAction::Reduce(40 /* SwonList0 */, 2),
-        /* 75 */ LRAction::Reduce(41 /* Text */, 17),
-        /* 76 */ LRAction::Reduce(42 /* TextBinding */, 14),
-        /* 77 */ LRAction::Reduce(43 /* TextBindingOpt */, 15),
-        /* 78 */ LRAction::Reduce(43 /* TextBindingOpt */, 16),
-        /* 79 */ LRAction::Reduce(44 /* TextStart */, 70),
-        /* 80 */ LRAction::Reduce(45 /* True */, 52),
-        /* 81 */ LRAction::Reduce(46 /* Value */, 33),
-        /* 82 */ LRAction::Reduce(46 /* Value */, 34),
-        /* 83 */ LRAction::Reduce(46 /* Value */, 35),
-        /* 84 */ LRAction::Reduce(46 /* Value */, 36),
-        /* 85 */ LRAction::Reduce(46 /* Value */, 37),
-        /* 86 */ LRAction::Reduce(46 /* Value */, 38),
-        /* 87 */ LRAction::Reduce(47 /* ValueBinding */, 10),
-        /* 88 */ LRAction::Reduce(48 /* ValueBindingOpt */, 11),
-        /* 89 */ LRAction::Reduce(48 /* ValueBindingOpt */, 12),
-        /* 90 */ LRAction::Accept,
-    ],
-    states: &[
-        // State 0
-        LR1State {
-            actions: &[
-                (0, 72),  /* '<$>' => LRAction::Reduce(SwonList, 4) */
-                (6, 72),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(SwonList, 4) */
-                (11, 72), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(SwonList, 4) */
-                (13, 72), /* '@' => LRAction::Reduce(SwonList, 4) */
-                (14, 72), /* '$' => LRAction::Reduce(SwonList, 4) */
-            ],
-            gotos: &[(39, 1) /* SwonList => 1 */],
-        },
-        // State 1
-        LR1State {
-            actions: &[
-                (0, 74),  /* '<$>' => LRAction::Reduce(SwonList0, 2) */
-                (6, 0),   /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Shift(2) */
-                (11, 1), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Shift(3) */
-                (12, 74), /* '\r\n|\r|\n' => LRAction::Reduce(SwonList0, 2) */
-                (13, 74), /* '@' => LRAction::Reduce(SwonList0, 2) */
-                (14, 2), /* '$' => LRAction::Shift(4) */
-            ],
-            gotos: &[
-                (10, 5),  /* Binding => 5 */
-                (17, 6),  /* Ext => 6 */
-                (18, 7),  /* ExtensionNameSpace => 7 */
-                (20, 8),  /* Ident => 8 */
-                (22, 9),  /* Key => 9 */
-                (23, 10), /* KeyBase => 10 */
-                (25, 11), /* Keys => 11 */
-                (35, 12), /* String => 12 */
-                (40, 13), /* SwonList0 => 13 */
-            ],
-        },
-        // State 2
-        LR1State {
-            actions: &[
-                (12, 45), /* '\r\n|\r|\n' => LRAction::Reduce(Ident, 31) */
-                (15, 45), /* '.' => LRAction::Reduce(Ident, 31) */
-                (16, 45), /* '{' => LRAction::Reduce(Ident, 31) */
-                (18, 45), /* '[' => LRAction::Reduce(Ident, 31) */
-                (20, 45), /* '=' => LRAction::Reduce(Ident, 31) */
-                (23, 45), /* ':' => LRAction::Reduce(Ident, 31) */
-            ],
-            gotos: &[],
-        },
-        // State 3
-        LR1State {
-            actions: &[
-                (6, 66),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(String, 58) */
-                (7, 66),  /* '\d[\d_]*' => LRAction::Reduce(String, 58) */
-                (8, 66),  /* 'true' => LRAction::Reduce(String, 58) */
-                (9, 66),  /* 'false' => LRAction::Reduce(String, 58) */
-                (10, 66), /* 'null' => LRAction::Reduce(String, 58) */
-                (11, 66), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(String, 58) */
-                (12, 66), /* '\r\n|\r|\n' => LRAction::Reduce(String, 58) */
-                (14, 66), /* '$' => LRAction::Reduce(String, 58) */
-                (15, 66), /* '.' => LRAction::Reduce(String, 58) */
-                (16, 66), /* '{' => LRAction::Reduce(String, 58) */
-                (17, 66), /* '}' => LRAction::Reduce(String, 58) */
-                (18, 66), /* '[' => LRAction::Reduce(String, 58) */
-                (19, 66), /* ']' => LRAction::Reduce(String, 58) */
-                (20, 66), /* '=' => LRAction::Reduce(String, 58) */
-                (21, 66), /* ',' => LRAction::Reduce(String, 58) */
-                (22, 66), /* '\\' => LRAction::Reduce(String, 58) */
-                (23, 66), /* ':' => LRAction::Reduce(String, 58) */
-            ],
-            gotos: &[],
-        },
-        // State 4
-        LR1State {
-            actions: &[
-                (6, 42), /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(Ext, 61) */
-            ],
-            gotos: &[],
-        },
-        // State 5
-        LR1State {
-            actions: &[
-                (0, 71),  /* '<$>' => LRAction::Reduce(SwonList, 3) */
-                (6, 71),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(SwonList, 3) */
-                (11, 71), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(SwonList, 3) */
-                (12, 71), /* '\r\n|\r|\n' => LRAction::Reduce(SwonList, 3) */
-                (13, 71), /* '@' => LRAction::Reduce(SwonList, 3) */
-                (14, 71), /* '$' => LRAction::Reduce(SwonList, 3) */
-            ],
-            gotos: &[],
-        },
-        // State 6
-        LR1State {
-            actions: &[
-                (6, 0), /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Shift(2) */
-            ],
-            gotos: &[(20, 14) /* Ident => 14 */],
-        },
-        // State 7
-        LR1State {
-            actions: &[
-                (12, 49), /* '\r\n|\r|\n' => LRAction::Reduce(KeyBase, 29) */
-                (15, 49), /* '.' => LRAction::Reduce(KeyBase, 29) */
-                (16, 49), /* '{' => LRAction::Reduce(KeyBase, 29) */
-                (18, 49), /* '[' => LRAction::Reduce(KeyBase, 29) */
-                (20, 49), /* '=' => LRAction::Reduce(KeyBase, 29) */
-                (23, 49), /* ':' => LRAction::Reduce(KeyBase, 29) */
-            ],
-            gotos: &[],
-        },
-        // State 8
-        LR1State {
-            actions: &[
-                (12, 48), /* '\r\n|\r|\n' => LRAction::Reduce(KeyBase, 28) */
-                (15, 48), /* '.' => LRAction::Reduce(KeyBase, 28) */
-                (16, 48), /* '{' => LRAction::Reduce(KeyBase, 28) */
-                (18, 48), /* '[' => LRAction::Reduce(KeyBase, 28) */
-                (20, 48), /* '=' => LRAction::Reduce(KeyBase, 28) */
-                (23, 48), /* ':' => LRAction::Reduce(KeyBase, 28) */
-            ],
-            gotos: &[],
-        },
-        // State 9
-        LR1State {
-            actions: &[
-                (12, 55), /* '\r\n|\r|\n' => LRAction::Reduce(KeysList, 21) */
-                (15, 55), /* '.' => LRAction::Reduce(KeysList, 21) */
-                (16, 55), /* '{' => LRAction::Reduce(KeysList, 21) */
-                (20, 55), /* '=' => LRAction::Reduce(KeysList, 21) */
-                (23, 55), /* ':' => LRAction::Reduce(KeysList, 21) */
-            ],
-            gotos: &[(26, 15) /* KeysList => 15 */],
-        },
-        // State 10
-        LR1State {
-            actions: &[
-                (12, 52), /* '\r\n|\r|\n' => LRAction::Reduce(KeyOpt, 24) */
-                (15, 52), /* '.' => LRAction::Reduce(KeyOpt, 24) */
-                (16, 52), /* '{' => LRAction::Reduce(KeyOpt, 24) */
-                (18, 3),  /* '[' => LRAction::Shift(16) */
-                (20, 52), /* '=' => LRAction::Reduce(KeyOpt, 24) */
-                (23, 52), /* ':' => LRAction::Reduce(KeyOpt, 24) */
-            ],
-            gotos: &[
-                (1, 17),  /* ArrayBegin => 17 */
-                (4, 18),  /* ArrayMarker => 18 */
-                (24, 19), /* KeyOpt => 19 */
-            ],
-        },
-        // State 11
-        LR1State {
-            actions: &[
-                (16, 4), /* '{' => LRAction::Shift(20) */
-                (20, 5), /* '=' => LRAction::Shift(21) */
-                (23, 6), /* ':' => LRAction::Shift(22) */
-            ],
-            gotos: &[
-                (8, 23),  /* Begin => 23 */
-                (9, 24),  /* Bind => 24 */
-                (11, 25), /* Bindings => 25 */
-                (33, 26), /* SectionBinding => 26 */
-                (42, 27), /* TextBinding => 27 */
-                (44, 28), /* TextStart => 28 */
-                (47, 29), /* ValueBinding => 29 */
-            ],
-        },
-        // State 12
-        LR1State {
-            actions: &[
-                (12, 50), /* '\r\n|\r|\n' => LRAction::Reduce(KeyBase, 30) */
-                (15, 50), /* '.' => LRAction::Reduce(KeyBase, 30) */
-                (16, 50), /* '{' => LRAction::Reduce(KeyBase, 30) */
-                (18, 50), /* '[' => LRAction::Reduce(KeyBase, 30) */
-                (20, 50), /* '=' => LRAction::Reduce(KeyBase, 30) */
-                (23, 50), /* ':' => LRAction::Reduce(KeyBase, 30) */
-            ],
-            gotos: &[],
-        },
-        // State 13
-        LR1State {
-            actions: &[
-                (0, 90),  /* '<$>' => LRAction::Accept */
-                (12, 70), /* '\r\n|\r|\n' => LRAction::Reduce(Swon, 0) */
-                (13, 7),  /* '@' => LRAction::Shift(30) */
-            ],
-            gotos: &[
-                (7, 31),  /* At => 31 */
-                (32, 32), /* Section => 32 */
-                (34, 33), /* SectionHeader => 33 */
-            ],
-        },
-        // State 14
-        LR1State {
-            actions: &[
-                (12, 43), /* '\r\n|\r|\n' => LRAction::Reduce(ExtensionNameSpace, 32) */
-                (15, 43), /* '.' => LRAction::Reduce(ExtensionNameSpace, 32) */
-                (16, 43), /* '{' => LRAction::Reduce(ExtensionNameSpace, 32) */
-                (18, 43), /* '[' => LRAction::Reduce(ExtensionNameSpace, 32) */
-                (20, 43), /* '=' => LRAction::Reduce(ExtensionNameSpace, 32) */
-                (23, 43), /* ':' => LRAction::Reduce(ExtensionNameSpace, 32) */
-            ],
-            gotos: &[],
-        },
-        // State 15
-        LR1State {
-            actions: &[
-                (12, 53), /* '\r\n|\r|\n' => LRAction::Reduce(Keys, 19) */
-                (15, 8),  /* '.' => LRAction::Shift(34) */
-                (16, 53), /* '{' => LRAction::Reduce(Keys, 19) */
-                (20, 53), /* '=' => LRAction::Reduce(Keys, 19) */
-                (23, 53), /* ':' => LRAction::Reduce(Keys, 19) */
-            ],
-            gotos: &[(15, 35) /* Dot => 35 */],
-        },
-        // State 16
-        LR1State {
-            actions: &[
-                (7, 20),  /* '\d[\d_]*' => LRAction::Reduce(ArrayBegin, 65) */
-                (8, 20),  /* 'true' => LRAction::Reduce(ArrayBegin, 65) */
-                (9, 20),  /* 'false' => LRAction::Reduce(ArrayBegin, 65) */
-                (10, 20), /* 'null' => LRAction::Reduce(ArrayBegin, 65) */
-                (11, 20), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(ArrayBegin, 65) */
-                (16, 20), /* '{' => LRAction::Reduce(ArrayBegin, 65) */
-                (18, 20), /* '[' => LRAction::Reduce(ArrayBegin, 65) */
-                (19, 20), /* ']' => LRAction::Reduce(ArrayBegin, 65) */
-            ],
-            gotos: &[],
-        },
-        // State 17
-        LR1State {
-            actions: &[
-                (7, 9),   /* '\d[\d_]*' => LRAction::Shift(36) */
-                (19, 26), /* ']' => LRAction::Reduce(ArrayMarkerOpt, 27) */
-            ],
-            gotos: &[
-                (5, 37),  /* ArrayMarkerOpt => 37 */
-                (21, 38), /* Integer => 38 */
-            ],
-        },
-        // State 18
-        LR1State {
-            actions: &[
-                (12, 51), /* '\r\n|\r|\n' => LRAction::Reduce(KeyOpt, 23) */
-                (15, 51), /* '.' => LRAction::Reduce(KeyOpt, 23) */
-                (16, 51), /* '{' => LRAction::Reduce(KeyOpt, 23) */
-                (20, 51), /* '=' => LRAction::Reduce(KeyOpt, 23) */
-                (23, 51), /* ':' => LRAction::Reduce(KeyOpt, 23) */
-            ],
-            gotos: &[],
-        },
-        // State 19
-        LR1State {
-            actions: &[
-                (12, 47), /* '\r\n|\r|\n' => LRAction::Reduce(Key, 22) */
-                (15, 47), /* '.' => LRAction::Reduce(Key, 22) */
-                (16, 47), /* '{' => LRAction::Reduce(Key, 22) */
-                (20, 47), /* '=' => LRAction::Reduce(Key, 22) */
-                (23, 47), /* ':' => LRAction::Reduce(Key, 22) */
-            ],
-            gotos: &[],
-        },
-        // State 20
-        LR1State {
-            actions: &[
-                (6, 30),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(Begin, 63) */
-                (11, 30), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(Begin, 63) */
-                (12, 30), /* '\r\n|\r|\n' => LRAction::Reduce(Begin, 63) */
-                (14, 30), /* '$' => LRAction::Reduce(Begin, 63) */
-                (17, 30), /* '}' => LRAction::Reduce(Begin, 63) */
-            ],
-            gotos: &[],
-        },
-        // State 21
-        LR1State {
-            actions: &[
-                (7, 31),  /* '\d[\d_]*' => LRAction::Reduce(Bind, 67) */
-                (8, 31),  /* 'true' => LRAction::Reduce(Bind, 67) */
-                (9, 31),  /* 'false' => LRAction::Reduce(Bind, 67) */
-                (10, 31), /* 'null' => LRAction::Reduce(Bind, 67) */
-                (11, 31), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(Bind, 67) */
-                (12, 31), /* '\r\n|\r|\n' => LRAction::Reduce(Bind, 67) */
-                (16, 31), /* '{' => LRAction::Reduce(Bind, 67) */
-                (18, 31), /* '[' => LRAction::Reduce(Bind, 67) */
-            ],
-            gotos: &[],
-        },
-        // State 22
-        LR1State {
-            actions: &[
-                (5, 79),  /* 'todo' => LRAction::Reduce(TextStart, 70) */
-                (12, 79), /* '\r\n|\r|\n' => LRAction::Reduce(TextStart, 70) */
-            ],
-            gotos: &[],
-        },
-        // State 23
-        LR1State {
-            actions: &[(12, 10) /* '\r\n|\r|\n' => LRAction::Shift(39) */],
-            gotos: &[(27, 40) /* Newline => 40 */],
-        },
-        // State 24
-        LR1State {
-            actions: &[
-                (7, 89),  /* '\d[\d_]*' => LRAction::Reduce(ValueBindingOpt, 12) */
-                (8, 89),  /* 'true' => LRAction::Reduce(ValueBindingOpt, 12) */
-                (9, 89),  /* 'false' => LRAction::Reduce(ValueBindingOpt, 12) */
-                (10, 89), /* 'null' => LRAction::Reduce(ValueBindingOpt, 12) */
-                (11, 89), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(ValueBindingOpt, 12) */
-                (12, 10), /* '\r\n|\r|\n' => LRAction::Shift(39) */
-                (16, 89), /* '{' => LRAction::Reduce(ValueBindingOpt, 12) */
-                (18, 89), /* '[' => LRAction::Reduce(ValueBindingOpt, 12) */
-            ],
-            gotos: &[
-                (27, 41), /* Newline => 41 */
-                (48, 42), /* ValueBindingOpt => 42 */
-            ],
-        },
-        // State 25
-        LR1State {
-            actions: &[(12, 10) /* '\r\n|\r|\n' => LRAction::Shift(39) */],
-            gotos: &[(27, 43) /* Newline => 43 */],
-        },
-        // State 26
-        LR1State {
-            actions: &[
-                (12, 34), /* '\r\n|\r|\n' => LRAction::Reduce(Bindings, 8) */
-            ],
-            gotos: &[],
-        },
-        // State 27
-        LR1State {
-            actions: &[
-                (12, 35), /* '\r\n|\r|\n' => LRAction::Reduce(Bindings, 9) */
-            ],
-            gotos: &[],
-        },
-        // State 28
-        LR1State {
-            actions: &[
-                (5, 78),  /* 'todo' => LRAction::Reduce(TextBindingOpt, 16) */
-                (12, 10), /* '\r\n|\r|\n' => LRAction::Shift(39) */
-            ],
-            gotos: &[
-                (27, 44), /* Newline => 44 */
-                (43, 45), /* TextBindingOpt => 45 */
-            ],
-        },
-        // State 29
-        LR1State {
-            actions: &[
-                (12, 33), /* '\r\n|\r|\n' => LRAction::Reduce(Bindings, 7) */
-            ],
-            gotos: &[],
-        },
-        // State 30
-        LR1State {
-            actions: &[
-                (6, 29),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(At, 60) */
-                (11, 29), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(At, 60) */
-                (14, 29), /* '$' => LRAction::Reduce(At, 60) */
-            ],
-            gotos: &[],
-        },
-        // State 31
-        LR1State {
-            actions: &[
-                (6, 0),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Shift(2) */
-                (11, 1), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Shift(3) */
-                (14, 2), /* '$' => LRAction::Shift(4) */
-            ],
-            gotos: &[
-                (17, 6),  /* Ext => 6 */
-                (18, 7),  /* ExtensionNameSpace => 7 */
-                (20, 8),  /* Ident => 8 */
-                (22, 9),  /* Key => 9 */
-                (23, 10), /* KeyBase => 10 */
-                (25, 46), /* Keys => 46 */
-                (35, 12), /* String => 12 */
-            ],
-        },
-        // State 32
-        LR1State {
-            actions: &[
-                (0, 73),  /* '<$>' => LRAction::Reduce(SwonList0, 1) */
-                (12, 73), /* '\r\n|\r|\n' => LRAction::Reduce(SwonList0, 1) */
-                (13, 73), /* '@' => LRAction::Reduce(SwonList0, 1) */
-            ],
-            gotos: &[],
-        },
-        // State 33
-        LR1State {
-            actions: &[
-                (6, 72),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(SwonList, 4) */
-                (11, 72), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(SwonList, 4) */
-                (12, 72), /* '\r\n|\r|\n' => LRAction::Reduce(SwonList, 4) */
-                (13, 72), /* '@' => LRAction::Reduce(SwonList, 4) */
-                (14, 72), /* '$' => LRAction::Reduce(SwonList, 4) */
-            ],
-            gotos: &[
-                (38, 47), /* Swon => 47 */
-                (39, 1),  /* SwonList => 1 */
-            ],
-        },
-        // State 34
-        LR1State {
-            actions: &[
-                (6, 40),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(Dot, 62) */
-                (11, 40), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(Dot, 62) */
-                (14, 40), /* '$' => LRAction::Reduce(Dot, 62) */
-            ],
-            gotos: &[],
-        },
-        // State 35
-        LR1State {
-            actions: &[
-                (6, 0),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Shift(2) */
-                (11, 1), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Shift(3) */
-                (14, 2), /* '$' => LRAction::Shift(4) */
-            ],
-            gotos: &[
-                (17, 6),  /* Ext => 6 */
-                (18, 7),  /* ExtensionNameSpace => 7 */
-                (20, 8),  /* Ident => 8 */
-                (22, 48), /* Key => 48 */
-                (23, 10), /* KeyBase => 10 */
-                (35, 12), /* String => 12 */
-            ],
-        },
-        // State 36
-        LR1State {
-            actions: &[
-                (6, 46),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(Integer, 49) */
-                (7, 46),  /* '\d[\d_]*' => LRAction::Reduce(Integer, 49) */
-                (8, 46),  /* 'true' => LRAction::Reduce(Integer, 49) */
-                (9, 46),  /* 'false' => LRAction::Reduce(Integer, 49) */
-                (10, 46), /* 'null' => LRAction::Reduce(Integer, 49) */
-                (11, 46), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(Integer, 49) */
-                (12, 46), /* '\r\n|\r|\n' => LRAction::Reduce(Integer, 49) */
-                (14, 46), /* '$' => LRAction::Reduce(Integer, 49) */
-                (16, 46), /* '{' => LRAction::Reduce(Integer, 49) */
-                (17, 46), /* '}' => LRAction::Reduce(Integer, 49) */
-                (18, 46), /* '[' => LRAction::Reduce(Integer, 49) */
-                (19, 46), /* ']' => LRAction::Reduce(Integer, 49) */
-                (21, 46), /* ',' => LRAction::Reduce(Integer, 49) */
-            ],
-            gotos: &[],
-        },
-        // State 37
-        LR1State {
-            actions: &[(19, 11) /* ']' => LRAction::Shift(49) */],
-            gotos: &[(2, 50) /* ArrayEnd => 50 */],
-        },
-        // State 38
-        LR1State {
-            actions: &[
-                (19, 25), /* ']' => LRAction::Reduce(ArrayMarkerOpt, 26) */
-            ],
-            gotos: &[],
-        },
-        // State 39
-        LR1State {
-            actions: &[
-                (0, 56),  /* '<$>' => LRAction::Reduce(Newline, 59) */
-                (5, 56),  /* 'todo' => LRAction::Reduce(Newline, 59) */
-                (6, 56),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(Newline, 59) */
-                (7, 56),  /* '\d[\d_]*' => LRAction::Reduce(Newline, 59) */
-                (8, 56),  /* 'true' => LRAction::Reduce(Newline, 59) */
-                (9, 56),  /* 'false' => LRAction::Reduce(Newline, 59) */
-                (10, 56), /* 'null' => LRAction::Reduce(Newline, 59) */
-                (11, 56), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(Newline, 59) */
-                (12, 56), /* '\r\n|\r|\n' => LRAction::Reduce(Newline, 59) */
-                (13, 56), /* '@' => LRAction::Reduce(Newline, 59) */
-                (14, 56), /* '$' => LRAction::Reduce(Newline, 59) */
-                (16, 56), /* '{' => LRAction::Reduce(Newline, 59) */
-                (17, 56), /* '}' => LRAction::Reduce(Newline, 59) */
-                (18, 56), /* '[' => LRAction::Reduce(Newline, 59) */
-            ],
-            gotos: &[],
-        },
-        // State 40
-        LR1State {
-            actions: &[
-                (6, 72),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(SwonList, 4) */
-                (11, 72), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(SwonList, 4) */
-                (12, 72), /* '\r\n|\r|\n' => LRAction::Reduce(SwonList, 4) */
-                (13, 72), /* '@' => LRAction::Reduce(SwonList, 4) */
-                (14, 72), /* '$' => LRAction::Reduce(SwonList, 4) */
-            ],
-            gotos: &[
-                (38, 51), /* Swon => 51 */
-                (39, 1),  /* SwonList => 1 */
-            ],
-        },
-        // State 41
-        LR1State {
-            actions: &[
-                (7, 88),  /* '\d[\d_]*' => LRAction::Reduce(ValueBindingOpt, 11) */
-                (8, 88),  /* 'true' => LRAction::Reduce(ValueBindingOpt, 11) */
-                (9, 88),  /* 'false' => LRAction::Reduce(ValueBindingOpt, 11) */
-                (10, 88), /* 'null' => LRAction::Reduce(ValueBindingOpt, 11) */
-                (11, 88), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(ValueBindingOpt, 11) */
-                (16, 88), /* '{' => LRAction::Reduce(ValueBindingOpt, 11) */
-                (18, 88), /* '[' => LRAction::Reduce(ValueBindingOpt, 11) */
-            ],
-            gotos: &[],
-        },
-        // State 42
-        LR1State {
-            actions: &[
-                (7, 9),   /* '\d[\d_]*' => LRAction::Shift(36) */
-                (8, 12),  /* 'true' => LRAction::Shift(52) */
-                (9, 13),  /* 'false' => LRAction::Shift(53) */
-                (10, 14), /* 'null' => LRAction::Shift(54) */
-                (11, 1), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Shift(3) */
-                (16, 4), /* '{' => LRAction::Shift(20) */
-                (18, 3), /* '[' => LRAction::Shift(16) */
-            ],
-            gotos: &[
-                (0, 55),  /* Array => 55 */
-                (1, 56),  /* ArrayBegin => 56 */
-                (8, 57),  /* Begin => 57 */
-                (12, 58), /* Boolean => 58 */
-                (19, 59), /* False => 59 */
-                (21, 60), /* Integer => 60 */
-                (28, 61), /* Null => 61 */
-                (29, 62), /* Object => 62 */
-                (35, 63), /* String => 63 */
-                (36, 64), /* StringContinues => 64 */
-                (45, 65), /* True => 65 */
-                (46, 66), /* Value => 66 */
-            ],
-        },
-        // State 43
-        LR1State {
-            actions: &[
-                (0, 32),  /* '<$>' => LRAction::Reduce(Binding, 6) */
-                (6, 32),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(Binding, 6) */
-                (11, 32), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(Binding, 6) */
-                (12, 32), /* '\r\n|\r|\n' => LRAction::Reduce(Binding, 6) */
-                (13, 32), /* '@' => LRAction::Reduce(Binding, 6) */
-                (14, 32), /* '$' => LRAction::Reduce(Binding, 6) */
-            ],
-            gotos: &[],
-        },
-        // State 44
-        LR1State {
-            actions: &[
-                (5, 77), /* 'todo' => LRAction::Reduce(TextBindingOpt, 15) */
-            ],
-            gotos: &[],
-        },
-        // State 45
-        LR1State {
-            actions: &[(5, 15) /* 'todo' => LRAction::Shift(67) */],
-            gotos: &[(41, 68) /* Text => 68 */],
-        },
-        // State 46
-        LR1State {
-            actions: &[(12, 10) /* '\r\n|\r|\n' => LRAction::Shift(39) */],
-            gotos: &[(27, 69) /* Newline => 69 */],
-        },
-        // State 47
-        LR1State {
-            actions: &[(12, 10) /* '\r\n|\r|\n' => LRAction::Shift(39) */],
-            gotos: &[(27, 70) /* Newline => 70 */],
-        },
-        // State 48
-        LR1State {
-            actions: &[
-                (12, 54), /* '\r\n|\r|\n' => LRAction::Reduce(KeysList, 20) */
-                (15, 54), /* '.' => LRAction::Reduce(KeysList, 20) */
-                (16, 54), /* '{' => LRAction::Reduce(KeysList, 20) */
-                (20, 54), /* '=' => LRAction::Reduce(KeysList, 20) */
-                (23, 54), /* ':' => LRAction::Reduce(KeysList, 20) */
-            ],
-            gotos: &[],
-        },
-        // State 49
-        LR1State {
-            actions: &[
-                (6, 21),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(ArrayEnd, 66) */
-                (7, 21),  /* '\d[\d_]*' => LRAction::Reduce(ArrayEnd, 66) */
-                (8, 21),  /* 'true' => LRAction::Reduce(ArrayEnd, 66) */
-                (9, 21),  /* 'false' => LRAction::Reduce(ArrayEnd, 66) */
-                (10, 21), /* 'null' => LRAction::Reduce(ArrayEnd, 66) */
-                (11, 21), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(ArrayEnd, 66) */
-                (12, 21), /* '\r\n|\r|\n' => LRAction::Reduce(ArrayEnd, 66) */
-                (14, 21), /* '$' => LRAction::Reduce(ArrayEnd, 66) */
-                (15, 21), /* '.' => LRAction::Reduce(ArrayEnd, 66) */
-                (16, 21), /* '{' => LRAction::Reduce(ArrayEnd, 66) */
-                (17, 21), /* '}' => LRAction::Reduce(ArrayEnd, 66) */
-                (18, 21), /* '[' => LRAction::Reduce(ArrayEnd, 66) */
-                (19, 21), /* ']' => LRAction::Reduce(ArrayEnd, 66) */
-                (20, 21), /* '=' => LRAction::Reduce(ArrayEnd, 66) */
-                (21, 21), /* ',' => LRAction::Reduce(ArrayEnd, 66) */
-                (23, 21), /* ':' => LRAction::Reduce(ArrayEnd, 66) */
-            ],
-            gotos: &[],
-        },
-        // State 50
-        LR1State {
-            actions: &[
-                (12, 24), /* '\r\n|\r|\n' => LRAction::Reduce(ArrayMarker, 25) */
-                (15, 24), /* '.' => LRAction::Reduce(ArrayMarker, 25) */
-                (16, 24), /* '{' => LRAction::Reduce(ArrayMarker, 25) */
-                (20, 24), /* '=' => LRAction::Reduce(ArrayMarker, 25) */
-                (23, 24), /* ':' => LRAction::Reduce(ArrayMarker, 25) */
-            ],
-            gotos: &[],
-        },
-        // State 51
-        LR1State {
-            actions: &[(12, 10) /* '\r\n|\r|\n' => LRAction::Shift(39) */],
-            gotos: &[(27, 71) /* Newline => 71 */],
-        },
-        // State 52
-        LR1State {
-            actions: &[
-                (6, 80),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(True, 52) */
-                (7, 80),  /* '\d[\d_]*' => LRAction::Reduce(True, 52) */
-                (8, 80),  /* 'true' => LRAction::Reduce(True, 52) */
-                (9, 80),  /* 'false' => LRAction::Reduce(True, 52) */
-                (10, 80), /* 'null' => LRAction::Reduce(True, 52) */
-                (11, 80), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(True, 52) */
-                (12, 80), /* '\r\n|\r|\n' => LRAction::Reduce(True, 52) */
-                (14, 80), /* '$' => LRAction::Reduce(True, 52) */
-                (16, 80), /* '{' => LRAction::Reduce(True, 52) */
-                (17, 80), /* '}' => LRAction::Reduce(True, 52) */
-                (18, 80), /* '[' => LRAction::Reduce(True, 52) */
-                (19, 80), /* ']' => LRAction::Reduce(True, 52) */
-                (21, 80), /* ',' => LRAction::Reduce(True, 52) */
-            ],
-            gotos: &[],
-        },
-        // State 53
-        LR1State {
-            actions: &[
-                (6, 44),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(False, 53) */
-                (7, 44),  /* '\d[\d_]*' => LRAction::Reduce(False, 53) */
-                (8, 44),  /* 'true' => LRAction::Reduce(False, 53) */
-                (9, 44),  /* 'false' => LRAction::Reduce(False, 53) */
-                (10, 44), /* 'null' => LRAction::Reduce(False, 53) */
-                (11, 44), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(False, 53) */
-                (12, 44), /* '\r\n|\r|\n' => LRAction::Reduce(False, 53) */
-                (14, 44), /* '$' => LRAction::Reduce(False, 53) */
-                (16, 44), /* '{' => LRAction::Reduce(False, 53) */
-                (17, 44), /* '}' => LRAction::Reduce(False, 53) */
-                (18, 44), /* '[' => LRAction::Reduce(False, 53) */
-                (19, 44), /* ']' => LRAction::Reduce(False, 53) */
-                (21, 44), /* ',' => LRAction::Reduce(False, 53) */
-            ],
-            gotos: &[],
-        },
-        // State 54
-        LR1State {
-            actions: &[
-                (6, 57),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(Null, 54) */
-                (7, 57),  /* '\d[\d_]*' => LRAction::Reduce(Null, 54) */
-                (8, 57),  /* 'true' => LRAction::Reduce(Null, 54) */
-                (9, 57),  /* 'false' => LRAction::Reduce(Null, 54) */
-                (10, 57), /* 'null' => LRAction::Reduce(Null, 54) */
-                (11, 57), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(Null, 54) */
-                (12, 57), /* '\r\n|\r|\n' => LRAction::Reduce(Null, 54) */
-                (14, 57), /* '$' => LRAction::Reduce(Null, 54) */
-                (16, 57), /* '{' => LRAction::Reduce(Null, 54) */
-                (17, 57), /* '}' => LRAction::Reduce(Null, 54) */
-                (18, 57), /* '[' => LRAction::Reduce(Null, 54) */
-                (19, 57), /* ']' => LRAction::Reduce(Null, 54) */
-                (21, 57), /* ',' => LRAction::Reduce(Null, 54) */
-            ],
-            gotos: &[],
-        },
-        // State 55
-        LR1State {
-            actions: &[
-                (6, 82),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(Value, 34) */
-                (7, 82),  /* '\d[\d_]*' => LRAction::Reduce(Value, 34) */
-                (8, 82),  /* 'true' => LRAction::Reduce(Value, 34) */
-                (9, 82),  /* 'false' => LRAction::Reduce(Value, 34) */
-                (10, 82), /* 'null' => LRAction::Reduce(Value, 34) */
-                (11, 82), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(Value, 34) */
-                (12, 82), /* '\r\n|\r|\n' => LRAction::Reduce(Value, 34) */
-                (14, 82), /* '$' => LRAction::Reduce(Value, 34) */
-                (16, 82), /* '{' => LRAction::Reduce(Value, 34) */
-                (17, 82), /* '}' => LRAction::Reduce(Value, 34) */
-                (18, 82), /* '[' => LRAction::Reduce(Value, 34) */
-                (19, 82), /* ']' => LRAction::Reduce(Value, 34) */
-                (21, 82), /* ',' => LRAction::Reduce(Value, 34) */
-            ],
-            gotos: &[],
-        },
-        // State 56
-        LR1State {
-            actions: &[
-                (7, 23),  /* '\d[\d_]*' => LRAction::Reduce(ArrayList, 46) */
-                (8, 23),  /* 'true' => LRAction::Reduce(ArrayList, 46) */
-                (9, 23),  /* 'false' => LRAction::Reduce(ArrayList, 46) */
-                (10, 23), /* 'null' => LRAction::Reduce(ArrayList, 46) */
-                (11, 23), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(ArrayList, 46) */
-                (16, 23), /* '{' => LRAction::Reduce(ArrayList, 46) */
-                (18, 23), /* '[' => LRAction::Reduce(ArrayList, 46) */
-                (19, 23), /* ']' => LRAction::Reduce(ArrayList, 46) */
-            ],
-            gotos: &[(3, 72) /* ArrayList => 72 */],
-        },
-        // State 57
-        LR1State {
-            actions: &[
-                (6, 60),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(ObjectList, 41) */
-                (11, 60), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(ObjectList, 41) */
-                (14, 60), /* '$' => LRAction::Reduce(ObjectList, 41) */
-                (17, 60), /* '}' => LRAction::Reduce(ObjectList, 41) */
-            ],
-            gotos: &[(30, 73) /* ObjectList => 73 */],
-        },
-        // State 58
-        LR1State {
-            actions: &[
-                (6, 84),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(Value, 36) */
-                (7, 84),  /* '\d[\d_]*' => LRAction::Reduce(Value, 36) */
-                (8, 84),  /* 'true' => LRAction::Reduce(Value, 36) */
-                (9, 84),  /* 'false' => LRAction::Reduce(Value, 36) */
-                (10, 84), /* 'null' => LRAction::Reduce(Value, 36) */
-                (11, 84), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(Value, 36) */
-                (12, 84), /* '\r\n|\r|\n' => LRAction::Reduce(Value, 36) */
-                (14, 84), /* '$' => LRAction::Reduce(Value, 36) */
-                (16, 84), /* '{' => LRAction::Reduce(Value, 36) */
-                (17, 84), /* '}' => LRAction::Reduce(Value, 36) */
-                (18, 84), /* '[' => LRAction::Reduce(Value, 36) */
-                (19, 84), /* ']' => LRAction::Reduce(Value, 36) */
-                (21, 84), /* ',' => LRAction::Reduce(Value, 36) */
-            ],
-            gotos: &[],
-        },
-        // State 59
-        LR1State {
-            actions: &[
-                (6, 37),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(Boolean, 51) */
-                (7, 37),  /* '\d[\d_]*' => LRAction::Reduce(Boolean, 51) */
-                (8, 37),  /* 'true' => LRAction::Reduce(Boolean, 51) */
-                (9, 37),  /* 'false' => LRAction::Reduce(Boolean, 51) */
-                (10, 37), /* 'null' => LRAction::Reduce(Boolean, 51) */
-                (11, 37), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(Boolean, 51) */
-                (12, 37), /* '\r\n|\r|\n' => LRAction::Reduce(Boolean, 51) */
-                (14, 37), /* '$' => LRAction::Reduce(Boolean, 51) */
-                (16, 37), /* '{' => LRAction::Reduce(Boolean, 51) */
-                (17, 37), /* '}' => LRAction::Reduce(Boolean, 51) */
-                (18, 37), /* '[' => LRAction::Reduce(Boolean, 51) */
-                (19, 37), /* ']' => LRAction::Reduce(Boolean, 51) */
-                (21, 37), /* ',' => LRAction::Reduce(Boolean, 51) */
-            ],
-            gotos: &[],
-        },
-        // State 60
-        LR1State {
-            actions: &[
-                (6, 83),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(Value, 35) */
-                (7, 83),  /* '\d[\d_]*' => LRAction::Reduce(Value, 35) */
-                (8, 83),  /* 'true' => LRAction::Reduce(Value, 35) */
-                (9, 83),  /* 'false' => LRAction::Reduce(Value, 35) */
-                (10, 83), /* 'null' => LRAction::Reduce(Value, 35) */
-                (11, 83), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(Value, 35) */
-                (12, 83), /* '\r\n|\r|\n' => LRAction::Reduce(Value, 35) */
-                (14, 83), /* '$' => LRAction::Reduce(Value, 35) */
-                (16, 83), /* '{' => LRAction::Reduce(Value, 35) */
-                (17, 83), /* '}' => LRAction::Reduce(Value, 35) */
-                (18, 83), /* '[' => LRAction::Reduce(Value, 35) */
-                (19, 83), /* ']' => LRAction::Reduce(Value, 35) */
-                (21, 83), /* ',' => LRAction::Reduce(Value, 35) */
-            ],
-            gotos: &[],
-        },
-        // State 61
-        LR1State {
-            actions: &[
-                (6, 85),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(Value, 37) */
-                (7, 85),  /* '\d[\d_]*' => LRAction::Reduce(Value, 37) */
-                (8, 85),  /* 'true' => LRAction::Reduce(Value, 37) */
-                (9, 85),  /* 'false' => LRAction::Reduce(Value, 37) */
-                (10, 85), /* 'null' => LRAction::Reduce(Value, 37) */
-                (11, 85), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(Value, 37) */
-                (12, 85), /* '\r\n|\r|\n' => LRAction::Reduce(Value, 37) */
-                (14, 85), /* '$' => LRAction::Reduce(Value, 37) */
-                (16, 85), /* '{' => LRAction::Reduce(Value, 37) */
-                (17, 85), /* '}' => LRAction::Reduce(Value, 37) */
-                (18, 85), /* '[' => LRAction::Reduce(Value, 37) */
-                (19, 85), /* ']' => LRAction::Reduce(Value, 37) */
-                (21, 85), /* ',' => LRAction::Reduce(Value, 37) */
-            ],
-            gotos: &[],
-        },
-        // State 62
-        LR1State {
-            actions: &[
-                (6, 81),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(Value, 33) */
-                (7, 81),  /* '\d[\d_]*' => LRAction::Reduce(Value, 33) */
-                (8, 81),  /* 'true' => LRAction::Reduce(Value, 33) */
-                (9, 81),  /* 'false' => LRAction::Reduce(Value, 33) */
-                (10, 81), /* 'null' => LRAction::Reduce(Value, 33) */
-                (11, 81), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(Value, 33) */
-                (12, 81), /* '\r\n|\r|\n' => LRAction::Reduce(Value, 33) */
-                (14, 81), /* '$' => LRAction::Reduce(Value, 33) */
-                (16, 81), /* '{' => LRAction::Reduce(Value, 33) */
-                (17, 81), /* '}' => LRAction::Reduce(Value, 33) */
-                (18, 81), /* '[' => LRAction::Reduce(Value, 33) */
-                (19, 81), /* ']' => LRAction::Reduce(Value, 33) */
-                (21, 81), /* ',' => LRAction::Reduce(Value, 33) */
-            ],
-            gotos: &[],
-        },
-        // State 63
-        LR1State {
-            actions: &[
-                (6, 69),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(StringContinuesList, 57) */
-                (7, 69),  /* '\d[\d_]*' => LRAction::Reduce(StringContinuesList, 57) */
-                (8, 69),  /* 'true' => LRAction::Reduce(StringContinuesList, 57) */
-                (9, 69),  /* 'false' => LRAction::Reduce(StringContinuesList, 57) */
-                (10, 69), /* 'null' => LRAction::Reduce(StringContinuesList, 57) */
-                (11, 69), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(StringContinuesList, 57) */
-                (12, 69), /* '\r\n|\r|\n' => LRAction::Reduce(StringContinuesList, 57) */
-                (14, 69), /* '$' => LRAction::Reduce(StringContinuesList, 57) */
-                (16, 69), /* '{' => LRAction::Reduce(StringContinuesList, 57) */
-                (17, 69), /* '}' => LRAction::Reduce(StringContinuesList, 57) */
-                (18, 69), /* '[' => LRAction::Reduce(StringContinuesList, 57) */
-                (19, 69), /* ']' => LRAction::Reduce(StringContinuesList, 57) */
-                (21, 69), /* ',' => LRAction::Reduce(StringContinuesList, 57) */
-                (22, 69), /* '\\' => LRAction::Reduce(StringContinuesList, 57) */
-            ],
-            gotos: &[(37, 74) /* StringContinuesList => 74 */],
-        },
-        // State 64
-        LR1State {
-            actions: &[
-                (6, 86),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(Value, 38) */
-                (7, 86),  /* '\d[\d_]*' => LRAction::Reduce(Value, 38) */
-                (8, 86),  /* 'true' => LRAction::Reduce(Value, 38) */
-                (9, 86),  /* 'false' => LRAction::Reduce(Value, 38) */
-                (10, 86), /* 'null' => LRAction::Reduce(Value, 38) */
-                (11, 86), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(Value, 38) */
-                (12, 86), /* '\r\n|\r|\n' => LRAction::Reduce(Value, 38) */
-                (14, 86), /* '$' => LRAction::Reduce(Value, 38) */
-                (16, 86), /* '{' => LRAction::Reduce(Value, 38) */
-                (17, 86), /* '}' => LRAction::Reduce(Value, 38) */
-                (18, 86), /* '[' => LRAction::Reduce(Value, 38) */
-                (19, 86), /* ']' => LRAction::Reduce(Value, 38) */
-                (21, 86), /* ',' => LRAction::Reduce(Value, 38) */
-            ],
-            gotos: &[],
-        },
-        // State 65
-        LR1State {
-            actions: &[
-                (6, 36),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(Boolean, 50) */
-                (7, 36),  /* '\d[\d_]*' => LRAction::Reduce(Boolean, 50) */
-                (8, 36),  /* 'true' => LRAction::Reduce(Boolean, 50) */
-                (9, 36),  /* 'false' => LRAction::Reduce(Boolean, 50) */
-                (10, 36), /* 'null' => LRAction::Reduce(Boolean, 50) */
-                (11, 36), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(Boolean, 50) */
-                (12, 36), /* '\r\n|\r|\n' => LRAction::Reduce(Boolean, 50) */
-                (14, 36), /* '$' => LRAction::Reduce(Boolean, 50) */
-                (16, 36), /* '{' => LRAction::Reduce(Boolean, 50) */
-                (17, 36), /* '}' => LRAction::Reduce(Boolean, 50) */
-                (18, 36), /* '[' => LRAction::Reduce(Boolean, 50) */
-                (19, 36), /* ']' => LRAction::Reduce(Boolean, 50) */
-                (21, 36), /* ',' => LRAction::Reduce(Boolean, 50) */
-            ],
-            gotos: &[],
-        },
-        // State 66
-        LR1State {
-            actions: &[
-                (12, 87), /* '\r\n|\r|\n' => LRAction::Reduce(ValueBinding, 10) */
-            ],
-            gotos: &[],
-        },
-        // State 67
-        LR1State {
-            actions: &[
-                (12, 75), /* '\r\n|\r|\n' => LRAction::Reduce(Text, 17) */
-            ],
-            gotos: &[],
-        },
-        // State 68
-        LR1State {
-            actions: &[
-                (12, 76), /* '\r\n|\r|\n' => LRAction::Reduce(TextBinding, 14) */
-            ],
-            gotos: &[],
-        },
-        // State 69
-        LR1State {
-            actions: &[
-                (6, 65),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(SectionHeader, 18) */
-                (11, 65), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(SectionHeader, 18) */
-                (12, 65), /* '\r\n|\r|\n' => LRAction::Reduce(SectionHeader, 18) */
-                (13, 65), /* '@' => LRAction::Reduce(SectionHeader, 18) */
-                (14, 65), /* '$' => LRAction::Reduce(SectionHeader, 18) */
-            ],
-            gotos: &[],
-        },
-        // State 70
-        LR1State {
-            actions: &[
-                (0, 63),  /* '<$>' => LRAction::Reduce(Section, 5) */
-                (12, 63), /* '\r\n|\r|\n' => LRAction::Reduce(Section, 5) */
-                (13, 63), /* '@' => LRAction::Reduce(Section, 5) */
-            ],
-            gotos: &[],
-        },
-        // State 71
-        LR1State {
-            actions: &[(17, 16) /* '}' => LRAction::Shift(75) */],
-            gotos: &[(16, 76) /* End => 76 */],
-        },
-        // State 72
-        LR1State {
-            actions: &[
-                (7, 9),   /* '\d[\d_]*' => LRAction::Shift(36) */
-                (8, 12),  /* 'true' => LRAction::Shift(52) */
-                (9, 13),  /* 'false' => LRAction::Shift(53) */
-                (10, 14), /* 'null' => LRAction::Shift(54) */
-                (11, 1), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Shift(3) */
-                (16, 4), /* '{' => LRAction::Shift(20) */
-                (18, 3), /* '[' => LRAction::Shift(16) */
-                (19, 11), /* ']' => LRAction::Shift(49) */
-            ],
-            gotos: &[
-                (0, 55),  /* Array => 55 */
-                (1, 56),  /* ArrayBegin => 56 */
-                (2, 77),  /* ArrayEnd => 77 */
-                (8, 57),  /* Begin => 57 */
-                (12, 58), /* Boolean => 58 */
-                (19, 59), /* False => 59 */
-                (21, 60), /* Integer => 60 */
-                (28, 61), /* Null => 61 */
-                (29, 62), /* Object => 62 */
-                (35, 63), /* String => 63 */
-                (36, 64), /* StringContinues => 64 */
-                (45, 65), /* True => 65 */
-                (46, 78), /* Value => 78 */
-            ],
-        },
-        // State 73
-        LR1State {
-            actions: &[
-                (6, 0),   /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Shift(2) */
-                (11, 1), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Shift(3) */
-                (14, 2), /* '$' => LRAction::Shift(4) */
-                (17, 16), /* '}' => LRAction::Shift(75) */
-            ],
-            gotos: &[
-                (16, 79), /* End => 79 */
-                (17, 6),  /* Ext => 6 */
-                (18, 7),  /* ExtensionNameSpace => 7 */
-                (20, 8),  /* Ident => 8 */
-                (22, 80), /* Key => 80 */
-                (23, 10), /* KeyBase => 10 */
-                (35, 12), /* String => 12 */
-            ],
-        },
-        // State 74
-        LR1State {
-            actions: &[
-                (6, 67),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(StringContinues, 55) */
-                (7, 67),  /* '\d[\d_]*' => LRAction::Reduce(StringContinues, 55) */
-                (8, 67),  /* 'true' => LRAction::Reduce(StringContinues, 55) */
-                (9, 67),  /* 'false' => LRAction::Reduce(StringContinues, 55) */
-                (10, 67), /* 'null' => LRAction::Reduce(StringContinues, 55) */
-                (11, 67), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(StringContinues, 55) */
-                (12, 67), /* '\r\n|\r|\n' => LRAction::Reduce(StringContinues, 55) */
-                (14, 67), /* '$' => LRAction::Reduce(StringContinues, 55) */
-                (16, 67), /* '{' => LRAction::Reduce(StringContinues, 55) */
-                (17, 67), /* '}' => LRAction::Reduce(StringContinues, 55) */
-                (18, 67), /* '[' => LRAction::Reduce(StringContinues, 55) */
-                (19, 67), /* ']' => LRAction::Reduce(StringContinues, 55) */
-                (21, 67), /* ',' => LRAction::Reduce(StringContinues, 55) */
-                (22, 17), /* '\\' => LRAction::Shift(81) */
-            ],
-            gotos: &[(14, 82) /* Continue => 82 */],
-        },
-        // State 75
-        LR1State {
-            actions: &[
-                (6, 41),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(End, 64) */
-                (7, 41),  /* '\d[\d_]*' => LRAction::Reduce(End, 64) */
-                (8, 41),  /* 'true' => LRAction::Reduce(End, 64) */
-                (9, 41),  /* 'false' => LRAction::Reduce(End, 64) */
-                (10, 41), /* 'null' => LRAction::Reduce(End, 64) */
-                (11, 41), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(End, 64) */
-                (12, 41), /* '\r\n|\r|\n' => LRAction::Reduce(End, 64) */
-                (14, 41), /* '$' => LRAction::Reduce(End, 64) */
-                (16, 41), /* '{' => LRAction::Reduce(End, 64) */
-                (17, 41), /* '}' => LRAction::Reduce(End, 64) */
-                (18, 41), /* '[' => LRAction::Reduce(End, 64) */
-                (19, 41), /* ']' => LRAction::Reduce(End, 64) */
-                (21, 41), /* ',' => LRAction::Reduce(End, 64) */
-            ],
-            gotos: &[],
-        },
-        // State 76
-        LR1State {
-            actions: &[
-                (12, 64), /* '\r\n|\r|\n' => LRAction::Reduce(SectionBinding, 13) */
-            ],
-            gotos: &[],
-        },
-        // State 77
-        LR1State {
-            actions: &[
-                (6, 19),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(Array, 44) */
-                (7, 19),  /* '\d[\d_]*' => LRAction::Reduce(Array, 44) */
-                (8, 19),  /* 'true' => LRAction::Reduce(Array, 44) */
-                (9, 19),  /* 'false' => LRAction::Reduce(Array, 44) */
-                (10, 19), /* 'null' => LRAction::Reduce(Array, 44) */
-                (11, 19), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(Array, 44) */
-                (12, 19), /* '\r\n|\r|\n' => LRAction::Reduce(Array, 44) */
-                (14, 19), /* '$' => LRAction::Reduce(Array, 44) */
-                (16, 19), /* '{' => LRAction::Reduce(Array, 44) */
-                (17, 19), /* '}' => LRAction::Reduce(Array, 44) */
-                (18, 19), /* '[' => LRAction::Reduce(Array, 44) */
-                (19, 19), /* ']' => LRAction::Reduce(Array, 44) */
-                (21, 19), /* ',' => LRAction::Reduce(Array, 44) */
-            ],
-            gotos: &[],
-        },
-        // State 78
-        LR1State {
-            actions: &[
-                (7, 28),  /* '\d[\d_]*' => LRAction::Reduce(ArrayOpt, 48) */
-                (8, 28),  /* 'true' => LRAction::Reduce(ArrayOpt, 48) */
-                (9, 28),  /* 'false' => LRAction::Reduce(ArrayOpt, 48) */
-                (10, 28), /* 'null' => LRAction::Reduce(ArrayOpt, 48) */
-                (11, 28), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(ArrayOpt, 48) */
-                (16, 28), /* '{' => LRAction::Reduce(ArrayOpt, 48) */
-                (18, 28), /* '[' => LRAction::Reduce(ArrayOpt, 48) */
-                (19, 28), /* ']' => LRAction::Reduce(ArrayOpt, 48) */
-                (21, 18), /* ',' => LRAction::Shift(83) */
-            ],
-            gotos: &[
-                (6, 84),  /* ArrayOpt => 84 */
-                (13, 85), /* Comma => 85 */
-            ],
-        },
-        // State 79
-        LR1State {
-            actions: &[
-                (6, 58),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(Object, 39) */
-                (7, 58),  /* '\d[\d_]*' => LRAction::Reduce(Object, 39) */
-                (8, 58),  /* 'true' => LRAction::Reduce(Object, 39) */
-                (9, 58),  /* 'false' => LRAction::Reduce(Object, 39) */
-                (10, 58), /* 'null' => LRAction::Reduce(Object, 39) */
-                (11, 58), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(Object, 39) */
-                (12, 58), /* '\r\n|\r|\n' => LRAction::Reduce(Object, 39) */
-                (14, 58), /* '$' => LRAction::Reduce(Object, 39) */
-                (16, 58), /* '{' => LRAction::Reduce(Object, 39) */
-                (17, 58), /* '}' => LRAction::Reduce(Object, 39) */
-                (18, 58), /* '[' => LRAction::Reduce(Object, 39) */
-                (19, 58), /* ']' => LRAction::Reduce(Object, 39) */
-                (21, 58), /* ',' => LRAction::Reduce(Object, 39) */
-            ],
-            gotos: &[],
-        },
-        // State 80
-        LR1State {
-            actions: &[(20, 5) /* '=' => LRAction::Shift(21) */],
-            gotos: &[(9, 86) /* Bind => 86 */],
-        },
-        // State 81
-        LR1State {
-            actions: &[
-                (12, 39), /* '\r\n|\r|\n' => LRAction::Reduce(Continue, 69) */
-            ],
-            gotos: &[],
-        },
-        // State 82
-        LR1State {
-            actions: &[(12, 10) /* '\r\n|\r|\n' => LRAction::Shift(39) */],
-            gotos: &[(27, 87) /* Newline => 87 */],
-        },
-        // State 83
-        LR1State {
-            actions: &[
-                (6, 38),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(Comma, 68) */
-                (7, 38),  /* '\d[\d_]*' => LRAction::Reduce(Comma, 68) */
-                (8, 38),  /* 'true' => LRAction::Reduce(Comma, 68) */
-                (9, 38),  /* 'false' => LRAction::Reduce(Comma, 68) */
-                (10, 38), /* 'null' => LRAction::Reduce(Comma, 68) */
-                (11, 38), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(Comma, 68) */
-                (14, 38), /* '$' => LRAction::Reduce(Comma, 68) */
-                (16, 38), /* '{' => LRAction::Reduce(Comma, 68) */
-                (17, 38), /* '}' => LRAction::Reduce(Comma, 68) */
-                (18, 38), /* '[' => LRAction::Reduce(Comma, 68) */
-                (19, 38), /* ']' => LRAction::Reduce(Comma, 68) */
-            ],
-            gotos: &[],
-        },
-        // State 84
-        LR1State {
-            actions: &[
-                (7, 22),  /* '\d[\d_]*' => LRAction::Reduce(ArrayList, 45) */
-                (8, 22),  /* 'true' => LRAction::Reduce(ArrayList, 45) */
-                (9, 22),  /* 'false' => LRAction::Reduce(ArrayList, 45) */
-                (10, 22), /* 'null' => LRAction::Reduce(ArrayList, 45) */
-                (11, 22), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(ArrayList, 45) */
-                (16, 22), /* '{' => LRAction::Reduce(ArrayList, 45) */
-                (18, 22), /* '[' => LRAction::Reduce(ArrayList, 45) */
-                (19, 22), /* ']' => LRAction::Reduce(ArrayList, 45) */
-            ],
-            gotos: &[],
-        },
-        // State 85
-        LR1State {
-            actions: &[
-                (7, 27),  /* '\d[\d_]*' => LRAction::Reduce(ArrayOpt, 47) */
-                (8, 27),  /* 'true' => LRAction::Reduce(ArrayOpt, 47) */
-                (9, 27),  /* 'false' => LRAction::Reduce(ArrayOpt, 47) */
-                (10, 27), /* 'null' => LRAction::Reduce(ArrayOpt, 47) */
-                (11, 27), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(ArrayOpt, 47) */
-                (16, 27), /* '{' => LRAction::Reduce(ArrayOpt, 47) */
-                (18, 27), /* '[' => LRAction::Reduce(ArrayOpt, 47) */
-                (19, 27), /* ']' => LRAction::Reduce(ArrayOpt, 47) */
-            ],
-            gotos: &[],
-        },
-        // State 86
-        LR1State {
-            actions: &[
-                (7, 9),   /* '\d[\d_]*' => LRAction::Shift(36) */
-                (8, 12),  /* 'true' => LRAction::Shift(52) */
-                (9, 13),  /* 'false' => LRAction::Shift(53) */
-                (10, 14), /* 'null' => LRAction::Shift(54) */
-                (11, 1), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Shift(3) */
-                (16, 4), /* '{' => LRAction::Shift(20) */
-                (18, 3), /* '[' => LRAction::Shift(16) */
-            ],
-            gotos: &[
-                (0, 55),  /* Array => 55 */
-                (1, 56),  /* ArrayBegin => 56 */
-                (8, 57),  /* Begin => 57 */
-                (12, 58), /* Boolean => 58 */
-                (19, 59), /* False => 59 */
-                (21, 60), /* Integer => 60 */
-                (28, 61), /* Null => 61 */
-                (29, 62), /* Object => 62 */
-                (35, 63), /* String => 63 */
-                (36, 64), /* StringContinues => 64 */
-                (45, 65), /* True => 65 */
-                (46, 88), /* Value => 88 */
-            ],
-        },
-        // State 87
-        LR1State {
-            actions: &[
-                (11, 1), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Shift(3) */
-            ],
-            gotos: &[(35, 89) /* String => 89 */],
-        },
-        // State 88
-        LR1State {
-            actions: &[
-                (6, 62),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(ObjectOpt, 43) */
-                (11, 62), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(ObjectOpt, 43) */
-                (14, 62), /* '$' => LRAction::Reduce(ObjectOpt, 43) */
-                (17, 62), /* '}' => LRAction::Reduce(ObjectOpt, 43) */
-                (21, 18), /* ',' => LRAction::Shift(83) */
-            ],
-            gotos: &[
-                (13, 90), /* Comma => 90 */
-                (31, 91), /* ObjectOpt => 91 */
-            ],
-        },
-        // State 89
-        LR1State {
-            actions: &[
-                (6, 68),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(StringContinuesList, 56) */
-                (7, 68),  /* '\d[\d_]*' => LRAction::Reduce(StringContinuesList, 56) */
-                (8, 68),  /* 'true' => LRAction::Reduce(StringContinuesList, 56) */
-                (9, 68),  /* 'false' => LRAction::Reduce(StringContinuesList, 56) */
-                (10, 68), /* 'null' => LRAction::Reduce(StringContinuesList, 56) */
-                (11, 68), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(StringContinuesList, 56) */
-                (12, 68), /* '\r\n|\r|\n' => LRAction::Reduce(StringContinuesList, 56) */
-                (14, 68), /* '$' => LRAction::Reduce(StringContinuesList, 56) */
-                (16, 68), /* '{' => LRAction::Reduce(StringContinuesList, 56) */
-                (17, 68), /* '}' => LRAction::Reduce(StringContinuesList, 56) */
-                (18, 68), /* '[' => LRAction::Reduce(StringContinuesList, 56) */
-                (19, 68), /* ']' => LRAction::Reduce(StringContinuesList, 56) */
-                (21, 68), /* ',' => LRAction::Reduce(StringContinuesList, 56) */
-                (22, 68), /* '\\' => LRAction::Reduce(StringContinuesList, 56) */
-            ],
-            gotos: &[],
-        },
-        // State 90
-        LR1State {
-            actions: &[
-                (6, 61),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(ObjectOpt, 42) */
-                (11, 61), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(ObjectOpt, 42) */
-                (14, 61), /* '$' => LRAction::Reduce(ObjectOpt, 42) */
-                (17, 61), /* '}' => LRAction::Reduce(ObjectOpt, 42) */
-            ],
-            gotos: &[],
-        },
-        // State 91
-        LR1State {
-            actions: &[
-                (6, 59),  /* '\p{XID_Start}\p{XID_Continue}*' => LRAction::Reduce(ObjectList, 40) */
-                (11, 59), /* '"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"' => LRAction::Reduce(ObjectList, 40) */
-                (14, 59), /* '$' => LRAction::Reduce(ObjectList, 40) */
-                (17, 59), /* '}' => LRAction::Reduce(ObjectList, 40) */
-            ],
-            gotos: &[],
-        },
-    ],
-};
+pub const LOOKAHEAD_AUTOMATA: &[LookaheadDFA; 46] = &[
+    /* 0 - "Array" */
+    LookaheadDFA {
+        prod0: 41,
+        transitions: &[],
+        k: 0,
+    },
+    /* 1 - "ArrayBegin" */
+    LookaheadDFA {
+        prod0: 61,
+        transitions: &[],
+        k: 0,
+    },
+    /* 2 - "ArrayEnd" */
+    LookaheadDFA {
+        prod0: 62,
+        transitions: &[],
+        k: 0,
+    },
+    /* 3 - "ArrayList" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[
+            Trans(0, 7, 1, 42),
+            Trans(0, 8, 1, 42),
+            Trans(0, 9, 1, 42),
+            Trans(0, 10, 1, 42),
+            Trans(0, 11, 1, 42),
+            Trans(0, 15, 1, 42),
+            Trans(0, 17, 1, 42),
+            Trans(0, 18, 2, 43),
+        ],
+        k: 1,
+    },
+    /* 4 - "ArrayMarker" */
+    LookaheadDFA {
+        prod0: 22,
+        transitions: &[],
+        k: 0,
+    },
+    /* 5 - "ArrayMarkerOpt" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[Trans(0, 7, 1, 23), Trans(0, 18, 2, 24)],
+        k: 1,
+    },
+    /* 6 - "ArrayOpt" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[
+            Trans(0, 7, 2, 45),
+            Trans(0, 8, 2, 45),
+            Trans(0, 9, 2, 45),
+            Trans(0, 10, 2, 45),
+            Trans(0, 11, 2, 45),
+            Trans(0, 15, 2, 45),
+            Trans(0, 17, 2, 45),
+            Trans(0, 18, 2, 45),
+            Trans(0, 20, 1, 44),
+        ],
+        k: 1,
+    },
+    /* 7 - "At" */
+    LookaheadDFA {
+        prod0: 56,
+        transitions: &[],
+        k: 0,
+    },
+    /* 8 - "Begin" */
+    LookaheadDFA {
+        prod0: 59,
+        transitions: &[],
+        k: 0,
+    },
+    /* 9 - "Bind" */
+    LookaheadDFA {
+        prod0: 63,
+        transitions: &[],
+        k: 0,
+    },
+    /* 10 - "Binding" */
+    LookaheadDFA {
+        prod0: 5,
+        transitions: &[],
+        k: 0,
+    },
+    /* 11 - "Bindings" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[Trans(0, 15, 2, 7), Trans(0, 19, 1, 6), Trans(0, 22, 3, 8)],
+        k: 1,
+    },
+    /* 12 - "Boolean" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[Trans(0, 8, 1, 47), Trans(0, 9, 2, 48)],
+        k: 1,
+    },
+    /* 13 - "Comma" */
+    LookaheadDFA {
+        prod0: 64,
+        transitions: &[],
+        k: 0,
+    },
+    /* 14 - "Continue" */
+    LookaheadDFA {
+        prod0: 65,
+        transitions: &[],
+        k: 0,
+    },
+    /* 15 - "Dot" */
+    LookaheadDFA {
+        prod0: 58,
+        transitions: &[],
+        k: 0,
+    },
+    /* 16 - "End" */
+    LookaheadDFA {
+        prod0: 60,
+        transitions: &[],
+        k: 0,
+    },
+    /* 17 - "Ext" */
+    LookaheadDFA {
+        prod0: 57,
+        transitions: &[],
+        k: 0,
+    },
+    /* 18 - "ExtensionNameSpace" */
+    LookaheadDFA {
+        prod0: 29,
+        transitions: &[],
+        k: 0,
+    },
+    /* 19 - "False" */
+    LookaheadDFA {
+        prod0: 50,
+        transitions: &[],
+        k: 0,
+    },
+    /* 20 - "Ident" */
+    LookaheadDFA {
+        prod0: 28,
+        transitions: &[],
+        k: 0,
+    },
+    /* 21 - "Integer" */
+    LookaheadDFA {
+        prod0: 46,
+        transitions: &[],
+        k: 0,
+    },
+    /* 22 - "Key" */
+    LookaheadDFA {
+        prod0: 19,
+        transitions: &[],
+        k: 0,
+    },
+    /* 23 - "KeyBase" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[Trans(0, 6, 1, 25), Trans(0, 11, 3, 27), Trans(0, 13, 2, 26)],
+        k: 1,
+    },
+    /* 24 - "KeyOpt" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[
+            Trans(0, 0, 2, 21),
+            Trans(0, 6, 2, 21),
+            Trans(0, 11, 2, 21),
+            Trans(0, 12, 2, 21),
+            Trans(0, 13, 2, 21),
+            Trans(0, 14, 2, 21),
+            Trans(0, 15, 2, 21),
+            Trans(0, 16, 2, 21),
+            Trans(0, 17, 1, 20),
+            Trans(0, 19, 2, 21),
+            Trans(0, 22, 2, 21),
+        ],
+        k: 1,
+    },
+    /* 25 - "Keys" */
+    LookaheadDFA {
+        prod0: 16,
+        transitions: &[],
+        k: 0,
+    },
+    /* 26 - "KeysList" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[
+            Trans(0, 0, 2, 18),
+            Trans(0, 6, 2, 18),
+            Trans(0, 11, 2, 18),
+            Trans(0, 12, 2, 18),
+            Trans(0, 13, 2, 18),
+            Trans(0, 14, 1, 17),
+            Trans(0, 15, 2, 18),
+            Trans(0, 16, 2, 18),
+            Trans(0, 19, 2, 18),
+            Trans(0, 22, 2, 18),
+        ],
+        k: 1,
+    },
+    /* 27 - "Null" */
+    LookaheadDFA {
+        prod0: 51,
+        transitions: &[],
+        k: 0,
+    },
+    /* 28 - "Object" */
+    LookaheadDFA {
+        prod0: 36,
+        transitions: &[],
+        k: 0,
+    },
+    /* 29 - "ObjectList" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[
+            Trans(0, 6, 1, 37),
+            Trans(0, 11, 1, 37),
+            Trans(0, 13, 1, 37),
+            Trans(0, 16, 2, 38),
+        ],
+        k: 1,
+    },
+    /* 30 - "ObjectOpt" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[
+            Trans(0, 6, 2, 40),
+            Trans(0, 11, 2, 40),
+            Trans(0, 13, 2, 40),
+            Trans(0, 16, 2, 40),
+            Trans(0, 20, 1, 39),
+        ],
+        k: 1,
+    },
+    /* 31 - "Section" */
+    LookaheadDFA {
+        prod0: 13,
+        transitions: &[],
+        k: 0,
+    },
+    /* 32 - "SectionBinding" */
+    LookaheadDFA {
+        prod0: 10,
+        transitions: &[],
+        k: 0,
+    },
+    /* 33 - "SectionList" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[
+            Trans(0, 0, 2, 15),
+            Trans(0, 6, 1, 14),
+            Trans(0, 11, 1, 14),
+            Trans(0, 12, 2, 15),
+            Trans(0, 13, 1, 14),
+            Trans(0, 16, 2, 15),
+        ],
+        k: 1,
+    },
+    /* 34 - "String" */
+    LookaheadDFA {
+        prod0: 55,
+        transitions: &[],
+        k: 0,
+    },
+    /* 35 - "StringContinues" */
+    LookaheadDFA {
+        prod0: 52,
+        transitions: &[],
+        k: 0,
+    },
+    /* 36 - "StringContinuesList" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[
+            Trans(0, 0, 2, 54),
+            Trans(0, 6, 2, 54),
+            Trans(0, 7, 2, 54),
+            Trans(0, 8, 2, 54),
+            Trans(0, 9, 2, 54),
+            Trans(0, 10, 2, 54),
+            Trans(0, 11, 2, 54),
+            Trans(0, 12, 2, 54),
+            Trans(0, 13, 2, 54),
+            Trans(0, 15, 2, 54),
+            Trans(0, 16, 2, 54),
+            Trans(0, 17, 2, 54),
+            Trans(0, 18, 2, 54),
+            Trans(0, 20, 2, 54),
+            Trans(0, 21, 1, 53),
+        ],
+        k: 1,
+    },
+    /* 37 - "Swon" */
+    LookaheadDFA {
+        prod0: 0,
+        transitions: &[],
+        k: 0,
+    },
+    /* 38 - "SwonList" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[
+            Trans(0, 0, 2, 4),
+            Trans(0, 6, 1, 3),
+            Trans(0, 11, 1, 3),
+            Trans(0, 12, 2, 4),
+            Trans(0, 13, 1, 3),
+            Trans(0, 16, 2, 4),
+        ],
+        k: 1,
+    },
+    /* 39 - "SwonList0" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[Trans(0, 0, 2, 2), Trans(0, 12, 1, 1), Trans(0, 16, 2, 2)],
+        k: 1,
+    },
+    /* 40 - "Text" */
+    LookaheadDFA {
+        prod0: 12,
+        transitions: &[],
+        k: 0,
+    },
+    /* 41 - "TextBinding" */
+    LookaheadDFA {
+        prod0: 11,
+        transitions: &[],
+        k: 0,
+    },
+    /* 42 - "TextStart" */
+    LookaheadDFA {
+        prod0: 66,
+        transitions: &[],
+        k: 0,
+    },
+    /* 43 - "True" */
+    LookaheadDFA {
+        prod0: 49,
+        transitions: &[],
+        k: 0,
+    },
+    /* 44 - "Value" */
+    LookaheadDFA {
+        prod0: -1,
+        transitions: &[
+            Trans(0, 7, 3, 32),
+            Trans(0, 8, 4, 33),
+            Trans(0, 9, 4, 33),
+            Trans(0, 10, 5, 34),
+            Trans(0, 11, 6, 35),
+            Trans(0, 15, 1, 30),
+            Trans(0, 17, 2, 31),
+        ],
+        k: 1,
+    },
+    /* 45 - "ValueBinding" */
+    LookaheadDFA {
+        prod0: 9,
+        transitions: &[],
+        k: 0,
+    },
+];
 
-pub const PRODUCTIONS: &[LRProduction; 71] = &[
+pub const PRODUCTIONS: &[Production; 67] = &[
     // 0 - Swon: SwonList /* Vec */ SwonList0 /* Vec */;
-    LRProduction { lhs: 38, len: 2 },
-    // 1 - SwonList0: SwonList0 Section;
-    LRProduction { lhs: 40, len: 2 },
+    Production {
+        lhs: 37,
+        production: &[ParseType::N(39), ParseType::N(38)],
+    },
+    // 1 - SwonList0: Section SwonList0;
+    Production {
+        lhs: 39,
+        production: &[ParseType::N(39), ParseType::N(31)],
+    },
     // 2 - SwonList0: ;
-    LRProduction { lhs: 40, len: 0 },
-    // 3 - SwonList: SwonList Binding;
-    LRProduction { lhs: 39, len: 2 },
+    Production {
+        lhs: 39,
+        production: &[],
+    },
+    // 3 - SwonList: Binding SwonList;
+    Production {
+        lhs: 38,
+        production: &[ParseType::N(38), ParseType::N(10)],
+    },
     // 4 - SwonList: ;
-    LRProduction { lhs: 39, len: 0 },
-    // 5 - Section: SectionHeader Swon Newline;
-    LRProduction { lhs: 32, len: 3 },
-    // 6 - Binding: Keys Bindings Newline;
-    LRProduction { lhs: 10, len: 3 },
-    // 7 - Bindings: ValueBinding;
-    LRProduction { lhs: 11, len: 1 },
-    // 8 - Bindings: SectionBinding;
-    LRProduction { lhs: 11, len: 1 },
-    // 9 - Bindings: TextBinding;
-    LRProduction { lhs: 11, len: 1 },
-    // 10 - ValueBinding: Bind ValueBindingOpt /* Option */ Value;
-    LRProduction { lhs: 47, len: 3 },
-    // 11 - ValueBindingOpt: Newline;
-    LRProduction { lhs: 48, len: 1 },
-    // 12 - ValueBindingOpt: ;
-    LRProduction { lhs: 48, len: 0 },
-    // 13 - SectionBinding: Begin Newline Swon Newline End;
-    LRProduction { lhs: 33, len: 5 },
-    // 14 - TextBinding: TextStart TextBindingOpt /* Option */ Text;
-    LRProduction { lhs: 42, len: 3 },
-    // 15 - TextBindingOpt: Newline;
-    LRProduction { lhs: 43, len: 1 },
-    // 16 - TextBindingOpt: ;
-    LRProduction { lhs: 43, len: 0 },
-    // 17 - Text: /todo/;
-    LRProduction { lhs: 41, len: 1 },
-    // 18 - SectionHeader: At Keys Newline;
-    LRProduction { lhs: 34, len: 3 },
-    // 19 - Keys: Key KeysList /* Vec */;
-    LRProduction { lhs: 25, len: 2 },
-    // 20 - KeysList: KeysList Dot Key;
-    LRProduction { lhs: 26, len: 3 },
-    // 21 - KeysList: ;
-    LRProduction { lhs: 26, len: 0 },
-    // 22 - Key: KeyBase KeyOpt /* Option */;
-    LRProduction { lhs: 22, len: 2 },
-    // 23 - KeyOpt: ArrayMarker;
-    LRProduction { lhs: 24, len: 1 },
-    // 24 - KeyOpt: ;
-    LRProduction { lhs: 24, len: 0 },
-    // 25 - ArrayMarker: ArrayBegin ArrayMarkerOpt /* Option */ ArrayEnd;
-    LRProduction { lhs: 4, len: 3 },
-    // 26 - ArrayMarkerOpt: Integer;
-    LRProduction { lhs: 5, len: 1 },
-    // 27 - ArrayMarkerOpt: ;
-    LRProduction { lhs: 5, len: 0 },
-    // 28 - KeyBase: Ident;
-    LRProduction { lhs: 23, len: 1 },
-    // 29 - KeyBase: ExtensionNameSpace;
-    LRProduction { lhs: 23, len: 1 },
-    // 30 - KeyBase: String;
-    LRProduction { lhs: 23, len: 1 },
-    // 31 - Ident: /\p{XID_Start}\p{XID_Continue}*/;
-    LRProduction { lhs: 20, len: 1 },
-    // 32 - ExtensionNameSpace: Ext Ident;
-    LRProduction { lhs: 18, len: 2 },
-    // 33 - Value: Object;
-    LRProduction { lhs: 46, len: 1 },
-    // 34 - Value: Array;
-    LRProduction { lhs: 46, len: 1 },
-    // 35 - Value: Integer;
-    LRProduction { lhs: 46, len: 1 },
-    // 36 - Value: Boolean;
-    LRProduction { lhs: 46, len: 1 },
-    // 37 - Value: Null;
-    LRProduction { lhs: 46, len: 1 },
-    // 38 - Value: StringContinues;
-    LRProduction { lhs: 46, len: 1 },
-    // 39 - Object: Begin ObjectList /* Vec */ End;
-    LRProduction { lhs: 29, len: 3 },
-    // 40 - ObjectList: ObjectList Key Bind Value ObjectOpt /* Option */;
-    LRProduction { lhs: 30, len: 5 },
-    // 41 - ObjectList: ;
-    LRProduction { lhs: 30, len: 0 },
-    // 42 - ObjectOpt: Comma;
-    LRProduction { lhs: 31, len: 1 },
-    // 43 - ObjectOpt: ;
-    LRProduction { lhs: 31, len: 0 },
-    // 44 - Array: ArrayBegin ArrayList /* Vec */ ArrayEnd;
-    LRProduction { lhs: 0, len: 3 },
-    // 45 - ArrayList: ArrayList Value ArrayOpt /* Option */;
-    LRProduction { lhs: 3, len: 3 },
-    // 46 - ArrayList: ;
-    LRProduction { lhs: 3, len: 0 },
-    // 47 - ArrayOpt: Comma;
-    LRProduction { lhs: 6, len: 1 },
-    // 48 - ArrayOpt: ;
-    LRProduction { lhs: 6, len: 0 },
-    // 49 - Integer: /\d[\d_]*/;
-    LRProduction { lhs: 21, len: 1 },
-    // 50 - Boolean: True;
-    LRProduction { lhs: 12, len: 1 },
-    // 51 - Boolean: False;
-    LRProduction { lhs: 12, len: 1 },
-    // 52 - True: 'true';
-    LRProduction { lhs: 45, len: 1 },
-    // 53 - False: 'false';
-    LRProduction { lhs: 19, len: 1 },
-    // 54 - Null: 'null';
-    LRProduction { lhs: 28, len: 1 },
-    // 55 - StringContinues: String StringContinuesList /* Vec */;
-    LRProduction { lhs: 36, len: 2 },
-    // 56 - StringContinuesList: StringContinuesList Continue Newline String;
-    LRProduction { lhs: 37, len: 4 },
-    // 57 - StringContinuesList: ;
-    LRProduction { lhs: 37, len: 0 },
-    // 58 - String: /"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"/;
-    LRProduction { lhs: 35, len: 1 },
-    // 59 - Newline: /\r\n|\r|\n/;
-    LRProduction { lhs: 27, len: 1 },
-    // 60 - At: '@';
-    LRProduction { lhs: 7, len: 1 },
-    // 61 - Ext: '$';
-    LRProduction { lhs: 17, len: 1 },
-    // 62 - Dot: '.';
-    LRProduction { lhs: 15, len: 1 },
-    // 63 - Begin: '{';
-    LRProduction { lhs: 8, len: 1 },
-    // 64 - End: '}';
-    LRProduction { lhs: 16, len: 1 },
-    // 65 - ArrayBegin: '[';
-    LRProduction { lhs: 1, len: 1 },
-    // 66 - ArrayEnd: ']';
-    LRProduction { lhs: 2, len: 1 },
-    // 67 - Bind: '=';
-    LRProduction { lhs: 9, len: 1 },
-    // 68 - Comma: ',';
-    LRProduction { lhs: 13, len: 1 },
-    // 69 - Continue: '\\';
-    LRProduction { lhs: 14, len: 1 },
-    // 70 - TextStart: ":";
-    LRProduction { lhs: 44, len: 1 },
+    Production {
+        lhs: 38,
+        production: &[],
+    },
+    // 5 - Binding: Keys Bindings;
+    Production {
+        lhs: 10,
+        production: &[ParseType::N(11), ParseType::N(25)],
+    },
+    // 6 - Bindings: ValueBinding;
+    Production {
+        lhs: 11,
+        production: &[ParseType::N(45)],
+    },
+    // 7 - Bindings: SectionBinding;
+    Production {
+        lhs: 11,
+        production: &[ParseType::N(32)],
+    },
+    // 8 - Bindings: TextBinding;
+    Production {
+        lhs: 11,
+        production: &[ParseType::N(41)],
+    },
+    // 9 - ValueBinding: Bind Value;
+    Production {
+        lhs: 45,
+        production: &[ParseType::N(44), ParseType::N(9)],
+    },
+    // 10 - SectionBinding: Begin Swon End;
+    Production {
+        lhs: 32,
+        production: &[ParseType::N(16), ParseType::N(37), ParseType::N(8)],
+    },
+    // 11 - TextBinding: TextStart Text;
+    Production {
+        lhs: 41,
+        production: &[ParseType::N(40), ParseType::N(42)],
+    },
+    // 12 - Text: /todo/;
+    Production {
+        lhs: 40,
+        production: &[ParseType::T(5)],
+    },
+    // 13 - Section: At Keys SectionList /* Vec */;
+    Production {
+        lhs: 31,
+        production: &[ParseType::N(33), ParseType::N(25), ParseType::N(7)],
+    },
+    // 14 - SectionList: Binding SectionList;
+    Production {
+        lhs: 33,
+        production: &[ParseType::N(33), ParseType::N(10)],
+    },
+    // 15 - SectionList: ;
+    Production {
+        lhs: 33,
+        production: &[],
+    },
+    // 16 - Keys: Key KeysList /* Vec */;
+    Production {
+        lhs: 25,
+        production: &[ParseType::N(26), ParseType::N(22)],
+    },
+    // 17 - KeysList: Dot Key KeysList;
+    Production {
+        lhs: 26,
+        production: &[ParseType::N(26), ParseType::N(22), ParseType::N(15)],
+    },
+    // 18 - KeysList: ;
+    Production {
+        lhs: 26,
+        production: &[],
+    },
+    // 19 - Key: KeyBase KeyOpt /* Option */;
+    Production {
+        lhs: 22,
+        production: &[ParseType::N(24), ParseType::N(23)],
+    },
+    // 20 - KeyOpt: ArrayMarker;
+    Production {
+        lhs: 24,
+        production: &[ParseType::N(4)],
+    },
+    // 21 - KeyOpt: ;
+    Production {
+        lhs: 24,
+        production: &[],
+    },
+    // 22 - ArrayMarker: ArrayBegin ArrayMarkerOpt /* Option */ ArrayEnd;
+    Production {
+        lhs: 4,
+        production: &[ParseType::N(2), ParseType::N(5), ParseType::N(1)],
+    },
+    // 23 - ArrayMarkerOpt: Integer;
+    Production {
+        lhs: 5,
+        production: &[ParseType::N(21)],
+    },
+    // 24 - ArrayMarkerOpt: ;
+    Production {
+        lhs: 5,
+        production: &[],
+    },
+    // 25 - KeyBase: Ident;
+    Production {
+        lhs: 23,
+        production: &[ParseType::N(20)],
+    },
+    // 26 - KeyBase: ExtensionNameSpace;
+    Production {
+        lhs: 23,
+        production: &[ParseType::N(18)],
+    },
+    // 27 - KeyBase: String;
+    Production {
+        lhs: 23,
+        production: &[ParseType::N(34)],
+    },
+    // 28 - Ident: /\p{XID_Start}\p{XID_Continue}*/;
+    Production {
+        lhs: 20,
+        production: &[ParseType::T(6)],
+    },
+    // 29 - ExtensionNameSpace: Ext Ident;
+    Production {
+        lhs: 18,
+        production: &[ParseType::N(20), ParseType::N(17)],
+    },
+    // 30 - Value: Object;
+    Production {
+        lhs: 44,
+        production: &[ParseType::N(28)],
+    },
+    // 31 - Value: Array;
+    Production {
+        lhs: 44,
+        production: &[ParseType::N(0)],
+    },
+    // 32 - Value: Integer;
+    Production {
+        lhs: 44,
+        production: &[ParseType::N(21)],
+    },
+    // 33 - Value: Boolean;
+    Production {
+        lhs: 44,
+        production: &[ParseType::N(12)],
+    },
+    // 34 - Value: Null;
+    Production {
+        lhs: 44,
+        production: &[ParseType::N(27)],
+    },
+    // 35 - Value: StringContinues;
+    Production {
+        lhs: 44,
+        production: &[ParseType::N(35)],
+    },
+    // 36 - Object: Begin ObjectList /* Vec */ End;
+    Production {
+        lhs: 28,
+        production: &[ParseType::N(16), ParseType::N(29), ParseType::N(8)],
+    },
+    // 37 - ObjectList: Key Bind Value ObjectOpt /* Option */ ObjectList;
+    Production {
+        lhs: 29,
+        production: &[
+            ParseType::N(29),
+            ParseType::N(30),
+            ParseType::N(44),
+            ParseType::N(9),
+            ParseType::N(22),
+        ],
+    },
+    // 38 - ObjectList: ;
+    Production {
+        lhs: 29,
+        production: &[],
+    },
+    // 39 - ObjectOpt: Comma;
+    Production {
+        lhs: 30,
+        production: &[ParseType::N(13)],
+    },
+    // 40 - ObjectOpt: ;
+    Production {
+        lhs: 30,
+        production: &[],
+    },
+    // 41 - Array: ArrayBegin ArrayList /* Vec */ ArrayEnd;
+    Production {
+        lhs: 0,
+        production: &[ParseType::N(2), ParseType::N(3), ParseType::N(1)],
+    },
+    // 42 - ArrayList: Value ArrayOpt /* Option */ ArrayList;
+    Production {
+        lhs: 3,
+        production: &[ParseType::N(3), ParseType::N(6), ParseType::N(44)],
+    },
+    // 43 - ArrayList: ;
+    Production {
+        lhs: 3,
+        production: &[],
+    },
+    // 44 - ArrayOpt: Comma;
+    Production {
+        lhs: 6,
+        production: &[ParseType::N(13)],
+    },
+    // 45 - ArrayOpt: ;
+    Production {
+        lhs: 6,
+        production: &[],
+    },
+    // 46 - Integer: /\d[\d_]*/;
+    Production {
+        lhs: 21,
+        production: &[ParseType::T(7)],
+    },
+    // 47 - Boolean: True;
+    Production {
+        lhs: 12,
+        production: &[ParseType::N(43)],
+    },
+    // 48 - Boolean: False;
+    Production {
+        lhs: 12,
+        production: &[ParseType::N(19)],
+    },
+    // 49 - True: 'true';
+    Production {
+        lhs: 43,
+        production: &[ParseType::T(8)],
+    },
+    // 50 - False: 'false';
+    Production {
+        lhs: 19,
+        production: &[ParseType::T(9)],
+    },
+    // 51 - Null: 'null';
+    Production {
+        lhs: 27,
+        production: &[ParseType::T(10)],
+    },
+    // 52 - StringContinues: String StringContinuesList /* Vec */;
+    Production {
+        lhs: 35,
+        production: &[ParseType::N(36), ParseType::N(34)],
+    },
+    // 53 - StringContinuesList: Continue String StringContinuesList;
+    Production {
+        lhs: 36,
+        production: &[ParseType::N(36), ParseType::N(34), ParseType::N(14)],
+    },
+    // 54 - StringContinuesList: ;
+    Production {
+        lhs: 36,
+        production: &[],
+    },
+    // 55 - String: /"(\\[nrt\\"0]|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"/;
+    Production {
+        lhs: 34,
+        production: &[ParseType::T(11)],
+    },
+    // 56 - At: '@';
+    Production {
+        lhs: 7,
+        production: &[ParseType::T(12)],
+    },
+    // 57 - Ext: '$';
+    Production {
+        lhs: 17,
+        production: &[ParseType::T(13)],
+    },
+    // 58 - Dot: '.';
+    Production {
+        lhs: 15,
+        production: &[ParseType::T(14)],
+    },
+    // 59 - Begin: '{';
+    Production {
+        lhs: 8,
+        production: &[ParseType::T(15)],
+    },
+    // 60 - End: '}';
+    Production {
+        lhs: 16,
+        production: &[ParseType::T(16)],
+    },
+    // 61 - ArrayBegin: '[';
+    Production {
+        lhs: 1,
+        production: &[ParseType::T(17)],
+    },
+    // 62 - ArrayEnd: ']';
+    Production {
+        lhs: 2,
+        production: &[ParseType::T(18)],
+    },
+    // 63 - Bind: '=';
+    Production {
+        lhs: 9,
+        production: &[ParseType::T(19)],
+    },
+    // 64 - Comma: ',';
+    Production {
+        lhs: 13,
+        production: &[ParseType::T(20)],
+    },
+    // 65 - Continue: '\\';
+    Production {
+        lhs: 14,
+        production: &[ParseType::T(21)],
+    },
+    // 66 - TextStart: ":";
+    Production {
+        lhs: 42,
+        production: &[ParseType::T(22)],
+    },
 ];
 
 static SCANNERS: Lazy<Vec<ScannerConfig>> = Lazy::new(|| {
-    vec![
-        ScannerConfig::new(
-            "INITIAL",
-            Tokenizer::build(TERMINALS, SCANNER_0.0, SCANNER_0.1).unwrap(),
-            &[
-                (16 /* Begin */, 1 /* Value */),
-                (18 /* ArrayBegin */, 1 /* Value */),
-            ],
-        ),
-        ScannerConfig::new(
-            "Value",
-            Tokenizer::build(TERMINALS, SCANNER_1.0, SCANNER_1.1).unwrap(),
-            &[
-                (17 /* End */, 0 /* INITIAL */),
-                (19 /* ArrayEnd */, 0 /* INITIAL */),
-            ],
-        ),
-    ]
+    vec![ScannerConfig::new(
+        "INITIAL",
+        Tokenizer::build(TERMINALS, SCANNER_0.0, SCANNER_0.1).unwrap(),
+        &[],
+    )]
 });
 
 pub fn parse<'t, T>(
@@ -1664,13 +885,19 @@ pub fn parse<'t, T>(
 where
     T: AsRef<Path>,
 {
-    let mut lr_parser = LRParser::new(38, &PARSE_TABLE, PRODUCTIONS, TERMINAL_NAMES, NON_TERMINALS);
-    lr_parser.trim_parse_tree();
+    let mut llk_parser = LLKParser::new(
+        37,
+        LOOKAHEAD_AUTOMATA,
+        PRODUCTIONS,
+        TERMINAL_NAMES,
+        NON_TERMINALS,
+    );
+    llk_parser.trim_parse_tree();
 
     // Initialize wrapper
     let mut user_actions = GrammarAuto::new(user_actions);
-    lr_parser.parse(
-        TokenStream::new(input, file_name, &SCANNERS, 1).unwrap(),
+    llk_parser.parse(
+        TokenStream::new(input, file_name, &SCANNERS, MAX_K).unwrap(),
         &mut user_actions,
     )
 }

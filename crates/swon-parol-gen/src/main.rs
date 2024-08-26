@@ -11,7 +11,7 @@ fn main() {
         .range()
         .minimize_boxed_types()
         // 2 for trailing comma
-        .max_lookahead(2)
+        .max_lookahead(1)
         .unwrap()
         .generate_parser()
         .unwrap();

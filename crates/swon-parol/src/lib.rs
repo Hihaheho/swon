@@ -2,3 +2,14 @@
 pub mod grammar;
 pub mod grammar_trait;
 pub mod parser;
+
+#[test]
+fn test_parse() {
+    let mut actions = grammar::Grammar::new();
+    let input = r#"@ a.b.c
+	d = 1
+
+	"#;
+    parser::parse(input, "test.swon", &mut actions).unwrap();
+    println!("{}", actions);
+}

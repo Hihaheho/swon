@@ -1,30 +1,20 @@
 %start Swon
 %title "SWON"
-%grammar_type 'LALR(1)'
+%grammar_type 'LL(k)'
 %line_comment "#"
-
-%auto_newline_off
-
-// Allow newline within array or object
-%on Begin, ArrayBegin %enter Value
-%scanner Value {
-  %on End, ArrayEnd %enter INITIAL
-}
 
 %%
 
-// no bindings after any sections
 Swon: { Binding } { Section } ;
-  Section: SectionHeader Swon Newline ;
 
-Binding: Keys Bindings Newline ;
+Binding: Keys Bindings ;
   Bindings: ValueBinding | SectionBinding | TextBinding ;
-  ValueBinding: Bind [Newline] Value;
-  SectionBinding: Begin Newline Swon Newline End ;
-  TextBinding: TextStart [Newline] Text ;
+  ValueBinding: Bind Value ;
+  SectionBinding: Begin Swon End ;
+  TextBinding: TextStart Text ;
   Text: /todo/ ;
 
-SectionHeader: At Keys Newline ;
+Section: At Keys { Binding } ;
   Keys: Key { Dot Key } ;
   Key: KeyBase [ ArrayMarker ] ;
   ArrayMarker: ArrayBegin [ Integer ] ArrayEnd ;
@@ -36,24 +26,24 @@ SectionHeader: At Keys Newline ;
 Value: Object | Array | Integer | Boolean | Null | StringContinues ;
   Object: Begin { Key Bind Value [ Comma ] } End ;
   Array: ArrayBegin { Value [ Comma ] } ArrayEnd ;
-  Integer: <INITIAL, Value>/\d[\d_]*/ ;
+  Integer: /\d[\d_]*/ ;
   Boolean: True | False ;
-  True: <INITIAL, Value>'true' ;
-  False: <INITIAL, Value>'false';
-  Null: <INITIAL, Value>'null' ;
+  True: 'true' ;
+  False: 'false';
+  Null: 'null' ;
 
-StringContinues: String { Continue Newline String } ;
-String: /"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"/;
+StringContinues: String { Continue String } ;
+String: /"(\\[nrt\\"0]|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"/;
 
-Newline: /\r\n|\r|\n/ ;
+// Newline: /\r\n|\r|\n/ ;
 At: '@' ;
 Ext: '$' ;
-Dot: <INITIAL, Value>'.' ;
-Begin: <INITIAL, Value>'{' ;
-End: <INITIAL, Value>'}' ;
-ArrayBegin: <INITIAL, Value>'[' ;
-ArrayEnd: <INITIAL, Value>']' ;
-Bind: <INITIAL, Value>'=' ;
-Comma: <INITIAL, Value>',' ;
-Continue: <INITIAL, Value>'\\' ;
-TextStart: <INITIAL, Value> ":" ;
+Dot: '.' ;
+Begin: '{' ;
+End: '}' ;
+ArrayBegin: '[' ;
+ArrayEnd: ']' ;
+Bind: '=' ;
+Comma: ',' ;
+Continue: '\\' ;
+TextStart: ":" ;

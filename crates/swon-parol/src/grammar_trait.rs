@@ -25,11 +25,6 @@ pub trait GrammarTrait<'t> {
         Ok(())
     }
 
-    /// Semantic action for non-terminal 'Section'
-    fn section(&mut self, _arg: &Section<'t>) -> Result<()> {
-        Ok(())
-    }
-
     /// Semantic action for non-terminal 'Binding'
     fn binding(&mut self, _arg: &Binding<'t>) -> Result<()> {
         Ok(())
@@ -60,8 +55,8 @@ pub trait GrammarTrait<'t> {
         Ok(())
     }
 
-    /// Semantic action for non-terminal 'SectionHeader'
-    fn section_header(&mut self, _arg: &SectionHeader<'t>) -> Result<()> {
+    /// Semantic action for non-terminal 'Section'
+    fn section(&mut self, _arg: &Section<'t>) -> Result<()> {
         Ok(())
     }
 
@@ -145,11 +140,6 @@ pub trait GrammarTrait<'t> {
         Ok(())
     }
 
-    /// Semantic action for non-terminal 'Newline'
-    fn newline(&mut self, _arg: &Newline<'t>) -> Result<()> {
-        Ok(())
-    }
-
     /// Semantic action for non-terminal 'At'
     fn at(&mut self, _arg: &At<'t>) -> Result<()> {
         Ok(())
@@ -216,7 +206,7 @@ pub trait GrammarTrait<'t> {
 //
 
 ///
-/// Type derived for production 7
+/// Type derived for production 6
 ///
 /// `Bindings: ValueBinding;`
 ///
@@ -234,7 +224,7 @@ impl<'t> ToSpan for BindingsValueBinding<'t> {
 }
 
 ///
-/// Type derived for production 8
+/// Type derived for production 7
 ///
 /// `Bindings: SectionBinding;`
 ///
@@ -252,7 +242,7 @@ impl<'t> ToSpan for BindingsSectionBinding<'t> {
 }
 
 ///
-/// Type derived for production 9
+/// Type derived for production 8
 ///
 /// `Bindings: TextBinding;`
 ///
@@ -270,7 +260,7 @@ impl<'t> ToSpan for BindingsTextBinding<'t> {
 }
 
 ///
-/// Type derived for production 28
+/// Type derived for production 25
 ///
 /// `KeyBase: Ident;`
 ///
@@ -288,7 +278,7 @@ impl<'t> ToSpan for KeyBaseIdent<'t> {
 }
 
 ///
-/// Type derived for production 29
+/// Type derived for production 26
 ///
 /// `KeyBase: ExtensionNameSpace;`
 ///
@@ -306,7 +296,7 @@ impl<'t> ToSpan for KeyBaseExtensionNameSpace<'t> {
 }
 
 ///
-/// Type derived for production 30
+/// Type derived for production 27
 ///
 /// `KeyBase: String;`
 ///
@@ -324,7 +314,7 @@ impl<'t> ToSpan for KeyBaseString<'t> {
 }
 
 ///
-/// Type derived for production 33
+/// Type derived for production 30
 ///
 /// `Value: Object;`
 ///
@@ -342,7 +332,7 @@ impl<'t> ToSpan for ValueObject<'t> {
 }
 
 ///
-/// Type derived for production 34
+/// Type derived for production 31
 ///
 /// `Value: Array;`
 ///
@@ -360,7 +350,7 @@ impl<'t> ToSpan for ValueArray<'t> {
 }
 
 ///
-/// Type derived for production 35
+/// Type derived for production 32
 ///
 /// `Value: Integer;`
 ///
@@ -378,7 +368,7 @@ impl<'t> ToSpan for ValueInteger<'t> {
 }
 
 ///
-/// Type derived for production 36
+/// Type derived for production 33
 ///
 /// `Value: Boolean;`
 ///
@@ -396,7 +386,7 @@ impl<'t> ToSpan for ValueBoolean<'t> {
 }
 
 ///
-/// Type derived for production 37
+/// Type derived for production 34
 ///
 /// `Value: Null;`
 ///
@@ -414,7 +404,7 @@ impl<'t> ToSpan for ValueNull<'t> {
 }
 
 ///
-/// Type derived for production 38
+/// Type derived for production 35
 ///
 /// `Value: StringContinues;`
 ///
@@ -432,7 +422,7 @@ impl<'t> ToSpan for ValueStringContinues<'t> {
 }
 
 ///
-/// Type derived for production 50
+/// Type derived for production 47
 ///
 /// `Boolean: True;`
 ///
@@ -450,7 +440,7 @@ impl<'t> ToSpan for BooleanTrue<'t> {
 }
 
 ///
-/// Type derived for production 51
+/// Type derived for production 48
 ///
 /// `Boolean: False;`
 ///
@@ -661,12 +651,11 @@ impl<'t> ToSpan for Bind<'t> {
 pub struct Binding<'t> {
     pub keys: Keys<'t>,
     pub bindings: Bindings<'t>,
-    pub newline: Newline<'t>,
 }
 
 impl<'t> ToSpan for Binding<'t> {
     fn span(&self) -> Span {
-        self.keys.span() + self.bindings.span() + self.newline.span()
+        self.keys.span() + self.bindings.span()
     }
 }
 
@@ -946,22 +935,6 @@ impl<'t> ToSpan for KeysList<'t> {
 }
 
 ///
-/// Type derived for non-terminal Newline
-///
-#[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
-pub struct Newline<'t> {
-    pub newline: Token<'t>, /* \r\n|\r|\n */
-}
-
-impl<'t> ToSpan for Newline<'t> {
-    fn span(&self) -> Span {
-        self.newline.span()
-    }
-}
-
-///
 /// Type derived for non-terminal Null
 ///
 #[allow(dead_code)]
@@ -1052,14 +1025,23 @@ impl<'t> ToSpan for ObjectOpt<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct Section<'t> {
-    pub section_header: SectionHeader<'t>,
-    pub swon: Swon<'t>,
-    pub newline: Newline<'t>,
+    pub at: At<'t>,
+    pub keys: Keys<'t>,
+    pub section_list: Vec<SectionList<'t>>,
 }
 
 impl<'t> ToSpan for Section<'t> {
     fn span(&self) -> Span {
-        self.section_header.span() + self.swon.span() + self.newline.span()
+        self.at.span()
+            + self.keys.span()
+            + self
+                .section_list
+                .first()
+                .map_or(Span::default(), |f| f.span())
+            + self
+                .section_list
+                .last()
+                .map_or(Span::default(), |l| l.span())
     }
 }
 
@@ -1071,37 +1053,29 @@ impl<'t> ToSpan for Section<'t> {
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct SectionBinding<'t> {
     pub begin: Begin<'t>,
-    pub newline: Newline<'t>,
     pub swon: Swon<'t>,
-    pub newline0: Newline<'t>,
     pub end: End<'t>,
 }
 
 impl<'t> ToSpan for SectionBinding<'t> {
     fn span(&self) -> Span {
-        self.begin.span()
-            + self.newline.span()
-            + self.swon.span()
-            + self.newline0.span()
-            + self.end.span()
+        self.begin.span() + self.swon.span() + self.end.span()
     }
 }
 
 ///
-/// Type derived for non-terminal SectionHeader
+/// Type derived for non-terminal SectionList
 ///
 #[allow(dead_code)]
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
-pub struct SectionHeader<'t> {
-    pub at: At<'t>,
-    pub keys: Keys<'t>,
-    pub newline: Newline<'t>,
+pub struct SectionList<'t> {
+    pub binding: Binding<'t>,
 }
 
-impl<'t> ToSpan for SectionHeader<'t> {
+impl<'t> ToSpan for SectionList<'t> {
     fn span(&self) -> Span {
-        self.at.span() + self.keys.span() + self.newline.span()
+        self.binding.span()
     }
 }
 
@@ -1112,7 +1086,7 @@ impl<'t> ToSpan for SectionHeader<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct String<'t> {
-    pub string: Token<'t>, /* "(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*" */
+    pub string: Token<'t>, /* "(\\[nrt\\"0]|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*" */
 }
 
 impl<'t> ToSpan for String<'t> {
@@ -1154,13 +1128,12 @@ impl<'t> ToSpan for StringContinues<'t> {
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct StringContinuesList<'t> {
     pub r#continue: Continue<'t>,
-    pub newline: Newline<'t>,
     pub string: String<'t>,
 }
 
 impl<'t> ToSpan for StringContinuesList<'t> {
     fn span(&self) -> Span {
-        self.r#continue.span() + self.newline.span() + self.string.span()
+        self.r#continue.span() + self.string.span()
     }
 }
 
@@ -1243,34 +1216,12 @@ impl<'t> ToSpan for Text<'t> {
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct TextBinding<'t> {
     pub text_start: TextStart<'t>,
-    pub text_binding_opt: Option<TextBindingOpt<'t>>,
     pub text: Text<'t>,
 }
 
 impl<'t> ToSpan for TextBinding<'t> {
     fn span(&self) -> Span {
-        self.text_start.span()
-            + self
-                .text_binding_opt
-                .as_ref()
-                .map_or(Span::default(), |o| o.span())
-            + self.text.span()
-    }
-}
-
-///
-/// Type derived for non-terminal TextBindingOpt
-///
-#[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
-pub struct TextBindingOpt<'t> {
-    pub newline: Newline<'t>,
-}
-
-impl<'t> ToSpan for TextBindingOpt<'t> {
-    fn span(&self) -> Span {
-        self.newline.span()
+        self.text_start.span() + self.text.span()
     }
 }
 
@@ -1341,34 +1292,12 @@ impl<'t> ToSpan for Value<'t> {
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct ValueBinding<'t> {
     pub bind: Bind<'t>,
-    pub value_binding_opt: Option<ValueBindingOpt<'t>>,
     pub value: Value<'t>,
 }
 
 impl<'t> ToSpan for ValueBinding<'t> {
     fn span(&self) -> Span {
-        self.bind.span()
-            + self
-                .value_binding_opt
-                .as_ref()
-                .map_or(Span::default(), |o| o.span())
-            + self.value.span()
-    }
-}
-
-///
-/// Type derived for non-terminal ValueBindingOpt
-///
-#[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
-pub struct ValueBindingOpt<'t> {
-    pub newline: Newline<'t>,
-}
-
-impl<'t> ToSpan for ValueBindingOpt<'t> {
-    fn span(&self) -> Span {
-        self.newline.span()
+        self.bind.span() + self.value.span()
     }
 }
 
@@ -1407,14 +1336,13 @@ pub enum ASTType<'t> {
     KeyOpt(Option<KeyOpt<'t>>),
     Keys(Keys<'t>),
     KeysList(Vec<KeysList<'t>>),
-    Newline(Newline<'t>),
     Null(Null<'t>),
     Object(Object<'t>),
     ObjectList(Vec<ObjectList<'t>>),
     ObjectOpt(Option<ObjectOpt<'t>>),
     Section(Section<'t>),
     SectionBinding(SectionBinding<'t>),
-    SectionHeader(SectionHeader<'t>),
+    SectionList(Vec<SectionList<'t>>),
     String(String<'t>),
     StringContinues(StringContinues<'t>),
     StringContinuesList(Vec<StringContinuesList<'t>>),
@@ -1423,12 +1351,10 @@ pub enum ASTType<'t> {
     SwonList0(Vec<SwonList0<'t>>),
     Text(Text<'t>),
     TextBinding(TextBinding<'t>),
-    TextBindingOpt(Option<TextBindingOpt<'t>>),
     TextStart(TextStart<'t>),
     True(True<'t>),
     Value(Value<'t>),
     ValueBinding(ValueBinding<'t>),
-    ValueBindingOpt(Option<ValueBindingOpt<'t>>),
 }
 impl<'t> ToSpan for ASTType<'t> {
     fn span(&self) -> Span {
@@ -1466,7 +1392,6 @@ impl<'t> ToSpan for ASTType<'t> {
                 v.first().map_or(Span::default(), |f| f.span())
                     + v.last().map_or(Span::default(), |l| l.span())
             }
-            ASTType::Newline(v) => v.span(),
             ASTType::Null(v) => v.span(),
             ASTType::Object(v) => v.span(),
             ASTType::ObjectList(v) => {
@@ -1476,7 +1401,10 @@ impl<'t> ToSpan for ASTType<'t> {
             ASTType::ObjectOpt(o) => o.as_ref().map_or(Span::default(), |o| o.span()),
             ASTType::Section(v) => v.span(),
             ASTType::SectionBinding(v) => v.span(),
-            ASTType::SectionHeader(v) => v.span(),
+            ASTType::SectionList(v) => {
+                v.first().map_or(Span::default(), |f| f.span())
+                    + v.last().map_or(Span::default(), |l| l.span())
+            }
             ASTType::String(v) => v.span(),
             ASTType::StringContinues(v) => v.span(),
             ASTType::StringContinuesList(v) => {
@@ -1494,12 +1422,10 @@ impl<'t> ToSpan for ASTType<'t> {
             }
             ASTType::Text(v) => v.span(),
             ASTType::TextBinding(v) => v.span(),
-            ASTType::TextBindingOpt(o) => o.as_ref().map_or(Span::default(), |o| o.span()),
             ASTType::TextStart(v) => v.span(),
             ASTType::True(v) => v.span(),
             ASTType::Value(v) => v.span(),
             ASTType::ValueBinding(v) => v.span(),
-            ASTType::ValueBindingOpt(o) => o.as_ref().map_or(Span::default(), |o| o.span()),
         }
     }
 }
@@ -1575,8 +1501,8 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let swon_list0 = pop_item!(self, swon_list0, SwonList0, context);
-        let swon_list = pop_item!(self, swon_list, SwonList, context);
+        let swon_list0 = pop_and_reverse_item!(self, swon_list0, SwonList0, context);
+        let swon_list = pop_and_reverse_item!(self, swon_list, SwonList, context);
         let swon_built = Swon {
             swon_list,
             swon_list0,
@@ -1589,18 +1515,18 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 1:
     ///
-    /// `SwonList0 /* Vec<T>::Push */: SwonList0 Section;`
+    /// `SwonList0 /* Vec<T>::Push */: Section SwonList0;`
     ///
     #[parol_runtime::function_name::named]
     fn swon_list0_0(
         &mut self,
-        _swon_list0: &ParseTreeType<'t>,
         _section: &ParseTreeType<'t>,
+        _swon_list0: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let section = pop_item!(self, section, Section, context);
         let mut swon_list0 = pop_item!(self, swon_list0, SwonList0, context);
+        let section = pop_item!(self, section, Section, context);
         let swon_list0_0_built = SwonList0 { section };
         // Add an element to the vector
         swon_list0.push(swon_list0_0_built);
@@ -1623,18 +1549,18 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 3:
     ///
-    /// `SwonList /* Vec<T>::Push */: SwonList Binding;`
+    /// `SwonList /* Vec<T>::Push */: Binding SwonList;`
     ///
     #[parol_runtime::function_name::named]
     fn swon_list_0(
         &mut self,
-        _swon_list: &ParseTreeType<'t>,
         _binding: &ParseTreeType<'t>,
+        _swon_list: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let binding = pop_item!(self, binding, Binding, context);
         let mut swon_list = pop_item!(self, swon_list, SwonList, context);
+        let binding = pop_item!(self, binding, Binding, context);
         let swon_list_0_built = SwonList { binding };
         // Add an element to the vector
         swon_list.push(swon_list_0_built);
@@ -1657,59 +1583,22 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 5:
     ///
-    /// `Section: SectionHeader Swon Newline;`
+    /// `Binding: Keys Bindings;`
     ///
     #[parol_runtime::function_name::named]
-    fn section(
-        &mut self,
-        _section_header: &ParseTreeType<'t>,
-        _swon: &ParseTreeType<'t>,
-        _newline: &ParseTreeType<'t>,
-    ) -> Result<()> {
+    fn binding(&mut self, _keys: &ParseTreeType<'t>, _bindings: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let newline = pop_item!(self, newline, Newline, context);
-        let swon = pop_item!(self, swon, Swon, context);
-        let section_header = pop_item!(self, section_header, SectionHeader, context);
-        let section_built = Section {
-            section_header,
-            swon,
-            newline,
-        };
-        // Calling user action here
-        self.user_grammar.section(&section_built)?;
-        self.push(ASTType::Section(section_built), context);
-        Ok(())
-    }
-
-    /// Semantic action for production 6:
-    ///
-    /// `Binding: Keys Bindings Newline;`
-    ///
-    #[parol_runtime::function_name::named]
-    fn binding(
-        &mut self,
-        _keys: &ParseTreeType<'t>,
-        _bindings: &ParseTreeType<'t>,
-        _newline: &ParseTreeType<'t>,
-    ) -> Result<()> {
-        let context = function_name!();
-        trace!("{}", self.trace_item_stack(context));
-        let newline = pop_item!(self, newline, Newline, context);
         let bindings = pop_item!(self, bindings, Bindings, context);
         let keys = pop_item!(self, keys, Keys, context);
-        let binding_built = Binding {
-            keys,
-            bindings,
-            newline,
-        };
+        let binding_built = Binding { keys, bindings };
         // Calling user action here
         self.user_grammar.binding(&binding_built)?;
         self.push(ASTType::Binding(binding_built), context);
         Ok(())
     }
 
-    /// Semantic action for production 7:
+    /// Semantic action for production 6:
     ///
     /// `Bindings: ValueBinding;`
     ///
@@ -1726,7 +1615,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 8:
+    /// Semantic action for production 7:
     ///
     /// `Bindings: SectionBinding;`
     ///
@@ -1743,7 +1632,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 9:
+    /// Semantic action for production 8:
     ///
     /// `Bindings: TextBinding;`
     ///
@@ -1760,152 +1649,72 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 10:
+    /// Semantic action for production 9:
     ///
-    /// `ValueBinding: Bind ValueBindingOpt /* Option */ Value;`
+    /// `ValueBinding: Bind Value;`
     ///
     #[parol_runtime::function_name::named]
     fn value_binding(
         &mut self,
         _bind: &ParseTreeType<'t>,
-        _value_binding_opt: &ParseTreeType<'t>,
         _value: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let value = pop_item!(self, value, Value, context);
-        let value_binding_opt = pop_item!(self, value_binding_opt, ValueBindingOpt, context);
         let bind = pop_item!(self, bind, Bind, context);
-        let value_binding_built = ValueBinding {
-            bind,
-            value_binding_opt,
-            value,
-        };
+        let value_binding_built = ValueBinding { bind, value };
         // Calling user action here
         self.user_grammar.value_binding(&value_binding_built)?;
         self.push(ASTType::ValueBinding(value_binding_built), context);
         Ok(())
     }
 
-    /// Semantic action for production 11:
+    /// Semantic action for production 10:
     ///
-    /// `ValueBindingOpt /* Option<T>::Some */: Newline;`
-    ///
-    #[parol_runtime::function_name::named]
-    fn value_binding_opt_0(&mut self, _newline: &ParseTreeType<'t>) -> Result<()> {
-        let context = function_name!();
-        trace!("{}", self.trace_item_stack(context));
-        let newline = pop_item!(self, newline, Newline, context);
-        let value_binding_opt_0_built = ValueBindingOpt { newline };
-        self.push(
-            ASTType::ValueBindingOpt(Some(value_binding_opt_0_built)),
-            context,
-        );
-        Ok(())
-    }
-
-    /// Semantic action for production 12:
-    ///
-    /// `ValueBindingOpt /* Option<T>::None */: ;`
-    ///
-    #[parol_runtime::function_name::named]
-    fn value_binding_opt_1(&mut self) -> Result<()> {
-        let context = function_name!();
-        trace!("{}", self.trace_item_stack(context));
-        self.push(ASTType::ValueBindingOpt(None), context);
-        Ok(())
-    }
-
-    /// Semantic action for production 13:
-    ///
-    /// `SectionBinding: Begin Newline Swon Newline End;`
+    /// `SectionBinding: Begin Swon End;`
     ///
     #[parol_runtime::function_name::named]
     fn section_binding(
         &mut self,
         _begin: &ParseTreeType<'t>,
-        _newline: &ParseTreeType<'t>,
         _swon: &ParseTreeType<'t>,
-        _newline0: &ParseTreeType<'t>,
         _end: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let end = pop_item!(self, end, End, context);
-        let newline0 = pop_item!(self, newline0, Newline, context);
         let swon = pop_item!(self, swon, Swon, context);
-        let newline = pop_item!(self, newline, Newline, context);
         let begin = pop_item!(self, begin, Begin, context);
-        let section_binding_built = SectionBinding {
-            begin,
-            newline,
-            swon,
-            newline0,
-            end,
-        };
+        let section_binding_built = SectionBinding { begin, swon, end };
         // Calling user action here
         self.user_grammar.section_binding(&section_binding_built)?;
         self.push(ASTType::SectionBinding(section_binding_built), context);
         Ok(())
     }
 
-    /// Semantic action for production 14:
+    /// Semantic action for production 11:
     ///
-    /// `TextBinding: TextStart TextBindingOpt /* Option */ Text;`
+    /// `TextBinding: TextStart Text;`
     ///
     #[parol_runtime::function_name::named]
     fn text_binding(
         &mut self,
         _text_start: &ParseTreeType<'t>,
-        _text_binding_opt: &ParseTreeType<'t>,
         _text: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let text = pop_item!(self, text, Text, context);
-        let text_binding_opt = pop_item!(self, text_binding_opt, TextBindingOpt, context);
         let text_start = pop_item!(self, text_start, TextStart, context);
-        let text_binding_built = TextBinding {
-            text_start,
-            text_binding_opt,
-            text,
-        };
+        let text_binding_built = TextBinding { text_start, text };
         // Calling user action here
         self.user_grammar.text_binding(&text_binding_built)?;
         self.push(ASTType::TextBinding(text_binding_built), context);
         Ok(())
     }
 
-    /// Semantic action for production 15:
-    ///
-    /// `TextBindingOpt /* Option<T>::Some */: Newline;`
-    ///
-    #[parol_runtime::function_name::named]
-    fn text_binding_opt_0(&mut self, _newline: &ParseTreeType<'t>) -> Result<()> {
-        let context = function_name!();
-        trace!("{}", self.trace_item_stack(context));
-        let newline = pop_item!(self, newline, Newline, context);
-        let text_binding_opt_0_built = TextBindingOpt { newline };
-        self.push(
-            ASTType::TextBindingOpt(Some(text_binding_opt_0_built)),
-            context,
-        );
-        Ok(())
-    }
-
-    /// Semantic action for production 16:
-    ///
-    /// `TextBindingOpt /* Option<T>::None */: ;`
-    ///
-    #[parol_runtime::function_name::named]
-    fn text_binding_opt_1(&mut self) -> Result<()> {
-        let context = function_name!();
-        trace!("{}", self.trace_item_stack(context));
-        self.push(ASTType::TextBindingOpt(None), context);
-        Ok(())
-    }
-
-    /// Semantic action for production 17:
+    /// Semantic action for production 12:
     ///
     /// `Text: /todo/;`
     ///
@@ -1921,30 +1730,68 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 18:
+    /// Semantic action for production 13:
     ///
-    /// `SectionHeader: At Keys Newline;`
+    /// `Section: At Keys SectionList /* Vec */;`
     ///
     #[parol_runtime::function_name::named]
-    fn section_header(
+    fn section(
         &mut self,
         _at: &ParseTreeType<'t>,
         _keys: &ParseTreeType<'t>,
-        _newline: &ParseTreeType<'t>,
+        _section_list: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let newline = pop_item!(self, newline, Newline, context);
+        let section_list = pop_and_reverse_item!(self, section_list, SectionList, context);
         let keys = pop_item!(self, keys, Keys, context);
         let at = pop_item!(self, at, At, context);
-        let section_header_built = SectionHeader { at, keys, newline };
+        let section_built = Section {
+            at,
+            keys,
+            section_list,
+        };
         // Calling user action here
-        self.user_grammar.section_header(&section_header_built)?;
-        self.push(ASTType::SectionHeader(section_header_built), context);
+        self.user_grammar.section(&section_built)?;
+        self.push(ASTType::Section(section_built), context);
         Ok(())
     }
 
-    /// Semantic action for production 19:
+    /// Semantic action for production 14:
+    ///
+    /// `SectionList /* Vec<T>::Push */: Binding SectionList;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn section_list_0(
+        &mut self,
+        _binding: &ParseTreeType<'t>,
+        _section_list: &ParseTreeType<'t>,
+    ) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let mut section_list = pop_item!(self, section_list, SectionList, context);
+        let binding = pop_item!(self, binding, Binding, context);
+        let section_list_0_built = SectionList { binding };
+        // Add an element to the vector
+        section_list.push(section_list_0_built);
+        self.push(ASTType::SectionList(section_list), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 15:
+    ///
+    /// `SectionList /* Vec<T>::New */: ;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn section_list_1(&mut self) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let section_list_1_built = Vec::new();
+        self.push(ASTType::SectionList(section_list_1_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 16:
     ///
     /// `Keys: Key KeysList /* Vec */;`
     ///
@@ -1952,7 +1799,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
     fn keys(&mut self, _key: &ParseTreeType<'t>, _keys_list: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let keys_list = pop_item!(self, keys_list, KeysList, context);
+        let keys_list = pop_and_reverse_item!(self, keys_list, KeysList, context);
         let key = pop_item!(self, key, Key, context);
         let keys_built = Keys { key, keys_list };
         // Calling user action here
@@ -1961,22 +1808,22 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 20:
+    /// Semantic action for production 17:
     ///
-    /// `KeysList /* Vec<T>::Push */: KeysList Dot Key;`
+    /// `KeysList /* Vec<T>::Push */: Dot Key KeysList;`
     ///
     #[parol_runtime::function_name::named]
     fn keys_list_0(
         &mut self,
-        _keys_list: &ParseTreeType<'t>,
         _dot: &ParseTreeType<'t>,
         _key: &ParseTreeType<'t>,
+        _keys_list: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
+        let mut keys_list = pop_item!(self, keys_list, KeysList, context);
         let key = pop_item!(self, key, Key, context);
         let dot = pop_item!(self, dot, Dot, context);
-        let mut keys_list = pop_item!(self, keys_list, KeysList, context);
         let keys_list_0_built = KeysList { key, dot };
         // Add an element to the vector
         keys_list.push(keys_list_0_built);
@@ -1984,7 +1831,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 21:
+    /// Semantic action for production 18:
     ///
     /// `KeysList /* Vec<T>::New */: ;`
     ///
@@ -1997,7 +1844,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 22:
+    /// Semantic action for production 19:
     ///
     /// `Key: KeyBase KeyOpt /* Option */;`
     ///
@@ -2014,7 +1861,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 23:
+    /// Semantic action for production 20:
     ///
     /// `KeyOpt /* Option<T>::Some */: ArrayMarker;`
     ///
@@ -2028,7 +1875,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 24:
+    /// Semantic action for production 21:
     ///
     /// `KeyOpt /* Option<T>::None */: ;`
     ///
@@ -2040,7 +1887,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 25:
+    /// Semantic action for production 22:
     ///
     /// `ArrayMarker: ArrayBegin ArrayMarkerOpt /* Option */ ArrayEnd;`
     ///
@@ -2067,7 +1914,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 26:
+    /// Semantic action for production 23:
     ///
     /// `ArrayMarkerOpt /* Option<T>::Some */: Integer;`
     ///
@@ -2084,7 +1931,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 27:
+    /// Semantic action for production 24:
     ///
     /// `ArrayMarkerOpt /* Option<T>::None */: ;`
     ///
@@ -2096,7 +1943,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 28:
+    /// Semantic action for production 25:
     ///
     /// `KeyBase: Ident;`
     ///
@@ -2113,7 +1960,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 29:
+    /// Semantic action for production 26:
     ///
     /// `KeyBase: ExtensionNameSpace;`
     ///
@@ -2133,7 +1980,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 30:
+    /// Semantic action for production 27:
     ///
     /// `KeyBase: String;`
     ///
@@ -2150,7 +1997,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 31:
+    /// Semantic action for production 28:
     ///
     /// `Ident: /\p{XID_Start}\p{XID_Continue}*/;`
     ///
@@ -2166,7 +2013,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 32:
+    /// Semantic action for production 29:
     ///
     /// `ExtensionNameSpace: Ext Ident;`
     ///
@@ -2191,7 +2038,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 33:
+    /// Semantic action for production 30:
     ///
     /// `Value: Object;`
     ///
@@ -2208,7 +2055,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 34:
+    /// Semantic action for production 31:
     ///
     /// `Value: Array;`
     ///
@@ -2225,7 +2072,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 35:
+    /// Semantic action for production 32:
     ///
     /// `Value: Integer;`
     ///
@@ -2242,7 +2089,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 36:
+    /// Semantic action for production 33:
     ///
     /// `Value: Boolean;`
     ///
@@ -2259,7 +2106,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 37:
+    /// Semantic action for production 34:
     ///
     /// `Value: Null;`
     ///
@@ -2276,7 +2123,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 38:
+    /// Semantic action for production 35:
     ///
     /// `Value: StringContinues;`
     ///
@@ -2293,7 +2140,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 39:
+    /// Semantic action for production 36:
     ///
     /// `Object: Begin ObjectList /* Vec */ End;`
     ///
@@ -2307,7 +2154,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let end = pop_item!(self, end, End, context);
-        let object_list = pop_item!(self, object_list, ObjectList, context);
+        let object_list = pop_and_reverse_item!(self, object_list, ObjectList, context);
         let begin = pop_item!(self, begin, Begin, context);
         let object_built = Object {
             begin,
@@ -2320,26 +2167,26 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 40:
+    /// Semantic action for production 37:
     ///
-    /// `ObjectList /* Vec<T>::Push */: ObjectList Key Bind Value ObjectOpt /* Option */;`
+    /// `ObjectList /* Vec<T>::Push */: Key Bind Value ObjectOpt /* Option */ ObjectList;`
     ///
     #[parol_runtime::function_name::named]
     fn object_list_0(
         &mut self,
-        _object_list: &ParseTreeType<'t>,
         _key: &ParseTreeType<'t>,
         _bind: &ParseTreeType<'t>,
         _value: &ParseTreeType<'t>,
         _object_opt: &ParseTreeType<'t>,
+        _object_list: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
+        let mut object_list = pop_item!(self, object_list, ObjectList, context);
         let object_opt = pop_item!(self, object_opt, ObjectOpt, context);
         let value = pop_item!(self, value, Value, context);
         let bind = pop_item!(self, bind, Bind, context);
         let key = pop_item!(self, key, Key, context);
-        let mut object_list = pop_item!(self, object_list, ObjectList, context);
         let object_list_0_built = ObjectList {
             object_opt,
             value,
@@ -2352,7 +2199,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 41:
+    /// Semantic action for production 38:
     ///
     /// `ObjectList /* Vec<T>::New */: ;`
     ///
@@ -2365,7 +2212,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 42:
+    /// Semantic action for production 39:
     ///
     /// `ObjectOpt /* Option<T>::Some */: Comma;`
     ///
@@ -2379,7 +2226,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 43:
+    /// Semantic action for production 40:
     ///
     /// `ObjectOpt /* Option<T>::None */: ;`
     ///
@@ -2391,7 +2238,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 44:
+    /// Semantic action for production 41:
     ///
     /// `Array: ArrayBegin ArrayList /* Vec */ ArrayEnd;`
     ///
@@ -2405,7 +2252,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let array_end = pop_item!(self, array_end, ArrayEnd, context);
-        let array_list = pop_item!(self, array_list, ArrayList, context);
+        let array_list = pop_and_reverse_item!(self, array_list, ArrayList, context);
         let array_begin = pop_item!(self, array_begin, ArrayBegin, context);
         let array_built = Array {
             array_begin,
@@ -2418,22 +2265,22 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 45:
+    /// Semantic action for production 42:
     ///
-    /// `ArrayList /* Vec<T>::Push */: ArrayList Value ArrayOpt /* Option */;`
+    /// `ArrayList /* Vec<T>::Push */: Value ArrayOpt /* Option */ ArrayList;`
     ///
     #[parol_runtime::function_name::named]
     fn array_list_0(
         &mut self,
-        _array_list: &ParseTreeType<'t>,
         _value: &ParseTreeType<'t>,
         _array_opt: &ParseTreeType<'t>,
+        _array_list: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
+        let mut array_list = pop_item!(self, array_list, ArrayList, context);
         let array_opt = pop_item!(self, array_opt, ArrayOpt, context);
         let value = pop_item!(self, value, Value, context);
-        let mut array_list = pop_item!(self, array_list, ArrayList, context);
         let array_list_0_built = ArrayList { array_opt, value };
         // Add an element to the vector
         array_list.push(array_list_0_built);
@@ -2441,7 +2288,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 46:
+    /// Semantic action for production 43:
     ///
     /// `ArrayList /* Vec<T>::New */: ;`
     ///
@@ -2454,7 +2301,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 47:
+    /// Semantic action for production 44:
     ///
     /// `ArrayOpt /* Option<T>::Some */: Comma;`
     ///
@@ -2468,7 +2315,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 48:
+    /// Semantic action for production 45:
     ///
     /// `ArrayOpt /* Option<T>::None */: ;`
     ///
@@ -2480,9 +2327,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 49:
+    /// Semantic action for production 46:
     ///
-    /// `Integer: <INITIAL, Value>/\d[\d_]*/;`
+    /// `Integer: /\d[\d_]*/;`
     ///
     #[parol_runtime::function_name::named]
     fn integer(&mut self, integer: &ParseTreeType<'t>) -> Result<()> {
@@ -2496,7 +2343,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 50:
+    /// Semantic action for production 47:
     ///
     /// `Boolean: True;`
     ///
@@ -2513,7 +2360,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 51:
+    /// Semantic action for production 48:
     ///
     /// `Boolean: False;`
     ///
@@ -2530,9 +2377,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 52:
+    /// Semantic action for production 49:
     ///
-    /// `True: <INITIAL, Value>'true';`
+    /// `True: 'true';`
     ///
     #[parol_runtime::function_name::named]
     fn r#true(&mut self, r#true: &ParseTreeType<'t>) -> Result<()> {
@@ -2546,9 +2393,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 53:
+    /// Semantic action for production 50:
     ///
-    /// `False: <INITIAL, Value>'false';`
+    /// `False: 'false';`
     ///
     #[parol_runtime::function_name::named]
     fn r#false(&mut self, r#false: &ParseTreeType<'t>) -> Result<()> {
@@ -2562,9 +2409,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 54:
+    /// Semantic action for production 51:
     ///
-    /// `Null: <INITIAL, Value>'null';`
+    /// `Null: 'null';`
     ///
     #[parol_runtime::function_name::named]
     fn null(&mut self, null: &ParseTreeType<'t>) -> Result<()> {
@@ -2578,7 +2425,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 55:
+    /// Semantic action for production 52:
     ///
     /// `StringContinues: String StringContinuesList /* Vec */;`
     ///
@@ -2591,7 +2438,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let string_continues_list =
-            pop_item!(self, string_continues_list, StringContinuesList, context);
+            pop_and_reverse_item!(self, string_continues_list, StringContinuesList, context);
         let string = pop_item!(self, string, String, context);
         let string_continues_built = StringContinues {
             string,
@@ -2604,37 +2451,31 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 56:
+    /// Semantic action for production 53:
     ///
-    /// `StringContinuesList /* Vec<T>::Push */: StringContinuesList Continue Newline String;`
+    /// `StringContinuesList /* Vec<T>::Push */: Continue String StringContinuesList;`
     ///
     #[parol_runtime::function_name::named]
     fn string_continues_list_0(
         &mut self,
-        _string_continues_list: &ParseTreeType<'t>,
         _continue: &ParseTreeType<'t>,
-        _newline: &ParseTreeType<'t>,
         _string: &ParseTreeType<'t>,
+        _string_continues_list: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let string = pop_item!(self, string, String, context);
-        let newline = pop_item!(self, newline, Newline, context);
-        let r#continue = pop_item!(self, r#continue, Continue, context);
         let mut string_continues_list =
             pop_item!(self, string_continues_list, StringContinuesList, context);
-        let string_continues_list_0_built = StringContinuesList {
-            string,
-            newline,
-            r#continue,
-        };
+        let string = pop_item!(self, string, String, context);
+        let r#continue = pop_item!(self, r#continue, Continue, context);
+        let string_continues_list_0_built = StringContinuesList { string, r#continue };
         // Add an element to the vector
         string_continues_list.push(string_continues_list_0_built);
         self.push(ASTType::StringContinuesList(string_continues_list), context);
         Ok(())
     }
 
-    /// Semantic action for production 57:
+    /// Semantic action for production 54:
     ///
     /// `StringContinuesList /* Vec<T>::New */: ;`
     ///
@@ -2650,9 +2491,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 58:
+    /// Semantic action for production 55:
     ///
-    /// `String: /"(\\([\\nrt\"0]|\\u[0-9a-fA-F]{4}|\\U[0-9a-fA-F]{8}|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"/;`
+    /// `String: /"(\\[nrt\\"0]|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"/;`
     ///
     #[parol_runtime::function_name::named]
     fn string(&mut self, string: &ParseTreeType<'t>) -> Result<()> {
@@ -2666,23 +2507,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 59:
-    ///
-    /// `Newline: /\r\n|\r|\n/;`
-    ///
-    #[parol_runtime::function_name::named]
-    fn newline(&mut self, newline: &ParseTreeType<'t>) -> Result<()> {
-        let context = function_name!();
-        trace!("{}", self.trace_item_stack(context));
-        let newline = newline.token()?.clone();
-        let newline_built = Newline { newline };
-        // Calling user action here
-        self.user_grammar.newline(&newline_built)?;
-        self.push(ASTType::Newline(newline_built), context);
-        Ok(())
-    }
-
-    /// Semantic action for production 60:
+    /// Semantic action for production 56:
     ///
     /// `At: '@';`
     ///
@@ -2698,7 +2523,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 61:
+    /// Semantic action for production 57:
     ///
     /// `Ext: '$';`
     ///
@@ -2714,9 +2539,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 62:
+    /// Semantic action for production 58:
     ///
-    /// `Dot: <INITIAL, Value>'.';`
+    /// `Dot: '.';`
     ///
     #[parol_runtime::function_name::named]
     fn dot(&mut self, dot: &ParseTreeType<'t>) -> Result<()> {
@@ -2730,9 +2555,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 63:
+    /// Semantic action for production 59:
     ///
-    /// `Begin: <INITIAL, Value>'{';`
+    /// `Begin: '{';`
     ///
     #[parol_runtime::function_name::named]
     fn begin(&mut self, begin: &ParseTreeType<'t>) -> Result<()> {
@@ -2746,9 +2571,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 64:
+    /// Semantic action for production 60:
     ///
-    /// `End: <INITIAL, Value>'}';`
+    /// `End: '}';`
     ///
     #[parol_runtime::function_name::named]
     fn end(&mut self, end: &ParseTreeType<'t>) -> Result<()> {
@@ -2762,9 +2587,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 65:
+    /// Semantic action for production 61:
     ///
-    /// `ArrayBegin: <INITIAL, Value>'[';`
+    /// `ArrayBegin: '[';`
     ///
     #[parol_runtime::function_name::named]
     fn array_begin(&mut self, array_begin: &ParseTreeType<'t>) -> Result<()> {
@@ -2778,9 +2603,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 66:
+    /// Semantic action for production 62:
     ///
-    /// `ArrayEnd: <INITIAL, Value>']';`
+    /// `ArrayEnd: ']';`
     ///
     #[parol_runtime::function_name::named]
     fn array_end(&mut self, array_end: &ParseTreeType<'t>) -> Result<()> {
@@ -2794,9 +2619,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 67:
+    /// Semantic action for production 63:
     ///
-    /// `Bind: <INITIAL, Value>'=';`
+    /// `Bind: '=';`
     ///
     #[parol_runtime::function_name::named]
     fn bind(&mut self, bind: &ParseTreeType<'t>) -> Result<()> {
@@ -2810,9 +2635,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 68:
+    /// Semantic action for production 64:
     ///
-    /// `Comma: <INITIAL, Value>',';`
+    /// `Comma: ',';`
     ///
     #[parol_runtime::function_name::named]
     fn comma(&mut self, comma: &ParseTreeType<'t>) -> Result<()> {
@@ -2826,9 +2651,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 69:
+    /// Semantic action for production 65:
     ///
-    /// `Continue: <INITIAL, Value>'\\';`
+    /// `Continue: '\\';`
     ///
     #[parol_runtime::function_name::named]
     fn r#continue(&mut self, r#continue: &ParseTreeType<'t>) -> Result<()> {
@@ -2842,9 +2667,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 70:
+    /// Semantic action for production 66:
     ///
-    /// `TextStart: <INITIAL, Value>":";`
+    /// `TextStart: ":";`
     ///
     #[parol_runtime::function_name::named]
     fn text_start(&mut self, text_start: &ParseTreeType<'t>) -> Result<()> {
@@ -2874,86 +2699,74 @@ impl<'t> UserActionsTrait<'t> for GrammarAuto<'t, '_> {
             2 => self.swon_list0_1(),
             3 => self.swon_list_0(&children[0], &children[1]),
             4 => self.swon_list_1(),
-            5 => self.section(&children[0], &children[1], &children[2]),
-            6 => self.binding(&children[0], &children[1], &children[2]),
-            7 => self.bindings_0(&children[0]),
-            8 => self.bindings_1(&children[0]),
-            9 => self.bindings_2(&children[0]),
-            10 => self.value_binding(&children[0], &children[1], &children[2]),
-            11 => self.value_binding_opt_0(&children[0]),
-            12 => self.value_binding_opt_1(),
-            13 => self.section_binding(
+            5 => self.binding(&children[0], &children[1]),
+            6 => self.bindings_0(&children[0]),
+            7 => self.bindings_1(&children[0]),
+            8 => self.bindings_2(&children[0]),
+            9 => self.value_binding(&children[0], &children[1]),
+            10 => self.section_binding(&children[0], &children[1], &children[2]),
+            11 => self.text_binding(&children[0], &children[1]),
+            12 => self.text(&children[0]),
+            13 => self.section(&children[0], &children[1], &children[2]),
+            14 => self.section_list_0(&children[0], &children[1]),
+            15 => self.section_list_1(),
+            16 => self.keys(&children[0], &children[1]),
+            17 => self.keys_list_0(&children[0], &children[1], &children[2]),
+            18 => self.keys_list_1(),
+            19 => self.key(&children[0], &children[1]),
+            20 => self.key_opt_0(&children[0]),
+            21 => self.key_opt_1(),
+            22 => self.array_marker(&children[0], &children[1], &children[2]),
+            23 => self.array_marker_opt_0(&children[0]),
+            24 => self.array_marker_opt_1(),
+            25 => self.key_base_0(&children[0]),
+            26 => self.key_base_1(&children[0]),
+            27 => self.key_base_2(&children[0]),
+            28 => self.ident(&children[0]),
+            29 => self.extension_name_space(&children[0], &children[1]),
+            30 => self.value_0(&children[0]),
+            31 => self.value_1(&children[0]),
+            32 => self.value_2(&children[0]),
+            33 => self.value_3(&children[0]),
+            34 => self.value_4(&children[0]),
+            35 => self.value_5(&children[0]),
+            36 => self.object(&children[0], &children[1], &children[2]),
+            37 => self.object_list_0(
                 &children[0],
                 &children[1],
                 &children[2],
                 &children[3],
                 &children[4],
             ),
-            14 => self.text_binding(&children[0], &children[1], &children[2]),
-            15 => self.text_binding_opt_0(&children[0]),
-            16 => self.text_binding_opt_1(),
-            17 => self.text(&children[0]),
-            18 => self.section_header(&children[0], &children[1], &children[2]),
-            19 => self.keys(&children[0], &children[1]),
-            20 => self.keys_list_0(&children[0], &children[1], &children[2]),
-            21 => self.keys_list_1(),
-            22 => self.key(&children[0], &children[1]),
-            23 => self.key_opt_0(&children[0]),
-            24 => self.key_opt_1(),
-            25 => self.array_marker(&children[0], &children[1], &children[2]),
-            26 => self.array_marker_opt_0(&children[0]),
-            27 => self.array_marker_opt_1(),
-            28 => self.key_base_0(&children[0]),
-            29 => self.key_base_1(&children[0]),
-            30 => self.key_base_2(&children[0]),
-            31 => self.ident(&children[0]),
-            32 => self.extension_name_space(&children[0], &children[1]),
-            33 => self.value_0(&children[0]),
-            34 => self.value_1(&children[0]),
-            35 => self.value_2(&children[0]),
-            36 => self.value_3(&children[0]),
-            37 => self.value_4(&children[0]),
-            38 => self.value_5(&children[0]),
-            39 => self.object(&children[0], &children[1], &children[2]),
-            40 => self.object_list_0(
-                &children[0],
-                &children[1],
-                &children[2],
-                &children[3],
-                &children[4],
-            ),
-            41 => self.object_list_1(),
-            42 => self.object_opt_0(&children[0]),
-            43 => self.object_opt_1(),
-            44 => self.array(&children[0], &children[1], &children[2]),
-            45 => self.array_list_0(&children[0], &children[1], &children[2]),
-            46 => self.array_list_1(),
-            47 => self.array_opt_0(&children[0]),
-            48 => self.array_opt_1(),
-            49 => self.integer(&children[0]),
-            50 => self.boolean_0(&children[0]),
-            51 => self.boolean_1(&children[0]),
-            52 => self.r#true(&children[0]),
-            53 => self.r#false(&children[0]),
-            54 => self.null(&children[0]),
-            55 => self.string_continues(&children[0], &children[1]),
-            56 => {
-                self.string_continues_list_0(&children[0], &children[1], &children[2], &children[3])
-            }
-            57 => self.string_continues_list_1(),
-            58 => self.string(&children[0]),
-            59 => self.newline(&children[0]),
-            60 => self.at(&children[0]),
-            61 => self.ext(&children[0]),
-            62 => self.dot(&children[0]),
-            63 => self.begin(&children[0]),
-            64 => self.end(&children[0]),
-            65 => self.array_begin(&children[0]),
-            66 => self.array_end(&children[0]),
-            67 => self.bind(&children[0]),
-            68 => self.comma(&children[0]),
-            69 => self.r#continue(&children[0]),
-            70 => self.text_start(&children[0]),
+            38 => self.object_list_1(),
+            39 => self.object_opt_0(&children[0]),
+            40 => self.object_opt_1(),
+            41 => self.array(&children[0], &children[1], &children[2]),
+            42 => self.array_list_0(&children[0], &children[1], &children[2]),
+            43 => self.array_list_1(),
+            44 => self.array_opt_0(&children[0]),
+            45 => self.array_opt_1(),
+            46 => self.integer(&children[0]),
+            47 => self.boolean_0(&children[0]),
+            48 => self.boolean_1(&children[0]),
+            49 => self.r#true(&children[0]),
+            50 => self.r#false(&children[0]),
+            51 => self.null(&children[0]),
+            52 => self.string_continues(&children[0], &children[1]),
+            53 => self.string_continues_list_0(&children[0], &children[1], &children[2]),
+            54 => self.string_continues_list_1(),
+            55 => self.string(&children[0]),
+            56 => self.at(&children[0]),
+            57 => self.ext(&children[0]),
+            58 => self.dot(&children[0]),
+            59 => self.begin(&children[0]),
+            60 => self.end(&children[0]),
+            61 => self.array_begin(&children[0]),
+            62 => self.array_end(&children[0]),
+            63 => self.bind(&children[0]),
+            64 => self.comma(&children[0]),
+            65 => self.r#continue(&children[0]),
+            66 => self.text_start(&children[0]),
             _ => Err(ParserError::InternalError(format!(
                 "Unhandled production number: {}",
                 prod_num
