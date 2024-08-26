@@ -11,3 +11,9 @@
 ## Identical schema
 
 You can use another SWON file as a schema for another SWON file. This is convenient when you want to have a various version of the document, for example, for i18n or l10n.
+
+## Extensions
+
+`$types[]` is a namespace for store types.
+
+Any object can have this extension.

@@ -50,11 +50,6 @@ pub trait GrammarTrait<'t> {
         Ok(())
     }
 
-    /// Semantic action for non-terminal 'Text'
-    fn text(&mut self, _arg: &Text<'t>) -> Result<()> {
-        Ok(())
-    }
-
     /// Semantic action for non-terminal 'Section'
     fn section(&mut self, _arg: &Section<'t>) -> Result<()> {
         Ok(())
@@ -77,11 +72,6 @@ pub trait GrammarTrait<'t> {
 
     /// Semantic action for non-terminal 'KeyBase'
     fn key_base(&mut self, _arg: &KeyBase<'t>) -> Result<()> {
-        Ok(())
-    }
-
-    /// Semantic action for non-terminal 'Ident'
-    fn ident(&mut self, _arg: &Ident<'t>) -> Result<()> {
         Ok(())
     }
 
@@ -130,6 +120,11 @@ pub trait GrammarTrait<'t> {
         Ok(())
     }
 
+    /// Semantic action for non-terminal 'Hole'
+    fn hole(&mut self, _arg: &Hole<'t>) -> Result<()> {
+        Ok(())
+    }
+
     /// Semantic action for non-terminal 'StringContinues'
     fn string_continues(&mut self, _arg: &StringContinues<'t>) -> Result<()> {
         Ok(())
@@ -137,6 +132,36 @@ pub trait GrammarTrait<'t> {
 
     /// Semantic action for non-terminal 'String'
     fn string(&mut self, _arg: &String<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'TypedString'
+    fn typed_string(&mut self, _arg: &TypedString<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'Chars'
+    fn chars(&mut self, _arg: &Chars<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'Quote'
+    fn quote(&mut self, _arg: &Quote<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'TypedQuote'
+    fn typed_quote(&mut self, _arg: &TypedQuote<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'Newline'
+    fn newline(&mut self, _arg: &Newline<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'Ws'
+    fn ws(&mut self, _arg: &Ws<'t>) -> Result<()> {
         Ok(())
     }
 
@@ -192,6 +217,16 @@ pub trait GrammarTrait<'t> {
 
     /// Semantic action for non-terminal 'TextStart'
     fn text_start(&mut self, _arg: &TextStart<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'HoleStart'
+    fn hole_start(&mut self, _arg: &HoleStart<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'Ident'
+    fn ident(&mut self, _arg: &Ident<'t>) -> Result<()> {
         Ok(())
     }
 
@@ -260,7 +295,7 @@ impl<'t> ToSpan for BindingsTextBinding<'t> {
 }
 
 ///
-/// Type derived for production 25
+/// Type derived for production 26
 ///
 /// `KeyBase: Ident;`
 ///
@@ -278,7 +313,7 @@ impl<'t> ToSpan for KeyBaseIdent<'t> {
 }
 
 ///
-/// Type derived for production 26
+/// Type derived for production 27
 ///
 /// `KeyBase: ExtensionNameSpace;`
 ///
@@ -296,7 +331,7 @@ impl<'t> ToSpan for KeyBaseExtensionNameSpace<'t> {
 }
 
 ///
-/// Type derived for production 27
+/// Type derived for production 28
 ///
 /// `KeyBase: String;`
 ///
@@ -422,7 +457,43 @@ impl<'t> ToSpan for ValueStringContinues<'t> {
 }
 
 ///
-/// Type derived for production 47
+/// Type derived for production 36
+///
+/// `Value: TypedString;`
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct ValueTypedString<'t> {
+    pub typed_string: TypedString<'t>,
+}
+
+impl<'t> ToSpan for ValueTypedString<'t> {
+    fn span(&self) -> Span {
+        self.typed_string.span()
+    }
+}
+
+///
+/// Type derived for production 37
+///
+/// `Value: Hole;`
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct ValueHole<'t> {
+    pub hole: Hole<'t>,
+}
+
+impl<'t> ToSpan for ValueHole<'t> {
+    fn span(&self) -> Span {
+        self.hole.span()
+    }
+}
+
+///
+/// Type derived for production 49
 ///
 /// `Boolean: True;`
 ///
@@ -440,7 +511,7 @@ impl<'t> ToSpan for BooleanTrue<'t> {
 }
 
 ///
-/// Type derived for production 48
+/// Type derived for production 50
 ///
 /// `Boolean: False;`
 ///
@@ -700,6 +771,22 @@ impl<'t> ToSpan for Boolean<'t> {
 }
 
 ///
+/// Type derived for non-terminal Chars
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct Chars<'t> {
+    pub chars: Token<'t>, /* (\\[nrt\\"0]|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*" */
+}
+
+impl<'t> ToSpan for Chars<'t> {
+    fn span(&self) -> Span {
+        self.chars.span()
+    }
+}
+
+///
 /// Type derived for non-terminal Comma
 ///
 #[allow(dead_code)]
@@ -809,6 +896,39 @@ pub struct False<'t> {
 impl<'t> ToSpan for False<'t> {
     fn span(&self) -> Span {
         self.r#false.span()
+    }
+}
+
+///
+/// Type derived for non-terminal Hole
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct Hole<'t> {
+    pub hole_start: HoleStart<'t>,
+    pub ident: Ident<'t>,
+}
+
+impl<'t> ToSpan for Hole<'t> {
+    fn span(&self) -> Span {
+        self.hole_start.span() + self.ident.span()
+    }
+}
+
+///
+/// Type derived for non-terminal HoleStart
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct HoleStart<'t> {
+    pub hole_start: Token<'t>, /* \! */
+}
+
+impl<'t> ToSpan for HoleStart<'t> {
+    fn span(&self) -> Span {
+        self.hole_start.span()
     }
 }
 
@@ -935,6 +1055,22 @@ impl<'t> ToSpan for KeysList<'t> {
 }
 
 ///
+/// Type derived for non-terminal Newline
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct Newline<'t> {
+    pub newline: Token<'t>, /* \r\n|\r|\n */
+}
+
+impl<'t> ToSpan for Newline<'t> {
+    fn span(&self) -> Span {
+        self.newline.span()
+    }
+}
+
+///
 /// Type derived for non-terminal Null
 ///
 #[allow(dead_code)]
@@ -1019,6 +1155,22 @@ impl<'t> ToSpan for ObjectOpt<'t> {
 }
 
 ///
+/// Type derived for non-terminal Quote
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct Quote<'t> {
+    pub quote: Token<'t>, /* " */
+}
+
+impl<'t> ToSpan for Quote<'t> {
+    fn span(&self) -> Span {
+        self.quote.span()
+    }
+}
+
+///
 /// Type derived for non-terminal Section
 ///
 #[allow(dead_code)]
@@ -1086,12 +1238,14 @@ impl<'t> ToSpan for SectionList<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct String<'t> {
-    pub string: Token<'t>, /* "(\\[nrt\\"0]|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*" */
+    pub quote: Quote<'t>,
+    pub chars: Chars<'t>,
+    pub quote0: Quote<'t>,
 }
 
 impl<'t> ToSpan for String<'t> {
     fn span(&self) -> Span {
-        self.string.span()
+        self.quote.span() + self.chars.span() + self.quote0.span()
     }
 }
 
@@ -1193,22 +1347,6 @@ impl<'t> ToSpan for SwonList0<'t> {
 }
 
 ///
-/// Type derived for non-terminal Text
-///
-#[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
-pub struct Text<'t> {
-    pub text: Token<'t>, /* todo */
-}
-
-impl<'t> ToSpan for Text<'t> {
-    fn span(&self) -> Span {
-        self.text.span()
-    }
-}
-
-///
 /// Type derived for non-terminal TextBinding
 ///
 #[allow(dead_code)]
@@ -1216,12 +1354,34 @@ impl<'t> ToSpan for Text<'t> {
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct TextBinding<'t> {
     pub text_start: TextStart<'t>,
-    pub text: Text<'t>,
+    pub text_binding_opt: Option<TextBindingOpt>,
+    pub chars: Chars<'t>,
+    pub newline: Newline<'t>,
 }
 
 impl<'t> ToSpan for TextBinding<'t> {
     fn span(&self) -> Span {
-        self.text_start.span() + self.text.span()
+        self.text_start.span()
+            + self
+                .text_binding_opt
+                .as_ref()
+                .map_or(Span::default(), |o| o.span())
+            + self.chars.span()
+            + self.newline.span()
+    }
+}
+
+///
+/// Type derived for non-terminal TextBindingOpt
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct TextBindingOpt {}
+
+impl ToSpan for TextBindingOpt {
+    fn span(&self) -> Span {
+        Span::default()
     }
 }
 
@@ -1258,6 +1418,40 @@ impl<'t> ToSpan for True<'t> {
 }
 
 ///
+/// Type derived for non-terminal TypedQuote
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct TypedQuote<'t> {
+    pub typed_quote: Token<'t>, /* \p{XID_Start}\p{XID_Continue}*" */
+}
+
+impl<'t> ToSpan for TypedQuote<'t> {
+    fn span(&self) -> Span {
+        self.typed_quote.span()
+    }
+}
+
+///
+/// Type derived for non-terminal TypedString
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct TypedString<'t> {
+    pub typed_quote: TypedQuote<'t>,
+    pub chars: Chars<'t>,
+    pub quote: Quote<'t>,
+}
+
+impl<'t> ToSpan for TypedString<'t> {
+    fn span(&self) -> Span {
+        self.typed_quote.span() + self.chars.span() + self.quote.span()
+    }
+}
+
+///
 /// Type derived for non-terminal Value
 ///
 #[allow(dead_code)]
@@ -1269,6 +1463,8 @@ pub enum Value<'t> {
     Boolean(ValueBoolean<'t>),
     Null(ValueNull<'t>),
     StringContinues(ValueStringContinues<'t>),
+    TypedString(ValueTypedString<'t>),
+    Hole(ValueHole<'t>),
 }
 
 impl<'t> ToSpan for Value<'t> {
@@ -1280,6 +1476,8 @@ impl<'t> ToSpan for Value<'t> {
             Value::Boolean(v) => v.span(),
             Value::Null(v) => v.span(),
             Value::StringContinues(v) => v.span(),
+            Value::TypedString(v) => v.span(),
+            Value::Hole(v) => v.span(),
         }
     }
 }
@@ -1298,6 +1496,22 @@ pub struct ValueBinding<'t> {
 impl<'t> ToSpan for ValueBinding<'t> {
     fn span(&self) -> Span {
         self.bind.span() + self.value.span()
+    }
+}
+
+///
+/// Type derived for non-terminal Ws
+///
+#[allow(dead_code)]
+#[derive(Builder, Debug, Clone)]
+#[builder(crate = "parol_runtime::derive_builder")]
+pub struct Ws<'t> {
+    pub ws: Token<'t>, /* [\s--\r\n]+ */
+}
+
+impl<'t> ToSpan for Ws<'t> {
+    fn span(&self) -> Span {
+        self.ws.span()
     }
 }
 
@@ -1322,6 +1536,7 @@ pub enum ASTType<'t> {
     Binding(Binding<'t>),
     Bindings(Bindings<'t>),
     Boolean(Boolean<'t>),
+    Chars(Chars<'t>),
     Comma(Comma<'t>),
     Continue(Continue<'t>),
     Dot(Dot<'t>),
@@ -1329,6 +1544,8 @@ pub enum ASTType<'t> {
     Ext(Ext<'t>),
     ExtensionNameSpace(ExtensionNameSpace<'t>),
     False(False<'t>),
+    Hole(Hole<'t>),
+    HoleStart(HoleStart<'t>),
     Ident(Ident<'t>),
     Integer(Integer<'t>),
     Key(Key<'t>),
@@ -1336,10 +1553,12 @@ pub enum ASTType<'t> {
     KeyOpt(Option<KeyOpt<'t>>),
     Keys(Keys<'t>),
     KeysList(Vec<KeysList<'t>>),
+    Newline(Newline<'t>),
     Null(Null<'t>),
     Object(Object<'t>),
     ObjectList(Vec<ObjectList<'t>>),
     ObjectOpt(Option<ObjectOpt<'t>>),
+    Quote(Quote<'t>),
     Section(Section<'t>),
     SectionBinding(SectionBinding<'t>),
     SectionList(Vec<SectionList<'t>>),
@@ -1349,12 +1568,15 @@ pub enum ASTType<'t> {
     Swon(Swon<'t>),
     SwonList(Vec<SwonList<'t>>),
     SwonList0(Vec<SwonList0<'t>>),
-    Text(Text<'t>),
     TextBinding(TextBinding<'t>),
+    TextBindingOpt(Option<TextBindingOpt>),
     TextStart(TextStart<'t>),
     True(True<'t>),
+    TypedQuote(TypedQuote<'t>),
+    TypedString(TypedString<'t>),
     Value(Value<'t>),
     ValueBinding(ValueBinding<'t>),
+    Ws(Ws<'t>),
 }
 impl<'t> ToSpan for ASTType<'t> {
     fn span(&self) -> Span {
@@ -1375,6 +1597,7 @@ impl<'t> ToSpan for ASTType<'t> {
             ASTType::Binding(v) => v.span(),
             ASTType::Bindings(v) => v.span(),
             ASTType::Boolean(v) => v.span(),
+            ASTType::Chars(v) => v.span(),
             ASTType::Comma(v) => v.span(),
             ASTType::Continue(v) => v.span(),
             ASTType::Dot(v) => v.span(),
@@ -1382,6 +1605,8 @@ impl<'t> ToSpan for ASTType<'t> {
             ASTType::Ext(v) => v.span(),
             ASTType::ExtensionNameSpace(v) => v.span(),
             ASTType::False(v) => v.span(),
+            ASTType::Hole(v) => v.span(),
+            ASTType::HoleStart(v) => v.span(),
             ASTType::Ident(v) => v.span(),
             ASTType::Integer(v) => v.span(),
             ASTType::Key(v) => v.span(),
@@ -1392,6 +1617,7 @@ impl<'t> ToSpan for ASTType<'t> {
                 v.first().map_or(Span::default(), |f| f.span())
                     + v.last().map_or(Span::default(), |l| l.span())
             }
+            ASTType::Newline(v) => v.span(),
             ASTType::Null(v) => v.span(),
             ASTType::Object(v) => v.span(),
             ASTType::ObjectList(v) => {
@@ -1399,6 +1625,7 @@ impl<'t> ToSpan for ASTType<'t> {
                     + v.last().map_or(Span::default(), |l| l.span())
             }
             ASTType::ObjectOpt(o) => o.as_ref().map_or(Span::default(), |o| o.span()),
+            ASTType::Quote(v) => v.span(),
             ASTType::Section(v) => v.span(),
             ASTType::SectionBinding(v) => v.span(),
             ASTType::SectionList(v) => {
@@ -1420,12 +1647,15 @@ impl<'t> ToSpan for ASTType<'t> {
                 v.first().map_or(Span::default(), |f| f.span())
                     + v.last().map_or(Span::default(), |l| l.span())
             }
-            ASTType::Text(v) => v.span(),
             ASTType::TextBinding(v) => v.span(),
+            ASTType::TextBindingOpt(o) => o.as_ref().map_or(Span::default(), |o| o.span()),
             ASTType::TextStart(v) => v.span(),
             ASTType::True(v) => v.span(),
+            ASTType::TypedQuote(v) => v.span(),
+            ASTType::TypedString(v) => v.span(),
             ASTType::Value(v) => v.span(),
             ASTType::ValueBinding(v) => v.span(),
+            ASTType::Ws(v) => v.span(),
         }
     }
 }
@@ -1695,19 +1925,28 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 11:
     ///
-    /// `TextBinding: TextStart Text;`
+    /// `TextBinding: TextStart TextBindingOpt /* Option */ Chars Newline;`
     ///
     #[parol_runtime::function_name::named]
     fn text_binding(
         &mut self,
         _text_start: &ParseTreeType<'t>,
-        _text: &ParseTreeType<'t>,
+        _text_binding_opt: &ParseTreeType<'t>,
+        _chars: &ParseTreeType<'t>,
+        _newline: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let text = pop_item!(self, text, Text, context);
+        let newline = pop_item!(self, newline, Newline, context);
+        let chars = pop_item!(self, chars, Chars, context);
+        let text_binding_opt = pop_item!(self, text_binding_opt, TextBindingOpt, context);
         let text_start = pop_item!(self, text_start, TextStart, context);
-        let text_binding_built = TextBinding { text_start, text };
+        let text_binding_built = TextBinding {
+            text_start,
+            text_binding_opt,
+            chars,
+            newline,
+        };
         // Calling user action here
         self.user_grammar.text_binding(&text_binding_built)?;
         self.push(ASTType::TextBinding(text_binding_built), context);
@@ -1716,21 +1955,34 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 12:
     ///
-    /// `Text: /todo/;`
+    /// `TextBindingOpt /* Option<T>::Some */: Ws^ /* Clipped */;`
     ///
     #[parol_runtime::function_name::named]
-    fn text(&mut self, text: &ParseTreeType<'t>) -> Result<()> {
+    fn text_binding_opt_0(&mut self, _ws: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let text = text.token()?.clone();
-        let text_built = Text { text };
-        // Calling user action here
-        self.user_grammar.text(&text_built)?;
-        self.push(ASTType::Text(text_built), context);
+        self.pop(context);
+        let text_binding_opt_0_built = TextBindingOpt {};
+        self.push(
+            ASTType::TextBindingOpt(Some(text_binding_opt_0_built)),
+            context,
+        );
         Ok(())
     }
 
     /// Semantic action for production 13:
+    ///
+    /// `TextBindingOpt /* Option<T>::None */: ;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn text_binding_opt_1(&mut self) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        self.push(ASTType::TextBindingOpt(None), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 14:
     ///
     /// `Section: At Keys SectionList /* Vec */;`
     ///
@@ -1757,7 +2009,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 14:
+    /// Semantic action for production 15:
     ///
     /// `SectionList /* Vec<T>::Push */: Binding SectionList;`
     ///
@@ -1778,7 +2030,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 15:
+    /// Semantic action for production 16:
     ///
     /// `SectionList /* Vec<T>::New */: ;`
     ///
@@ -1791,7 +2043,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 16:
+    /// Semantic action for production 17:
     ///
     /// `Keys: Key KeysList /* Vec */;`
     ///
@@ -1808,7 +2060,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 17:
+    /// Semantic action for production 18:
     ///
     /// `KeysList /* Vec<T>::Push */: Dot Key KeysList;`
     ///
@@ -1831,7 +2083,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 18:
+    /// Semantic action for production 19:
     ///
     /// `KeysList /* Vec<T>::New */: ;`
     ///
@@ -1844,7 +2096,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 19:
+    /// Semantic action for production 20:
     ///
     /// `Key: KeyBase KeyOpt /* Option */;`
     ///
@@ -1861,7 +2113,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 20:
+    /// Semantic action for production 21:
     ///
     /// `KeyOpt /* Option<T>::Some */: ArrayMarker;`
     ///
@@ -1875,7 +2127,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 21:
+    /// Semantic action for production 22:
     ///
     /// `KeyOpt /* Option<T>::None */: ;`
     ///
@@ -1887,7 +2139,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 22:
+    /// Semantic action for production 23:
     ///
     /// `ArrayMarker: ArrayBegin ArrayMarkerOpt /* Option */ ArrayEnd;`
     ///
@@ -1914,7 +2166,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 23:
+    /// Semantic action for production 24:
     ///
     /// `ArrayMarkerOpt /* Option<T>::Some */: Integer;`
     ///
@@ -1931,7 +2183,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 24:
+    /// Semantic action for production 25:
     ///
     /// `ArrayMarkerOpt /* Option<T>::None */: ;`
     ///
@@ -1943,7 +2195,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 25:
+    /// Semantic action for production 26:
     ///
     /// `KeyBase: Ident;`
     ///
@@ -1960,7 +2212,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 26:
+    /// Semantic action for production 27:
     ///
     /// `KeyBase: ExtensionNameSpace;`
     ///
@@ -1980,7 +2232,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 27:
+    /// Semantic action for production 28:
     ///
     /// `KeyBase: String;`
     ///
@@ -1994,22 +2246,6 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         // Calling user action here
         self.user_grammar.key_base(&key_base_2_built)?;
         self.push(ASTType::KeyBase(key_base_2_built), context);
-        Ok(())
-    }
-
-    /// Semantic action for production 28:
-    ///
-    /// `Ident: /\p{XID_Start}\p{XID_Continue}*/;`
-    ///
-    #[parol_runtime::function_name::named]
-    fn ident(&mut self, ident: &ParseTreeType<'t>) -> Result<()> {
-        let context = function_name!();
-        trace!("{}", self.trace_item_stack(context));
-        let ident = ident.token()?.clone();
-        let ident_built = Ident { ident };
-        // Calling user action here
-        self.user_grammar.ident(&ident_built)?;
-        self.push(ASTType::Ident(ident_built), context);
         Ok(())
     }
 
@@ -2142,6 +2378,40 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 36:
     ///
+    /// `Value: TypedString;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn value_6(&mut self, _typed_string: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let typed_string = pop_item!(self, typed_string, TypedString, context);
+        let value_6_built = ValueTypedString { typed_string };
+        let value_6_built = Value::TypedString(value_6_built);
+        // Calling user action here
+        self.user_grammar.value(&value_6_built)?;
+        self.push(ASTType::Value(value_6_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 37:
+    ///
+    /// `Value: Hole;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn value_7(&mut self, _hole: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let hole = pop_item!(self, hole, Hole, context);
+        let value_7_built = ValueHole { hole };
+        let value_7_built = Value::Hole(value_7_built);
+        // Calling user action here
+        self.user_grammar.value(&value_7_built)?;
+        self.push(ASTType::Value(value_7_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 38:
+    ///
     /// `Object: Begin ObjectList /* Vec */ End;`
     ///
     #[parol_runtime::function_name::named]
@@ -2167,7 +2437,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 37:
+    /// Semantic action for production 39:
     ///
     /// `ObjectList /* Vec<T>::Push */: Key Bind Value ObjectOpt /* Option */ ObjectList;`
     ///
@@ -2199,7 +2469,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 38:
+    /// Semantic action for production 40:
     ///
     /// `ObjectList /* Vec<T>::New */: ;`
     ///
@@ -2212,7 +2482,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 39:
+    /// Semantic action for production 41:
     ///
     /// `ObjectOpt /* Option<T>::Some */: Comma;`
     ///
@@ -2226,7 +2496,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 40:
+    /// Semantic action for production 42:
     ///
     /// `ObjectOpt /* Option<T>::None */: ;`
     ///
@@ -2238,7 +2508,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 41:
+    /// Semantic action for production 43:
     ///
     /// `Array: ArrayBegin ArrayList /* Vec */ ArrayEnd;`
     ///
@@ -2265,7 +2535,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 42:
+    /// Semantic action for production 44:
     ///
     /// `ArrayList /* Vec<T>::Push */: Value ArrayOpt /* Option */ ArrayList;`
     ///
@@ -2288,7 +2558,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 43:
+    /// Semantic action for production 45:
     ///
     /// `ArrayList /* Vec<T>::New */: ;`
     ///
@@ -2301,7 +2571,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 44:
+    /// Semantic action for production 46:
     ///
     /// `ArrayOpt /* Option<T>::Some */: Comma;`
     ///
@@ -2315,7 +2585,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 45:
+    /// Semantic action for production 47:
     ///
     /// `ArrayOpt /* Option<T>::None */: ;`
     ///
@@ -2327,7 +2597,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 46:
+    /// Semantic action for production 48:
     ///
     /// `Integer: /\d[\d_]*/;`
     ///
@@ -2343,7 +2613,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 47:
+    /// Semantic action for production 49:
     ///
     /// `Boolean: True;`
     ///
@@ -2360,7 +2630,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 48:
+    /// Semantic action for production 50:
     ///
     /// `Boolean: False;`
     ///
@@ -2377,7 +2647,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 49:
+    /// Semantic action for production 51:
     ///
     /// `True: 'true';`
     ///
@@ -2393,7 +2663,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 50:
+    /// Semantic action for production 52:
     ///
     /// `False: 'false';`
     ///
@@ -2409,7 +2679,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 51:
+    /// Semantic action for production 53:
     ///
     /// `Null: 'null';`
     ///
@@ -2425,7 +2695,24 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 52:
+    /// Semantic action for production 54:
+    ///
+    /// `Hole: HoleStart Ident;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn hole(&mut self, _hole_start: &ParseTreeType<'t>, _ident: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let ident = pop_item!(self, ident, Ident, context);
+        let hole_start = pop_item!(self, hole_start, HoleStart, context);
+        let hole_built = Hole { hole_start, ident };
+        // Calling user action here
+        self.user_grammar.hole(&hole_built)?;
+        self.push(ASTType::Hole(hole_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 55:
     ///
     /// `StringContinues: String StringContinuesList /* Vec */;`
     ///
@@ -2451,7 +2738,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 53:
+    /// Semantic action for production 56:
     ///
     /// `StringContinuesList /* Vec<T>::Push */: Continue String StringContinuesList;`
     ///
@@ -2475,7 +2762,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 54:
+    /// Semantic action for production 57:
     ///
     /// `StringContinuesList /* Vec<T>::New */: ;`
     ///
@@ -2491,23 +2778,141 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 55:
+    /// Semantic action for production 58:
     ///
-    /// `String: /"(\\[nrt\\"0]|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"/;`
+    /// `String: Quote Chars Quote;`
     ///
     #[parol_runtime::function_name::named]
-    fn string(&mut self, string: &ParseTreeType<'t>) -> Result<()> {
+    fn string(
+        &mut self,
+        _quote: &ParseTreeType<'t>,
+        _chars: &ParseTreeType<'t>,
+        _quote0: &ParseTreeType<'t>,
+    ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let string = string.token()?.clone();
-        let string_built = String { string };
+        let quote0 = pop_item!(self, quote0, Quote, context);
+        let chars = pop_item!(self, chars, Chars, context);
+        let quote = pop_item!(self, quote, Quote, context);
+        let string_built = String {
+            quote,
+            chars,
+            quote0,
+        };
         // Calling user action here
         self.user_grammar.string(&string_built)?;
         self.push(ASTType::String(string_built), context);
         Ok(())
     }
 
-    /// Semantic action for production 56:
+    /// Semantic action for production 59:
+    ///
+    /// `TypedString: TypedQuote Chars Quote;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn typed_string(
+        &mut self,
+        _typed_quote: &ParseTreeType<'t>,
+        _chars: &ParseTreeType<'t>,
+        _quote: &ParseTreeType<'t>,
+    ) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let quote = pop_item!(self, quote, Quote, context);
+        let chars = pop_item!(self, chars, Chars, context);
+        let typed_quote = pop_item!(self, typed_quote, TypedQuote, context);
+        let typed_string_built = TypedString {
+            typed_quote,
+            chars,
+            quote,
+        };
+        // Calling user action here
+        self.user_grammar.typed_string(&typed_string_built)?;
+        self.push(ASTType::TypedString(typed_string_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 60:
+    ///
+    /// `Chars: /(\\[nrt\\"0]|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"/;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn chars(&mut self, chars: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let chars = chars.token()?.clone();
+        let chars_built = Chars { chars };
+        // Calling user action here
+        self.user_grammar.chars(&chars_built)?;
+        self.push(ASTType::Chars(chars_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 61:
+    ///
+    /// `Quote: <INITIAL, String>'"';`
+    ///
+    #[parol_runtime::function_name::named]
+    fn quote(&mut self, quote: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let quote = quote.token()?.clone();
+        let quote_built = Quote { quote };
+        // Calling user action here
+        self.user_grammar.quote(&quote_built)?;
+        self.push(ASTType::Quote(quote_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 62:
+    ///
+    /// `TypedQuote: <INITIAL, String>/\p{XID_Start}\p{XID_Continue}*"/;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn typed_quote(&mut self, typed_quote: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let typed_quote = typed_quote.token()?.clone();
+        let typed_quote_built = TypedQuote { typed_quote };
+        // Calling user action here
+        self.user_grammar.typed_quote(&typed_quote_built)?;
+        self.push(ASTType::TypedQuote(typed_quote_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 63:
+    ///
+    /// `Newline: <String>/\r\n|\r|\n/;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn newline(&mut self, newline: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let newline = newline.token()?.clone();
+        let newline_built = Newline { newline };
+        // Calling user action here
+        self.user_grammar.newline(&newline_built)?;
+        self.push(ASTType::Newline(newline_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 64:
+    ///
+    /// `Ws: <String>/[\s--\r\n]+/;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn ws(&mut self, ws: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let ws = ws.token()?.clone();
+        let ws_built = Ws { ws };
+        // Calling user action here
+        self.user_grammar.ws(&ws_built)?;
+        self.push(ASTType::Ws(ws_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 65:
     ///
     /// `At: '@';`
     ///
@@ -2523,7 +2928,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 57:
+    /// Semantic action for production 66:
     ///
     /// `Ext: '$';`
     ///
@@ -2539,7 +2944,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 58:
+    /// Semantic action for production 67:
     ///
     /// `Dot: '.';`
     ///
@@ -2555,7 +2960,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 59:
+    /// Semantic action for production 68:
     ///
     /// `Begin: '{';`
     ///
@@ -2571,7 +2976,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 60:
+    /// Semantic action for production 69:
     ///
     /// `End: '}';`
     ///
@@ -2587,7 +2992,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 61:
+    /// Semantic action for production 70:
     ///
     /// `ArrayBegin: '[';`
     ///
@@ -2603,7 +3008,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 62:
+    /// Semantic action for production 71:
     ///
     /// `ArrayEnd: ']';`
     ///
@@ -2619,7 +3024,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 63:
+    /// Semantic action for production 72:
     ///
     /// `Bind: '=';`
     ///
@@ -2635,7 +3040,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 64:
+    /// Semantic action for production 73:
     ///
     /// `Comma: ',';`
     ///
@@ -2651,7 +3056,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 65:
+    /// Semantic action for production 74:
     ///
     /// `Continue: '\\';`
     ///
@@ -2667,7 +3072,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 66:
+    /// Semantic action for production 75:
     ///
     /// `TextStart: ":";`
     ///
@@ -2680,6 +3085,38 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         // Calling user action here
         self.user_grammar.text_start(&text_start_built)?;
         self.push(ASTType::TextStart(text_start_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 76:
+    ///
+    /// `HoleStart: "\!";`
+    ///
+    #[parol_runtime::function_name::named]
+    fn hole_start(&mut self, hole_start: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let hole_start = hole_start.token()?.clone();
+        let hole_start_built = HoleStart { hole_start };
+        // Calling user action here
+        self.user_grammar.hole_start(&hole_start_built)?;
+        self.push(ASTType::HoleStart(hole_start_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 77:
+    ///
+    /// `Ident: /\p{XID_Start}\p{XID_Continue}*/;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn ident(&mut self, ident: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let ident = ident.token()?.clone();
+        let ident_built = Ident { ident };
+        // Calling user action here
+        self.user_grammar.ident(&ident_built)?;
+        self.push(ASTType::Ident(ident_built), context);
         Ok(())
     }
 }
@@ -2705,24 +3142,24 @@ impl<'t> UserActionsTrait<'t> for GrammarAuto<'t, '_> {
             8 => self.bindings_2(&children[0]),
             9 => self.value_binding(&children[0], &children[1]),
             10 => self.section_binding(&children[0], &children[1], &children[2]),
-            11 => self.text_binding(&children[0], &children[1]),
-            12 => self.text(&children[0]),
-            13 => self.section(&children[0], &children[1], &children[2]),
-            14 => self.section_list_0(&children[0], &children[1]),
-            15 => self.section_list_1(),
-            16 => self.keys(&children[0], &children[1]),
-            17 => self.keys_list_0(&children[0], &children[1], &children[2]),
-            18 => self.keys_list_1(),
-            19 => self.key(&children[0], &children[1]),
-            20 => self.key_opt_0(&children[0]),
-            21 => self.key_opt_1(),
-            22 => self.array_marker(&children[0], &children[1], &children[2]),
-            23 => self.array_marker_opt_0(&children[0]),
-            24 => self.array_marker_opt_1(),
-            25 => self.key_base_0(&children[0]),
-            26 => self.key_base_1(&children[0]),
-            27 => self.key_base_2(&children[0]),
-            28 => self.ident(&children[0]),
+            11 => self.text_binding(&children[0], &children[1], &children[2], &children[3]),
+            12 => self.text_binding_opt_0(&children[0]),
+            13 => self.text_binding_opt_1(),
+            14 => self.section(&children[0], &children[1], &children[2]),
+            15 => self.section_list_0(&children[0], &children[1]),
+            16 => self.section_list_1(),
+            17 => self.keys(&children[0], &children[1]),
+            18 => self.keys_list_0(&children[0], &children[1], &children[2]),
+            19 => self.keys_list_1(),
+            20 => self.key(&children[0], &children[1]),
+            21 => self.key_opt_0(&children[0]),
+            22 => self.key_opt_1(),
+            23 => self.array_marker(&children[0], &children[1], &children[2]),
+            24 => self.array_marker_opt_0(&children[0]),
+            25 => self.array_marker_opt_1(),
+            26 => self.key_base_0(&children[0]),
+            27 => self.key_base_1(&children[0]),
+            28 => self.key_base_2(&children[0]),
             29 => self.extension_name_space(&children[0], &children[1]),
             30 => self.value_0(&children[0]),
             31 => self.value_1(&children[0]),
@@ -2730,43 +3167,54 @@ impl<'t> UserActionsTrait<'t> for GrammarAuto<'t, '_> {
             33 => self.value_3(&children[0]),
             34 => self.value_4(&children[0]),
             35 => self.value_5(&children[0]),
-            36 => self.object(&children[0], &children[1], &children[2]),
-            37 => self.object_list_0(
+            36 => self.value_6(&children[0]),
+            37 => self.value_7(&children[0]),
+            38 => self.object(&children[0], &children[1], &children[2]),
+            39 => self.object_list_0(
                 &children[0],
                 &children[1],
                 &children[2],
                 &children[3],
                 &children[4],
             ),
-            38 => self.object_list_1(),
-            39 => self.object_opt_0(&children[0]),
-            40 => self.object_opt_1(),
-            41 => self.array(&children[0], &children[1], &children[2]),
-            42 => self.array_list_0(&children[0], &children[1], &children[2]),
-            43 => self.array_list_1(),
-            44 => self.array_opt_0(&children[0]),
-            45 => self.array_opt_1(),
-            46 => self.integer(&children[0]),
-            47 => self.boolean_0(&children[0]),
-            48 => self.boolean_1(&children[0]),
-            49 => self.r#true(&children[0]),
-            50 => self.r#false(&children[0]),
-            51 => self.null(&children[0]),
-            52 => self.string_continues(&children[0], &children[1]),
-            53 => self.string_continues_list_0(&children[0], &children[1], &children[2]),
-            54 => self.string_continues_list_1(),
-            55 => self.string(&children[0]),
-            56 => self.at(&children[0]),
-            57 => self.ext(&children[0]),
-            58 => self.dot(&children[0]),
-            59 => self.begin(&children[0]),
-            60 => self.end(&children[0]),
-            61 => self.array_begin(&children[0]),
-            62 => self.array_end(&children[0]),
-            63 => self.bind(&children[0]),
-            64 => self.comma(&children[0]),
-            65 => self.r#continue(&children[0]),
-            66 => self.text_start(&children[0]),
+            40 => self.object_list_1(),
+            41 => self.object_opt_0(&children[0]),
+            42 => self.object_opt_1(),
+            43 => self.array(&children[0], &children[1], &children[2]),
+            44 => self.array_list_0(&children[0], &children[1], &children[2]),
+            45 => self.array_list_1(),
+            46 => self.array_opt_0(&children[0]),
+            47 => self.array_opt_1(),
+            48 => self.integer(&children[0]),
+            49 => self.boolean_0(&children[0]),
+            50 => self.boolean_1(&children[0]),
+            51 => self.r#true(&children[0]),
+            52 => self.r#false(&children[0]),
+            53 => self.null(&children[0]),
+            54 => self.hole(&children[0], &children[1]),
+            55 => self.string_continues(&children[0], &children[1]),
+            56 => self.string_continues_list_0(&children[0], &children[1], &children[2]),
+            57 => self.string_continues_list_1(),
+            58 => self.string(&children[0], &children[1], &children[2]),
+            59 => self.typed_string(&children[0], &children[1], &children[2]),
+            60 => self.chars(&children[0]),
+            61 => self.quote(&children[0]),
+            62 => self.typed_quote(&children[0]),
+            63 => self.newline(&children[0]),
+            64 => self.ws(&children[0]),
+            65 => self.at(&children[0]),
+            66 => self.ext(&children[0]),
+            67 => self.dot(&children[0]),
+            68 => self.begin(&children[0]),
+            69 => self.end(&children[0]),
+            70 => self.array_begin(&children[0]),
+            71 => self.array_end(&children[0]),
+            72 => self.bind(&children[0]),
+            73 => self.comma(&children[0]),
+            74 => self.r#continue(&children[0]),
+            75 => self.text_start(&children[0]),
+            76 => self.hole_start(&children[0]),
+            77 => self.ident(&children[0]),
             _ => Err(ParserError::InternalError(format!(
                 "Unhandled production number: {}",
                 prod_num

@@ -3,6 +3,14 @@
 %grammar_type 'LL(k)'
 %line_comment "#"
 
+%on Quote, TypedQuote, TextStart %enter String
+
+%scanner String {
+  %auto_newline_off
+  %auto_ws_off
+  %on Quote, Newline %enter INITIAL
+}
+
 %%
 
 Swon: { Binding } { Section } ;
@@ -11,19 +19,17 @@ Binding: Keys Bindings ;
   Bindings: ValueBinding | SectionBinding | TextBinding ;
   ValueBinding: Bind Value ;
   SectionBinding: Begin Swon End ;
-  TextBinding: TextStart Text ;
-  Text: /todo/ ;
+  TextBinding: TextStart [Ws^] Chars Newline ;
 
 Section: At Keys { Binding } ;
   Keys: Key { Dot Key } ;
   Key: KeyBase [ ArrayMarker ] ;
   ArrayMarker: ArrayBegin [ Integer ] ArrayEnd ;
   KeyBase: Ident | ExtensionNameSpace | String ;
-  Ident: /\p{XID_Start}\p{XID_Continue}*/ ;
   // extension name must always be valid ident, not quoted ident
   ExtensionNameSpace: Ext Ident ;
 
-Value: Object | Array | Integer | Boolean | Null | StringContinues ;
+Value: Object | Array | Integer | Boolean | Null | StringContinues | TypedString | Hole ;
   Object: Begin { Key Bind Value [ Comma ] } End ;
   Array: ArrayBegin { Value [ Comma ] } ArrayEnd ;
   Integer: /\d[\d_]*/ ;
@@ -31,11 +37,17 @@ Value: Object | Array | Integer | Boolean | Null | StringContinues ;
   True: 'true' ;
   False: 'false';
   Null: 'null' ;
+  Hole: HoleStart Ident ;
 
 StringContinues: String { Continue String } ;
-String: /"(\\[nrt\\"0]|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"/;
+String: Quote Chars Quote ;
+TypedString: TypedQuote Chars Quote ;
+Chars: /(\\[nrt\\"0]|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"/;
+Quote: <INITIAL, String>'"' ;
+TypedQuote: <INITIAL, String>/\p{XID_Start}\p{XID_Continue}*"/ ;
 
-// Newline: /\r\n|\r|\n/ ;
+Newline: <String>/\r\n|\r|\n/ ;
+Ws: <String>/[\s--\r\n]+/ ;
 At: '@' ;
 Ext: '$' ;
 Dot: '.' ;
@@ -47,3 +59,5 @@ Bind: '=' ;
 Comma: ',' ;
 Continue: '\\' ;
 TextStart: ":" ;
+HoleStart: "\!" ;
+Ident: /\p{XID_Start}\p{XID_Continue}*/ ;
