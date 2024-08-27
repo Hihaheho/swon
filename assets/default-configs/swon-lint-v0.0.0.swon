@@ -1,7 +1,3 @@
-@ lint.ref-in-normal-swon-file
-rule = "deny"
-reason = "$ref is error-prone, not reader friendly, and not maintainable."
-
 @ lint.multi-level-array-flatten
 rule = "deny"
 reason = "Multi-level array flattening reduces readability and maintainability."

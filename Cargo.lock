@@ -876,6 +876,10 @@ name = "swon"
 version = "0.1.0"
 
 [[package]]
+name = "swon-cli"
+version = "0.1.0"
+
+[[package]]
 name = "swon-dev"
 version = "0.1.0"
 

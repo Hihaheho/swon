@@ -8,9 +8,9 @@ Extensions should be placed before any other bindings.
 ```swon
 @ $swon
 # version of the SWON specification
-version = "https://swon.dev/v1"
+version: https://swon.dev/v1
 # schema of this SWON file
-schema.$ref-https = "https://swon.dev/schemas/swon-schema/v1"
+schema: https://swon.dev/schemas/swon-schema/v1
 ```
 
 - `$swon-lint.config = "https://swon.dev/default-configs/swon-lint/v1"`
@@ -27,16 +27,3 @@ Since JSON doesn't support variants, the schema must be specify which way to con
 `$local is a namespace should be used for generic in-document local data store.
 
 Any object can have this extension.
-
-## $ref-*
-
-Inline the data into the extension's parent object from the following sources.
-
-- `$ref-https` SWON file over HTTPS.
-- `$ref-file` local file.
-- `$ref-git = { repo = "https://github.com/swon-dev/swon.git", path = "path/to/file", branch = "main" }` Git repository. `branch`, `tag`, `rev` are available.
-- `$ref.path.to.key` reference the data from the path
-
-Limitations:
-
-- You cannot ref any sub-object in the source data.
