@@ -48,6 +48,19 @@ scene: scenes/room_a.scn.ron
 }
 ```
 
+## TODO
+
+- [ ] swon-parol: Complete the grammar and parser
+- [ ] swon-ls: Syntax highlighting
+- [ ] swon-schema: SWON Schema specification
+- [ ] swon-ls: Schema validation
+- [ ] serde-swon: Serde support
+- [ ] swon-dev: Making the landing page on <https://swon.dev>
+- [ ] swon-fmt: Make the formatter
+- [ ] swon-cli: sub command to convert SWON to other formats
+- [ ] swon-lint: Some lint rules
+- [ ] swon-template: Templating extension for SWON files
+
 ## Credits
 
 - [Parol](https://github.com/jsinger67/parol) for the parser generator
