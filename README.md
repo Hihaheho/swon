@@ -56,3 +56,4 @@ scene: scenes/room_a.scn.ron
 - [Serde](https://serde.rs/) for the data model and attributes (especially about enum representation)
 - [JSON Schema](https://json-schema.org) for the idea of describing schema in the same language as the data
 - [Helm](https://helm.sh) for the idea of templating
+- [YAML](https://yaml.org) for easy nesting and the `:` syntax
