@@ -12,6 +12,42 @@
 - Dedicated templating language
 - Programmatically editable
 
+## Example
+
+```swon
+$swon.version: https://swon.dev/versions/v0.1.0
+title: test
+language: en
+target_window: Main
+
+@ actions[]
+$variant: use-script
+script-id: title
+
+@ actions[]
+$variant: sleep
+seconds = 2.0
+
+@ actions[]
+$variant: set-base-background-image
+image: images/backgrounds/blank.png
+
+@ actions[]
+$variant: set-scene
+scene: scenes/room_a.scn.ron
+
+@ actions[] {
+  $variant: set-text
+
+  @ pages[]
+  text: Hi,
+
+  @ pages[]
+  speaker: Ryo
+  text: I'm Ryo.
+}
+```
+
 ## Credits
 
 - [Parol](https://github.com/jsinger67/parol) for the parser generator
