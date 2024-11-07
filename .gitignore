@@ -12,3 +12,5 @@
 !Cargo.lock
 
 !crates/swon-parol/swon.par
+
+!example.swon

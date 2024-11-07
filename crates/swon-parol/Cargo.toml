@@ -5,3 +5,6 @@ edition = "2021"
 
 [dependencies]
 parol_runtime.workspace = true
+
+[dev-dependencies]
+syntree_layout = "0.3"

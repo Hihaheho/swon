@@ -263,18 +263,18 @@ dependencies = [
 
 [[package]]
 name = "derive_builder"
-version = "0.20.0"
+version = "0.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0350b5cb0331628a5916d6c5c0b72e97393b8b6b03b47a9284f4e7f5a405ffd7"
+checksum = "cd33f37ee6a119146a1781d3356a7c26028f83d779b2e04ecd45fdc75c76877b"
 dependencies = [
  "derive_builder_macro",
 ]
 
 [[package]]
 name = "derive_builder_core"
-version = "0.20.0"
+version = "0.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d48cda787f839151732d396ac69e3473923d54312c070ee21e9effcaa8ca0b1d"
+checksum = "7431fa049613920234f22c47fdc33e6cf3ee83067091ea4277a3f8c4587aae38"
 dependencies = [
  "darling",
  "proc-macro2",
@@ -284,9 +284,9 @@ dependencies = [
 
 [[package]]
 name = "derive_builder_macro"
-version = "0.20.0"
+version = "0.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "206868b8242f27cecce124c19fd88157fbd0dd334df2587f36417bafbc85097b"
+checksum = "4abae7035bf79b9877b779505d8cf3749285b80c43941eda66604841889451dc"
 dependencies = [
  "derive_builder_core",
  "syn",
@@ -544,8 +544,9 @@ checksum = "caff54706df99d2a78a5a4e3455ff45448d81ef1bb63c22cd14052ca0e993a3f"
 
 [[package]]
 name = "parol"
-version = "0.31.0"
-source = "git+https://github.com/ryo33/parol.git?rev=090d08e22b9519d65ff9a5ce29d84b52ea678976#090d08e22b9519d65ff9a5ce29d84b52ea678976"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "06d0899eb76dd338d29a1f4137ebf30aa7906bd8899b0a0ab3ecd9c5c311ebec"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -559,8 +560,8 @@ dependencies = [
  "lalry",
  "num_cpus",
  "owo-colors",
- "parol-macros 0.2.0 (git+https://github.com/ryo33/parol.git?rev=090d08e22b9519d65ff9a5ce29d84b52ea678976)",
- "parol_runtime 0.24.1 (git+https://github.com/ryo33/parol.git?rev=090d08e22b9519d65ff9a5ce29d84b52ea678976)",
+ "parol-macros",
+ "parol_runtime",
  "petgraph",
  "rand",
  "rand_regex",
@@ -570,8 +571,8 @@ dependencies = [
  "serde",
  "serde_json",
  "syn",
- "syntree",
- "syntree_layout",
+ "syntree 0.14.5",
+ "syntree_layout 0.2.0",
  "tempfile",
  "thiserror",
  "ts-rs",
@@ -580,20 +581,15 @@ dependencies = [
 
 [[package]]
 name = "parol-macros"
-version = "0.2.0"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bdd646301a99589f85ed580e3807ee2f7aa6529b900fd703f5a14716b7426b28"
-
-[[package]]
-name = "parol-macros"
-version = "0.2.0"
-source = "git+https://github.com/ryo33/parol.git?rev=090d08e22b9519d65ff9a5ce29d84b52ea678976#090d08e22b9519d65ff9a5ce29d84b52ea678976"
+checksum = "54ec451836679aaa55158b454b441e21446a111ea34aa1917eba29245bafe4b8"
 
 [[package]]
 name = "parol_runtime"
-version = "0.24.1"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "954cb83830f6f09d54c556d4b7cc0b2da0d5cca59c41f2c7eb240287e4f836d2"
+checksum = "2cda5f5f0606aaf8460dd4cf5c2ae98b321960562c61b02a6a66944c11a70ed7"
 dependencies = [
  "anyhow",
  "codespan-reporting",
@@ -601,30 +597,11 @@ dependencies = [
  "function_name",
  "log",
  "once_cell",
- "parol-macros 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "parol-macros",
  "petgraph",
  "regex-automata",
- "syntree",
- "syntree_layout",
- "thiserror",
-]
-
-[[package]]
-name = "parol_runtime"
-version = "0.24.1"
-source = "git+https://github.com/ryo33/parol.git?rev=090d08e22b9519d65ff9a5ce29d84b52ea678976#090d08e22b9519d65ff9a5ce29d84b52ea678976"
-dependencies = [
- "anyhow",
- "codespan-reporting",
- "derive_builder",
- "function_name",
- "log",
- "once_cell",
- "parol-macros 0.2.0 (git+https://github.com/ryo33/parol.git?rev=090d08e22b9519d65ff9a5ce29d84b52ea678976)",
- "petgraph",
- "regex-automata",
- "syntree",
- "syntree_layout",
+ "syntree 0.14.5",
+ "syntree_layout 0.2.0",
  "thiserror",
 ]
 
@@ -910,7 +887,8 @@ dependencies = [
 name = "swon-parol"
 version = "0.1.0"
 dependencies = [
- "parol_runtime 0.24.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "parol_runtime",
+ "syntree_layout 0.3.1",
 ]
 
 [[package]]
@@ -961,13 +939,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d8a019a25d9135e907319cd33f02eeed4633388deea3a723b9242d062fa09486"
 
 [[package]]
+name = "syntree"
+version = "0.17.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "881b7db0d70cb7f94a4b2eb5d671fbeaa7c847285e8d6ccfe942118a2f76ad92"
+
+[[package]]
 name = "syntree_layout"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6c4dcc044568a0f9708c87b9dd79f1d8e5fb2086a831ead7ef044c9a48bd756b"
 dependencies = [
  "anyhow",
- "syntree",
+ "syntree 0.14.5",
+ "thiserror",
+ "xml_writer",
+]
+
+[[package]]
+name = "syntree_layout"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dd232d4f93f4635045d19797919c4e13922b0c35533a72a6e5725297580c7440"
+dependencies = [
+ "anyhow",
+ "syntree 0.17.5",
  "thiserror",
  "xml_writer",
 ]

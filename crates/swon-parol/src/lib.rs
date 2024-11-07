@@ -10,6 +10,7 @@ fn test_parse() {
 	d = 1
 
 	"#;
-    parser::parse(input, "test.swon", &mut actions).unwrap();
+    let tree = parser::parse(input, "test.swon", &mut actions).unwrap();
     println!("{}", actions);
+    println!("{:?}", tree);
 }
