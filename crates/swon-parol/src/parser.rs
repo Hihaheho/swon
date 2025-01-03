@@ -18,38 +18,36 @@ use parol_runtime::lexer::tokenizer::{
     ERROR_TOKEN, NEW_LINE_TOKEN, UNMATCHABLE_TOKEN, WHITESPACE_TOKEN,
 };
 
-pub const TERMINALS: &[&str; 29] = &[
-    /*  0 */ UNMATCHABLE_TOKEN,
-    /*  1 */ UNMATCHABLE_TOKEN,
-    /*  2 */ UNMATCHABLE_TOKEN,
-    /*  3 */ UNMATCHABLE_TOKEN,
-    /*  4 */ UNMATCHABLE_TOKEN,
-    /*  5 */ r"\d[\d_]*",
-    /*  6 */ r"true",
-    /*  7 */ r"false",
-    /*  8 */ r"null",
-    /*  9 */ r"!",
-    /* 10 */ r#"""#,
-    /* 11 */ r#"\p{XID_Start}\p{XID_Continue}*""#,
-    /* 12 */
-    r#"(\\[nrt\\"0]|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*"#,
-    /* 13 */
-    r"(\p{Letter}|\p{Mark}|\p{Number}|\p{Punctuation}|\p{Symbol}|\p{Space_Separator})*",
-    /* 14 */ r"\r\n|\r|\n",
-    /* 15 */ r"[\s--\r\n]+",
-    /* 16 */ r"@",
-    /* 17 */ r"\$",
-    /* 18 */ r"\.",
-    /* 19 */ r"\{",
-    /* 20 */ r"\}",
-    /* 21 */ r"\[",
-    /* 22 */ r"\]",
-    /* 23 */ r"=",
-    /* 24 */ r",",
-    /* 25 */ r"\\\\",
-    /* 26 */ r":",
-    /* 27 */ r"\p{XID_Start}\p{XID_Continue}*",
-    /* 28 */ ERROR_TOKEN,
+pub const TERMINALS: &[(&str, Option<(bool, &str)>); 29] = &[
+    /*  0 */ (UNMATCHABLE_TOKEN, None),
+    /*  1 */ (UNMATCHABLE_TOKEN, None),
+    /*  2 */ (UNMATCHABLE_TOKEN, None),
+    /*  3 */ (UNMATCHABLE_TOKEN, None),
+    /*  4 */ (UNMATCHABLE_TOKEN, None),
+    /*  5 */ (r"\d[\d_]*", None),
+    /*  6 */ (r"true", None),
+    /*  7 */ (r"false", None),
+    /*  8 */ (r"null", None),
+    /*  9 */ (r"!", None),
+    /* 10 */ (r#"""#, None),
+    /* 11 */ (r#"[^ \t\n\r\x00-\x1F\x22\x7F]+""#, None),
+    /* 12 */ (r#"(\\[nrt\\"0]|[^\\"\r\n])*"#, None),
+    /* 13 */ (r#"[^\\"\r\n]*"#, None),
+    /* 14 */ (r"\r\n|\r|\n", None),
+    /* 15 */ (r"[\s--\r\n]+", None),
+    /* 16 */ (r"@", None),
+    /* 17 */ (r"\$", None),
+    /* 18 */ (r"\.", None),
+    /* 19 */ (r"\{", None),
+    /* 20 */ (r"\}", None),
+    /* 21 */ (r"\[", None),
+    /* 22 */ (r"\]", None),
+    /* 23 */ (r"=", None),
+    /* 24 */ (r",", None),
+    /* 25 */ (r"\\\\", None),
+    /* 26 */ (r":", None),
+    /* 27 */ (r"[^ \t\n\r\x00-\x1F\x22\x7F]+", None),
+    /* 28 */ (ERROR_TOKEN, None),
 ];
 
 pub const TERMINAL_NAMES: &[&str; 29] = &[
@@ -65,7 +63,7 @@ pub const TERMINAL_NAMES: &[&str; 29] = &[
     /*  9 */ "Hole",
     /* 10 */ "Quote",
     /* 11 */ "TypedQuote",
-    /* 12 */ "InString",
+    /* 12 */ "InStr",
     /* 13 */ "Text",
     /* 14 */ "Newline0",
     /* 15 */ "Ws",
@@ -90,7 +88,7 @@ const SCANNER_0: (&[&str; 5], &[TerminalIndex; 19]) = (
         /*  0 */ UNMATCHABLE_TOKEN,
         /*  1 */ NEW_LINE_TOKEN,
         /*  2 */ WHITESPACE_TOKEN,
-        /*  3 */ r"(#.*(\r\n|\r|\n|$))",
+        /*  3 */ r"#.*(\r\n|\r|\n)?",
         /*  4 */ UNMATCHABLE_TOKEN,
     ],
     &[
@@ -116,8 +114,8 @@ const SCANNER_0: (&[&str; 5], &[TerminalIndex; 19]) = (
     ],
 );
 
-/* SCANNER_1: "String" */
-const SCANNER_1: (&[&str; 5], &[TerminalIndex; 4]) = (
+/* SCANNER_1: "Str" */
+const SCANNER_1: (&[&str; 5], &[TerminalIndex; 3]) = (
     &[
         /*  0 */ UNMATCHABLE_TOKEN,
         /*  1 */ UNMATCHABLE_TOKEN,
@@ -125,12 +123,7 @@ const SCANNER_1: (&[&str; 5], &[TerminalIndex; 4]) = (
         /*  3 */ UNMATCHABLE_TOKEN,
         /*  4 */ UNMATCHABLE_TOKEN,
     ],
-    &[
-        10, /* Quote */
-        11, /* TypedQuote */
-        12, /* InString */
-        15, /* Ws */
-    ],
+    &[10 /* Quote */, 12 /* InStr */, 15 /* Ws */],
 );
 
 /* SCANNER_2: "Text" */
@@ -170,7 +163,7 @@ pub const NON_TERMINALS: &[&str; 54] = &[
     /* 19 */ "False",
     /* 20 */ "Hole",
     /* 21 */ "Ident",
-    /* 22 */ "InString",
+    /* 22 */ "InStr",
     /* 23 */ "Integer",
     /* 24 */ "Key",
     /* 25 */ "KeyBase",
@@ -186,9 +179,9 @@ pub const NON_TERMINALS: &[&str; 54] = &[
     /* 35 */ "Section",
     /* 36 */ "SectionBinding",
     /* 37 */ "SectionList",
-    /* 38 */ "String",
-    /* 39 */ "StringContinues",
-    /* 40 */ "StringContinuesList",
+    /* 38 */ "Str",
+    /* 39 */ "StrContinues",
+    /* 40 */ "StrContinuesList",
     /* 41 */ "Swon",
     /* 42 */ "SwonList",
     /* 43 */ "SwonList0",
@@ -198,7 +191,7 @@ pub const NON_TERMINALS: &[&str; 54] = &[
     /* 47 */ "TextStart",
     /* 48 */ "True",
     /* 49 */ "TypedQuote",
-    /* 50 */ "TypedString",
+    /* 50 */ "TypedStr",
     /* 51 */ "Value",
     /* 52 */ "ValueBinding",
     /* 53 */ "Ws",
@@ -360,7 +353,7 @@ pub const LOOKAHEAD_AUTOMATA: &[LookaheadDFA; 54] = &[
         transitions: &[],
         k: 0,
     },
-    /* 22 - "InString" */
+    /* 22 - "InStr" */
     LookaheadDFA {
         prod0: 62,
         transitions: &[],
@@ -501,19 +494,19 @@ pub const LOOKAHEAD_AUTOMATA: &[LookaheadDFA; 54] = &[
         ],
         k: 1,
     },
-    /* 38 - "String" */
+    /* 38 - "Str" */
     LookaheadDFA {
         prod0: 58,
         transitions: &[],
         k: 0,
     },
-    /* 39 - "StringContinues" */
+    /* 39 - "StrContinues" */
     LookaheadDFA {
         prod0: 55,
         transitions: &[],
         k: 0,
     },
-    /* 40 - "StringContinuesList" */
+    /* 40 - "StrContinuesList" */
     LookaheadDFA {
         prod0: -1,
         transitions: &[
@@ -598,7 +591,7 @@ pub const LOOKAHEAD_AUTOMATA: &[LookaheadDFA; 54] = &[
         transitions: &[],
         k: 0,
     },
-    /* 50 - "TypedString" */
+    /* 50 - "TypedStr" */
     LookaheadDFA {
         prod0: 59,
         transitions: &[],
@@ -780,7 +773,7 @@ pub const PRODUCTIONS: &[Production; 78] = &[
         lhs: 25,
         production: &[ParseType::N(18)],
     },
-    // 28 - KeyBase: String;
+    // 28 - KeyBase: Str;
     Production {
         lhs: 25,
         production: &[ParseType::N(38)],
@@ -815,12 +808,12 @@ pub const PRODUCTIONS: &[Production; 78] = &[
         lhs: 51,
         production: &[ParseType::N(30)],
     },
-    // 35 - Value: StringContinues;
+    // 35 - Value: StrContinues;
     Production {
         lhs: 51,
         production: &[ParseType::N(39)],
     },
-    // 36 - Value: TypedString;
+    // 36 - Value: TypedStr;
     Production {
         lhs: 51,
         production: &[ParseType::N(50)],
@@ -921,27 +914,27 @@ pub const PRODUCTIONS: &[Production; 78] = &[
         lhs: 20,
         production: &[ParseType::T(9)],
     },
-    // 55 - StringContinues: String StringContinuesList /* Vec */;
+    // 55 - StrContinues: Str StrContinuesList /* Vec */;
     Production {
         lhs: 39,
         production: &[ParseType::N(40), ParseType::N(38)],
     },
-    // 56 - StringContinuesList: Continue String StringContinuesList;
+    // 56 - StrContinuesList: Continue Str StrContinuesList;
     Production {
         lhs: 40,
         production: &[ParseType::N(40), ParseType::N(38), ParseType::N(14)],
     },
-    // 57 - StringContinuesList: ;
+    // 57 - StrContinuesList: ;
     Production {
         lhs: 40,
         production: &[],
     },
-    // 58 - String: Quote InString Quote;
+    // 58 - Str: Quote InStr Quote;
     Production {
         lhs: 38,
         production: &[ParseType::N(34), ParseType::N(22), ParseType::N(34)],
     },
-    // 59 - TypedString: TypedQuote InString Quote;
+    // 59 - TypedStr: TypedQuote InStr Quote;
     Production {
         lhs: 50,
         production: &[ParseType::N(34), ParseType::N(22), ParseType::N(49)],
@@ -951,17 +944,17 @@ pub const PRODUCTIONS: &[Production; 78] = &[
         lhs: 34,
         production: &[ParseType::T(10)],
     },
-    // 61 - TypedQuote: /\p{XID_Start}\p{XID_Continue}*"/;
+    // 61 - TypedQuote: /[^ \t\n\r\x00-\x1F\x22\x7F]+"/;
     Production {
         lhs: 49,
         production: &[ParseType::T(11)],
     },
-    // 62 - InString: /(\\[nrt\\"0]|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*/;
+    // 62 - InStr: /(\\[nrt\\"0]|[^\\"\r\n])*/;
     Production {
         lhs: 22,
         production: &[ParseType::T(12)],
     },
-    // 63 - Text: /(\p{Letter}|\p{Mark}|\p{Number}|\p{Punctuation}|\p{Symbol}|\p{Space_Separator})*/;
+    // 63 - Text: /[^\\"\r\n]*/;
     Production {
         lhs: 44,
         production: &[ParseType::T(13)],
@@ -1031,7 +1024,7 @@ pub const PRODUCTIONS: &[Production; 78] = &[
         lhs: 47,
         production: &[ParseType::T(26)],
     },
-    // 77 - Ident: /\p{XID_Start}\p{XID_Continue}*/;
+    // 77 - Ident: /[^ \t\n\r\x00-\x1F\x22\x7F]+/;
     Production {
         lhs: 21,
         production: &[ParseType::T(27)],
@@ -1044,13 +1037,13 @@ static SCANNERS: Lazy<Vec<ScannerConfig>> = Lazy::new(|| {
             "INITIAL",
             Tokenizer::build(TERMINALS, SCANNER_0.0, SCANNER_0.1).unwrap(),
             &[
-                (10 /* Quote */, 1 /* String */),
-                (11 /* TypedQuote */, 1 /* String */),
+                (10 /* Quote */, 1 /* Str */),
+                (11 /* TypedQuote */, 1 /* Str */),
                 (26 /* TextStart */, 2 /* Text */),
             ],
         ),
         ScannerConfig::new(
-            "String",
+            "Str",
             Tokenizer::build(TERMINALS, SCANNER_1.0, SCANNER_1.1).unwrap(),
             &[(10 /* Quote */, 0 /* INITIAL */)],
         ),
@@ -1066,7 +1059,7 @@ pub fn parse<'t, T>(
     input: &'t str,
     file_name: T,
     user_actions: &mut Grammar<'t>,
-) -> Result<ParseTree<'t>, ParolError>
+) -> Result<ParseTree, ParolError>
 where
     T: AsRef<Path>,
 {

@@ -7,4 +7,4 @@ edition = "2021"
 parol_runtime.workspace = true
 
 [dev-dependencies]
-syntree_layout = "0.3"
+syntree_layout = "0.4"

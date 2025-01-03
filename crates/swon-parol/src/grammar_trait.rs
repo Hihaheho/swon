@@ -125,18 +125,18 @@ pub trait GrammarTrait<'t> {
         Ok(())
     }
 
-    /// Semantic action for non-terminal 'StringContinues'
-    fn string_continues(&mut self, _arg: &StringContinues<'t>) -> Result<()> {
+    /// Semantic action for non-terminal 'StrContinues'
+    fn str_continues(&mut self, _arg: &StrContinues<'t>) -> Result<()> {
         Ok(())
     }
 
-    /// Semantic action for non-terminal 'String'
-    fn string(&mut self, _arg: &String<'t>) -> Result<()> {
+    /// Semantic action for non-terminal 'Str'
+    fn str(&mut self, _arg: &Str<'t>) -> Result<()> {
         Ok(())
     }
 
-    /// Semantic action for non-terminal 'TypedString'
-    fn typed_string(&mut self, _arg: &TypedString<'t>) -> Result<()> {
+    /// Semantic action for non-terminal 'TypedStr'
+    fn typed_str(&mut self, _arg: &TypedStr<'t>) -> Result<()> {
         Ok(())
     }
 
@@ -150,8 +150,8 @@ pub trait GrammarTrait<'t> {
         Ok(())
     }
 
-    /// Semantic action for non-terminal 'InString'
-    fn in_string(&mut self, _arg: &InString<'t>) -> Result<()> {
+    /// Semantic action for non-terminal 'InStr'
+    fn in_str(&mut self, _arg: &InStr<'t>) -> Result<()> {
         Ok(())
     }
 
@@ -232,7 +232,7 @@ pub trait GrammarTrait<'t> {
 
     /// This method provides skipped language comments.
     /// If you need comments please provide your own implementation of this method.
-    fn on_comment_parsed(&mut self, _token: Token<'t>) {}
+    fn on_comment(&mut self, _token: Token<'t>) {}
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -333,18 +333,18 @@ impl<'t> ToSpan for KeyBaseExtensionNameSpace<'t> {
 ///
 /// Type derived for production 28
 ///
-/// `KeyBase: String;`
+/// `KeyBase: Str;`
 ///
 #[allow(dead_code)]
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
-pub struct KeyBaseString<'t> {
-    pub string: String<'t>,
+pub struct KeyBaseStr<'t> {
+    pub str: Str<'t>,
 }
 
-impl<'t> ToSpan for KeyBaseString<'t> {
+impl<'t> ToSpan for KeyBaseStr<'t> {
     fn span(&self) -> Span {
-        self.string.span()
+        self.str.span()
     }
 }
 
@@ -441,36 +441,36 @@ impl<'t> ToSpan for ValueNull<'t> {
 ///
 /// Type derived for production 35
 ///
-/// `Value: StringContinues;`
+/// `Value: StrContinues;`
 ///
 #[allow(dead_code)]
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
-pub struct ValueStringContinues<'t> {
-    pub string_continues: StringContinues<'t>,
+pub struct ValueStrContinues<'t> {
+    pub str_continues: StrContinues<'t>,
 }
 
-impl<'t> ToSpan for ValueStringContinues<'t> {
+impl<'t> ToSpan for ValueStrContinues<'t> {
     fn span(&self) -> Span {
-        self.string_continues.span()
+        self.str_continues.span()
     }
 }
 
 ///
 /// Type derived for production 36
 ///
-/// `Value: TypedString;`
+/// `Value: TypedStr;`
 ///
 #[allow(dead_code)]
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
-pub struct ValueTypedString<'t> {
-    pub typed_string: TypedString<'t>,
+pub struct ValueTypedStr<'t> {
+    pub typed_str: TypedStr<'t>,
 }
 
-impl<'t> ToSpan for ValueTypedString<'t> {
+impl<'t> ToSpan for ValueTypedStr<'t> {
     fn span(&self) -> Span {
-        self.typed_string.span()
+        self.typed_str.span()
     }
 }
 
@@ -906,7 +906,7 @@ impl<'t> ToSpan for Hole<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct Ident<'t> {
-    pub ident: Token<'t>, /* \p{XID_Start}\p{XID_Continue}* */
+    pub ident: Token<'t>, /* [^ \t\n\r\x00-\x1F\x22\x7F]+ */
 }
 
 impl<'t> ToSpan for Ident<'t> {
@@ -916,18 +916,18 @@ impl<'t> ToSpan for Ident<'t> {
 }
 
 ///
-/// Type derived for non-terminal InString
+/// Type derived for non-terminal InStr
 ///
 #[allow(dead_code)]
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
-pub struct InString<'t> {
-    pub in_string: Token<'t>, /* (\\[nrt\\"0]|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})* */
+pub struct InStr<'t> {
+    pub in_str: Token<'t>, /* (\\[nrt\\"0]|[^\\"\r\n])* */
 }
 
-impl<'t> ToSpan for InString<'t> {
+impl<'t> ToSpan for InStr<'t> {
     fn span(&self) -> Span {
-        self.in_string.span()
+        self.in_str.span()
     }
 }
 
@@ -972,7 +972,7 @@ impl<'t> ToSpan for Key<'t> {
 pub enum KeyBase<'t> {
     Ident(KeyBaseIdent<'t>),
     ExtensionNameSpace(KeyBaseExtensionNameSpace<'t>),
-    String(KeyBaseString<'t>),
+    Str(KeyBaseStr<'t>),
 }
 
 impl<'t> ToSpan for KeyBase<'t> {
@@ -980,7 +980,7 @@ impl<'t> ToSpan for KeyBase<'t> {
         match self {
             KeyBase::Ident(v) => v.span(),
             KeyBase::ExtensionNameSpace(v) => v.span(),
-            KeyBase::String(v) => v.span(),
+            KeyBase::Str(v) => v.span(),
         }
     }
 }
@@ -1215,62 +1215,62 @@ impl<'t> ToSpan for SectionList<'t> {
 }
 
 ///
-/// Type derived for non-terminal String
+/// Type derived for non-terminal Str
 ///
 #[allow(dead_code)]
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
-pub struct String<'t> {
+pub struct Str<'t> {
     pub quote: Quote<'t>,
-    pub in_string: InString<'t>,
+    pub in_str: InStr<'t>,
     pub quote0: Quote<'t>,
 }
 
-impl<'t> ToSpan for String<'t> {
+impl<'t> ToSpan for Str<'t> {
     fn span(&self) -> Span {
-        self.quote.span() + self.in_string.span() + self.quote0.span()
+        self.quote.span() + self.in_str.span() + self.quote0.span()
     }
 }
 
 ///
-/// Type derived for non-terminal StringContinues
+/// Type derived for non-terminal StrContinues
 ///
 #[allow(dead_code)]
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
-pub struct StringContinues<'t> {
-    pub string: String<'t>,
-    pub string_continues_list: Vec<StringContinuesList<'t>>,
+pub struct StrContinues<'t> {
+    pub str: Str<'t>,
+    pub str_continues_list: Vec<StrContinuesList<'t>>,
 }
 
-impl<'t> ToSpan for StringContinues<'t> {
+impl<'t> ToSpan for StrContinues<'t> {
     fn span(&self) -> Span {
-        self.string.span()
+        self.str.span()
             + self
-                .string_continues_list
+                .str_continues_list
                 .first()
                 .map_or(Span::default(), |f| f.span())
             + self
-                .string_continues_list
+                .str_continues_list
                 .last()
                 .map_or(Span::default(), |l| l.span())
     }
 }
 
 ///
-/// Type derived for non-terminal StringContinuesList
+/// Type derived for non-terminal StrContinuesList
 ///
 #[allow(dead_code)]
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
-pub struct StringContinuesList<'t> {
+pub struct StrContinuesList<'t> {
     pub r#continue: Continue<'t>,
-    pub string: String<'t>,
+    pub str: Str<'t>,
 }
 
-impl<'t> ToSpan for StringContinuesList<'t> {
+impl<'t> ToSpan for StrContinuesList<'t> {
     fn span(&self) -> Span {
-        self.r#continue.span() + self.string.span()
+        self.r#continue.span() + self.str.span()
     }
 }
 
@@ -1336,7 +1336,7 @@ impl<'t> ToSpan for SwonList0<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct Text<'t> {
-    pub text: Token<'t>, /* (\p{Letter}|\p{Mark}|\p{Number}|\p{Punctuation}|\p{Symbol}|\p{Space_Separator})* */
+    pub text: Token<'t>, /* [^\\"\r\n]* */
 }
 
 impl<'t> ToSpan for Text<'t> {
@@ -1423,7 +1423,7 @@ impl<'t> ToSpan for True<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct TypedQuote<'t> {
-    pub typed_quote: Token<'t>, /* \p{XID_Start}\p{XID_Continue}*" */
+    pub typed_quote: Token<'t>, /* [^ \t\n\r\x00-\x1F\x22\x7F]+" */
 }
 
 impl<'t> ToSpan for TypedQuote<'t> {
@@ -1433,20 +1433,20 @@ impl<'t> ToSpan for TypedQuote<'t> {
 }
 
 ///
-/// Type derived for non-terminal TypedString
+/// Type derived for non-terminal TypedStr
 ///
 #[allow(dead_code)]
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
-pub struct TypedString<'t> {
+pub struct TypedStr<'t> {
     pub typed_quote: TypedQuote<'t>,
-    pub in_string: InString<'t>,
+    pub in_str: InStr<'t>,
     pub quote: Quote<'t>,
 }
 
-impl<'t> ToSpan for TypedString<'t> {
+impl<'t> ToSpan for TypedStr<'t> {
     fn span(&self) -> Span {
-        self.typed_quote.span() + self.in_string.span() + self.quote.span()
+        self.typed_quote.span() + self.in_str.span() + self.quote.span()
     }
 }
 
@@ -1461,8 +1461,8 @@ pub enum Value<'t> {
     Integer(ValueInteger<'t>),
     Boolean(ValueBoolean<'t>),
     Null(ValueNull<'t>),
-    StringContinues(ValueStringContinues<'t>),
-    TypedString(ValueTypedString<'t>),
+    StrContinues(ValueStrContinues<'t>),
+    TypedStr(ValueTypedStr<'t>),
     Hole(ValueHole<'t>),
 }
 
@@ -1474,8 +1474,8 @@ impl<'t> ToSpan for Value<'t> {
             Value::Integer(v) => v.span(),
             Value::Boolean(v) => v.span(),
             Value::Null(v) => v.span(),
-            Value::StringContinues(v) => v.span(),
-            Value::TypedString(v) => v.span(),
+            Value::StrContinues(v) => v.span(),
+            Value::TypedStr(v) => v.span(),
             Value::Hole(v) => v.span(),
         }
     }
@@ -1544,7 +1544,7 @@ pub enum ASTType<'t> {
     False(False<'t>),
     Hole(Hole<'t>),
     Ident(Ident<'t>),
-    InString(InString<'t>),
+    InStr(InStr<'t>),
     Integer(Integer<'t>),
     Key(Key<'t>),
     KeyBase(KeyBase<'t>),
@@ -1560,9 +1560,9 @@ pub enum ASTType<'t> {
     Section(Section<'t>),
     SectionBinding(SectionBinding<'t>),
     SectionList(Vec<SectionList<'t>>),
-    String(String<'t>),
-    StringContinues(StringContinues<'t>),
-    StringContinuesList(Vec<StringContinuesList<'t>>),
+    Str(Str<'t>),
+    StrContinues(StrContinues<'t>),
+    StrContinuesList(Vec<StrContinuesList<'t>>),
     Swon(Swon<'t>),
     SwonList(Vec<SwonList<'t>>),
     SwonList0(Vec<SwonList0<'t>>),
@@ -1572,7 +1572,7 @@ pub enum ASTType<'t> {
     TextStart(TextStart<'t>),
     True(True<'t>),
     TypedQuote(TypedQuote<'t>),
-    TypedString(TypedString<'t>),
+    TypedStr(TypedStr<'t>),
     Value(Value<'t>),
     ValueBinding(ValueBinding<'t>),
     Ws(Ws<'t>),
@@ -1605,7 +1605,7 @@ impl<'t> ToSpan for ASTType<'t> {
             ASTType::False(v) => v.span(),
             ASTType::Hole(v) => v.span(),
             ASTType::Ident(v) => v.span(),
-            ASTType::InString(v) => v.span(),
+            ASTType::InStr(v) => v.span(),
             ASTType::Integer(v) => v.span(),
             ASTType::Key(v) => v.span(),
             ASTType::KeyBase(v) => v.span(),
@@ -1630,9 +1630,9 @@ impl<'t> ToSpan for ASTType<'t> {
                 v.first().map_or(Span::default(), |f| f.span())
                     + v.last().map_or(Span::default(), |l| l.span())
             }
-            ASTType::String(v) => v.span(),
-            ASTType::StringContinues(v) => v.span(),
-            ASTType::StringContinuesList(v) => {
+            ASTType::Str(v) => v.span(),
+            ASTType::StrContinues(v) => v.span(),
+            ASTType::StrContinuesList(v) => {
                 v.first().map_or(Span::default(), |f| f.span())
                     + v.last().map_or(Span::default(), |l| l.span())
             }
@@ -1651,7 +1651,7 @@ impl<'t> ToSpan for ASTType<'t> {
             ASTType::TextStart(v) => v.span(),
             ASTType::True(v) => v.span(),
             ASTType::TypedQuote(v) => v.span(),
-            ASTType::TypedString(v) => v.span(),
+            ASTType::TypedStr(v) => v.span(),
             ASTType::Value(v) => v.span(),
             ASTType::ValueBinding(v) => v.span(),
             ASTType::Ws(v) => v.span(),
@@ -2233,15 +2233,15 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 28:
     ///
-    /// `KeyBase: String;`
+    /// `KeyBase: Str;`
     ///
     #[parol_runtime::function_name::named]
-    fn key_base_2(&mut self, _string: &ParseTreeType<'t>) -> Result<()> {
+    fn key_base_2(&mut self, _str: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let string = pop_item!(self, string, String, context);
-        let key_base_2_built = KeyBaseString { string };
-        let key_base_2_built = KeyBase::String(key_base_2_built);
+        let str = pop_item!(self, str, Str, context);
+        let key_base_2_built = KeyBaseStr { str };
+        let key_base_2_built = KeyBase::Str(key_base_2_built);
         // Calling user action here
         self.user_grammar.key_base(&key_base_2_built)?;
         self.push(ASTType::KeyBase(key_base_2_built), context);
@@ -2360,15 +2360,15 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 35:
     ///
-    /// `Value: StringContinues;`
+    /// `Value: StrContinues;`
     ///
     #[parol_runtime::function_name::named]
-    fn value_5(&mut self, _string_continues: &ParseTreeType<'t>) -> Result<()> {
+    fn value_5(&mut self, _str_continues: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let string_continues = pop_item!(self, string_continues, StringContinues, context);
-        let value_5_built = ValueStringContinues { string_continues };
-        let value_5_built = Value::StringContinues(value_5_built);
+        let str_continues = pop_item!(self, str_continues, StrContinues, context);
+        let value_5_built = ValueStrContinues { str_continues };
+        let value_5_built = Value::StrContinues(value_5_built);
         // Calling user action here
         self.user_grammar.value(&value_5_built)?;
         self.push(ASTType::Value(value_5_built), context);
@@ -2377,15 +2377,15 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 36:
     ///
-    /// `Value: TypedString;`
+    /// `Value: TypedStr;`
     ///
     #[parol_runtime::function_name::named]
-    fn value_6(&mut self, _typed_string: &ParseTreeType<'t>) -> Result<()> {
+    fn value_6(&mut self, _typed_str: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let typed_string = pop_item!(self, typed_string, TypedString, context);
-        let value_6_built = ValueTypedString { typed_string };
-        let value_6_built = Value::TypedString(value_6_built);
+        let typed_str = pop_item!(self, typed_str, TypedStr, context);
+        let value_6_built = ValueTypedStr { typed_str };
+        let value_6_built = Value::TypedStr(value_6_built);
         // Calling user action here
         self.user_grammar.value(&value_6_built)?;
         self.push(ASTType::Value(value_6_built), context);
@@ -2712,65 +2712,63 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 55:
     ///
-    /// `StringContinues: String StringContinuesList /* Vec */;`
+    /// `StrContinues: Str StrContinuesList /* Vec */;`
     ///
     #[parol_runtime::function_name::named]
-    fn string_continues(
+    fn str_continues(
         &mut self,
-        _string: &ParseTreeType<'t>,
-        _string_continues_list: &ParseTreeType<'t>,
+        _str: &ParseTreeType<'t>,
+        _str_continues_list: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let string_continues_list =
-            pop_and_reverse_item!(self, string_continues_list, StringContinuesList, context);
-        let string = pop_item!(self, string, String, context);
-        let string_continues_built = StringContinues {
-            string,
-            string_continues_list,
+        let str_continues_list =
+            pop_and_reverse_item!(self, str_continues_list, StrContinuesList, context);
+        let str = pop_item!(self, str, Str, context);
+        let str_continues_built = StrContinues {
+            str,
+            str_continues_list,
         };
         // Calling user action here
-        self.user_grammar
-            .string_continues(&string_continues_built)?;
-        self.push(ASTType::StringContinues(string_continues_built), context);
+        self.user_grammar.str_continues(&str_continues_built)?;
+        self.push(ASTType::StrContinues(str_continues_built), context);
         Ok(())
     }
 
     /// Semantic action for production 56:
     ///
-    /// `StringContinuesList /* Vec<T>::Push */: Continue String StringContinuesList;`
+    /// `StrContinuesList /* Vec<T>::Push */: Continue Str StrContinuesList;`
     ///
     #[parol_runtime::function_name::named]
-    fn string_continues_list_0(
+    fn str_continues_list_0(
         &mut self,
         _continue: &ParseTreeType<'t>,
-        _string: &ParseTreeType<'t>,
-        _string_continues_list: &ParseTreeType<'t>,
+        _str: &ParseTreeType<'t>,
+        _str_continues_list: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let mut string_continues_list =
-            pop_item!(self, string_continues_list, StringContinuesList, context);
-        let string = pop_item!(self, string, String, context);
+        let mut str_continues_list = pop_item!(self, str_continues_list, StrContinuesList, context);
+        let str = pop_item!(self, str, Str, context);
         let r#continue = pop_item!(self, r#continue, Continue, context);
-        let string_continues_list_0_built = StringContinuesList { string, r#continue };
+        let str_continues_list_0_built = StrContinuesList { str, r#continue };
         // Add an element to the vector
-        string_continues_list.push(string_continues_list_0_built);
-        self.push(ASTType::StringContinuesList(string_continues_list), context);
+        str_continues_list.push(str_continues_list_0_built);
+        self.push(ASTType::StrContinuesList(str_continues_list), context);
         Ok(())
     }
 
     /// Semantic action for production 57:
     ///
-    /// `StringContinuesList /* Vec<T>::New */: ;`
+    /// `StrContinuesList /* Vec<T>::New */: ;`
     ///
     #[parol_runtime::function_name::named]
-    fn string_continues_list_1(&mut self) -> Result<()> {
+    fn str_continues_list_1(&mut self) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let string_continues_list_1_built = Vec::new();
+        let str_continues_list_1_built = Vec::new();
         self.push(
-            ASTType::StringContinuesList(string_continues_list_1_built),
+            ASTType::StrContinuesList(str_continues_list_1_built),
             context,
         );
         Ok(())
@@ -2778,61 +2776,61 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 58:
     ///
-    /// `String: Quote InString Quote;`
+    /// `Str: Quote InStr Quote;`
     ///
     #[parol_runtime::function_name::named]
-    fn string(
+    fn str(
         &mut self,
         _quote: &ParseTreeType<'t>,
-        _in_string: &ParseTreeType<'t>,
+        _in_str: &ParseTreeType<'t>,
         _quote0: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let quote0 = pop_item!(self, quote0, Quote, context);
-        let in_string = pop_item!(self, in_string, InString, context);
+        let in_str = pop_item!(self, in_str, InStr, context);
         let quote = pop_item!(self, quote, Quote, context);
-        let string_built = String {
+        let str_built = Str {
             quote,
-            in_string,
+            in_str,
             quote0,
         };
         // Calling user action here
-        self.user_grammar.string(&string_built)?;
-        self.push(ASTType::String(string_built), context);
+        self.user_grammar.str(&str_built)?;
+        self.push(ASTType::Str(str_built), context);
         Ok(())
     }
 
     /// Semantic action for production 59:
     ///
-    /// `TypedString: TypedQuote InString Quote;`
+    /// `TypedStr: TypedQuote InStr Quote;`
     ///
     #[parol_runtime::function_name::named]
-    fn typed_string(
+    fn typed_str(
         &mut self,
         _typed_quote: &ParseTreeType<'t>,
-        _in_string: &ParseTreeType<'t>,
+        _in_str: &ParseTreeType<'t>,
         _quote: &ParseTreeType<'t>,
     ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let quote = pop_item!(self, quote, Quote, context);
-        let in_string = pop_item!(self, in_string, InString, context);
+        let in_str = pop_item!(self, in_str, InStr, context);
         let typed_quote = pop_item!(self, typed_quote, TypedQuote, context);
-        let typed_string_built = TypedString {
+        let typed_str_built = TypedStr {
             typed_quote,
-            in_string,
+            in_str,
             quote,
         };
         // Calling user action here
-        self.user_grammar.typed_string(&typed_string_built)?;
-        self.push(ASTType::TypedString(typed_string_built), context);
+        self.user_grammar.typed_str(&typed_str_built)?;
+        self.push(ASTType::TypedStr(typed_str_built), context);
         Ok(())
     }
 
     /// Semantic action for production 60:
     ///
-    /// `Quote: <INITIAL, String>'"';`
+    /// `Quote: <INITIAL, Str>'"';`
     ///
     #[parol_runtime::function_name::named]
     fn quote(&mut self, quote: &ParseTreeType<'t>) -> Result<()> {
@@ -2848,7 +2846,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 61:
     ///
-    /// `TypedQuote: <INITIAL, String>/\p{XID_Start}\p{XID_Continue}*"/;`
+    /// `TypedQuote: /[^ \t\n\r\x00-\x1F\x22\x7F]+"/;`
     ///
     #[parol_runtime::function_name::named]
     fn typed_quote(&mut self, typed_quote: &ParseTreeType<'t>) -> Result<()> {
@@ -2864,23 +2862,23 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 62:
     ///
-    /// `InString: <String>/(\\[nrt\\"0]|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*/;`
+    /// `InStr: <Str>/(\\[nrt\\"0]|[^\\"\r\n])*/;`
     ///
     #[parol_runtime::function_name::named]
-    fn in_string(&mut self, in_string: &ParseTreeType<'t>) -> Result<()> {
+    fn in_str(&mut self, in_str: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let in_string = in_string.token()?.clone();
-        let in_string_built = InString { in_string };
+        let in_str = in_str.token()?.clone();
+        let in_str_built = InStr { in_str };
         // Calling user action here
-        self.user_grammar.in_string(&in_string_built)?;
-        self.push(ASTType::InString(in_string_built), context);
+        self.user_grammar.in_str(&in_str_built)?;
+        self.push(ASTType::InStr(in_str_built), context);
         Ok(())
     }
 
     /// Semantic action for production 63:
     ///
-    /// `Text: <Text>/(\p{Letter}|\p{Mark}|\p{Number}|\p{Punctuation}|\p{Symbol}|\p{Space_Separator})*/;`
+    /// `Text: <Text>/[^\\"\r\n]*/;`
     ///
     #[parol_runtime::function_name::named]
     fn text(&mut self, text: &ParseTreeType<'t>) -> Result<()> {
@@ -2912,7 +2910,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 65:
     ///
-    /// `Ws: <String, Text>/[\s--\r\n]+/;`
+    /// `Ws: <Str, Text>/[\s--\r\n]+/;`
     ///
     #[parol_runtime::function_name::named]
     fn ws(&mut self, ws: &ParseTreeType<'t>) -> Result<()> {
@@ -3104,7 +3102,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 77:
     ///
-    /// `Ident: /\p{XID_Start}\p{XID_Continue}*/;`
+    /// `Ident: /[^ \t\n\r\x00-\x1F\x22\x7F]+/;`
     ///
     #[parol_runtime::function_name::named]
     fn ident(&mut self, ident: &ParseTreeType<'t>) -> Result<()> {
@@ -3190,14 +3188,14 @@ impl<'t> UserActionsTrait<'t> for GrammarAuto<'t, '_> {
             52 => self.r#false(&children[0]),
             53 => self.null(&children[0]),
             54 => self.hole(&children[0]),
-            55 => self.string_continues(&children[0], &children[1]),
-            56 => self.string_continues_list_0(&children[0], &children[1], &children[2]),
-            57 => self.string_continues_list_1(),
-            58 => self.string(&children[0], &children[1], &children[2]),
-            59 => self.typed_string(&children[0], &children[1], &children[2]),
+            55 => self.str_continues(&children[0], &children[1]),
+            56 => self.str_continues_list_0(&children[0], &children[1], &children[2]),
+            57 => self.str_continues_list_1(),
+            58 => self.str(&children[0], &children[1], &children[2]),
+            59 => self.typed_str(&children[0], &children[1], &children[2]),
             60 => self.quote(&children[0]),
             61 => self.typed_quote(&children[0]),
-            62 => self.in_string(&children[0]),
+            62 => self.in_str(&children[0]),
             63 => self.text(&children[0]),
             64 => self.newline(&children[0]),
             65 => self.ws(&children[0]),
@@ -3221,7 +3219,7 @@ impl<'t> UserActionsTrait<'t> for GrammarAuto<'t, '_> {
         }
     }
 
-    fn on_comment_parsed(&mut self, token: Token<'t>) {
-        self.user_grammar.on_comment_parsed(token)
+    fn on_comment(&mut self, token: Token<'t>) {
+        self.user_grammar.on_comment(token)
     }
 }

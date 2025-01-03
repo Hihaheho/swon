@@ -6,7 +6,6 @@ fn main() {
         .expanded_grammar_output_file("swon-expanded.par")
         .user_type_name("Grammar")
         .user_trait_module_name("grammar")
-        .enable_auto_generation()
         .range()
         .minimize_boxed_types()
         // 2 for trailing comma

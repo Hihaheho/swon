@@ -4,8 +4,8 @@ resolver = "2"
 members = ["crates/*"]
 
 [workspace.dependencies]
-parol_runtime = { version = "1.0", features = ["auto_generation"] }
-parol = { version = "1.0" }
+parol_runtime = { version = "2.0" }
+parol = { version = "2.0" }
 serde = "1"
 serde_json = "1"
 anyhow = "1"
@@ -13,3 +13,13 @@ anyhow = "1"
 # For faster parser generation
 [profile.dev.package.parol]
 opt-level = 3
+
+[profile.wasm-dev]
+inherits = "dev"
+opt-level = 1
+
+[profile.server-dev]
+inherits = "dev"
+
+[profile.android-dev]
+inherits = "dev"

@@ -41,8 +41,4 @@ impl<'t> GrammarTrait<'t> for Grammar<'t> {
         self.swon = Some(arg.clone());
         Ok(())
     }
-
-    fn on_comment_parsed(&mut self, _token: Token<'t>) {
-        // TODO
-    }
 }

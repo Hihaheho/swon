@@ -3,10 +3,10 @@
 %grammar_type 'LL(k)'
 %line_comment "#"
 
-%on Quote, TypedQuote %enter String
+%on Quote, TypedQuote %enter Str
 %on TextStart %enter Text
 
-%scanner String {
+%scanner Str {
   %auto_newline_off
   %auto_ws_off
   %on Quote %enter INITIAL
@@ -32,11 +32,11 @@ Section: At Keys { Binding } ;
   Keys: Key { Dot Key } ;
   Key: KeyBase [ ArrayMarker ] ;
   ArrayMarker: ArrayBegin [ Integer ] ArrayEnd ;
-  KeyBase: Ident | ExtensionNameSpace | String ;
+  KeyBase: Ident | ExtensionNameSpace | Str ;
   // extension name must always be valid ident, not quoted ident
   ExtensionNameSpace: Ext Ident ;
 
-Value: Object | Array | Integer | Boolean | Null | StringContinues | TypedString | Hole ;
+Value: Object | Array | Integer | Boolean | Null | StrContinues | TypedStr | Hole ;
   Object: Begin { Key Bind Value [ Comma ] } End ;
   Array: ArrayBegin { Value [ Comma ] } ArrayEnd ;
   Integer: /\d[\d_]*/ ;
@@ -46,17 +46,17 @@ Value: Object | Array | Integer | Boolean | Null | StringContinues | TypedString
   Null: 'null' ;
   Hole: '!' ;
 
-StringContinues: String { Continue String } ;
-String: Quote InString Quote ;
-TypedString: TypedQuote InString Quote ;
-  Quote: <INITIAL, String>'"' ;
-  TypedQuote: <INITIAL, String>/\p{XID_Start}\p{XID_Continue}*"/ ;
+StrContinues: Str { Continue Str } ;
+Str: Quote InStr Quote ;
+TypedStr: TypedQuote InStr Quote ;
+  Quote: <INITIAL, Str>'"' ;
+  TypedQuote: <INITIAL>/[^ \t\n\r\x00-\x1F\x22\x7F]+"/ ;
 
-InString: <String>/(\\[nrt\\"0]|\p{Letter}|\p{Mark}|\p{Number}|[\p{Punctuation}--\\"]|\p{Symbol}|\p{Space_Separator})*/;
-Text: <Text>/(\p{Letter}|\p{Mark}|\p{Number}|\p{Punctuation}|\p{Symbol}|\p{Space_Separator})*/;
+InStr: <Str>/(\\[nrt\\"0]|[^\\"\r\n])*/ ;
+Text: <Text>/[^\\"\r\n]*/ ;
 
 Newline: <Text>/\r\n|\r|\n/ ;
-Ws: <String, Text>/[\s--\r\n]+/ ;
+Ws: <Str, Text>/[\s--\r\n]+/ ;
 At: '@' ;
 Ext: '$' ;
 Dot: '.' ;
@@ -68,4 +68,4 @@ Bind: '=' ;
 Comma: ',' ;
 Continue: '\\' ;
 TextStart: ":" ;
-Ident: /\p{XID_Start}\p{XID_Continue}*/ ;
+Ident: /[^ \t\n\r\x00-\x1F\x22\x7F:]+/ ;

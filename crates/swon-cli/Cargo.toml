@@ -3,4 +3,10 @@ name = "swon-cli"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "swon"
+path = "src/main.rs"
+
 [dependencies]
+clap = { version = "4.0", features = ["derive"] }
+swon-parol = { path = "../swon-parol" }
