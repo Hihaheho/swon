@@ -68,4 +68,4 @@ Bind: '=' ;
 Comma: ',' ;
 Continue: '\\' ;
 TextStart: ":" ;
-Ident: /[^ \t\n\r\x00-\x1F\x22\x7F:]+/ ;
+Ident: /[^ \t\n\r\x00-\x1F\x22\x7F:$]+/ ;

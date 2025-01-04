@@ -906,7 +906,7 @@ impl<'t> ToSpan for Hole<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct Ident<'t> {
-    pub ident: Token<'t>, /* [^ \t\n\r\x00-\x1F\x22\x7F]+ */
+    pub ident: Token<'t>, /* [^ \t\n\r\x00-\x1F\x22\x7F:$]+ */
 }
 
 impl<'t> ToSpan for Ident<'t> {
@@ -3102,7 +3102,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 77:
     ///
-    /// `Ident: /[^ \t\n\r\x00-\x1F\x22\x7F]+/;`
+    /// `Ident: /[^ \t\n\r\x00-\x1F\x22\x7F:$]+/;`
     ///
     #[parol_runtime::function_name::named]
     fn ident(&mut self, ident: &ParseTreeType<'t>) -> Result<()> {

@@ -46,7 +46,7 @@ pub const TERMINALS: &[(&str, Option<(bool, &str)>); 29] = &[
     /* 24 */ (r",", None),
     /* 25 */ (r"\\\\", None),
     /* 26 */ (r":", None),
-    /* 27 */ (r"[^ \t\n\r\x00-\x1F\x22\x7F]+", None),
+    /* 27 */ (r"[^ \t\n\r\x00-\x1F\x22\x7F:$]+", None),
     /* 28 */ (ERROR_TOKEN, None),
 ];
 
@@ -1024,7 +1024,7 @@ pub const PRODUCTIONS: &[Production; 78] = &[
         lhs: 47,
         production: &[ParseType::T(26)],
     },
-    // 77 - Ident: /[^ \t\n\r\x00-\x1F\x22\x7F]+/;
+    // 77 - Ident: /[^ \t\n\r\x00-\x1F\x22\x7F:$]+/;
     Production {
         lhs: 21,
         production: &[ParseType::T(27)],
