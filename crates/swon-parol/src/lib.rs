@@ -3,6 +3,14 @@ pub mod grammar;
 #[allow(clippy::needless_lifetimes)]
 pub mod grammar_trait;
 pub mod parser;
+pub use parol_runtime;
+use parol_runtime::parser::parse_tree_type::GrammarEnums;
+pub use parol_runtime::syntree;
+
+impl GrammarEnums for grammar::Grammar<'_> {
+    type NonTerminalEnum = grammar_trait::NonTerminalKind;
+    type TerminalEnum = grammar_trait::TerminalKind;
+}
 
 #[test]
 fn test_parse() {
@@ -12,10 +20,13 @@ fn test_parse() {
 	d = 1 # comment
     e = "aaa"
 	"#;
-    let tree = parser::parse(input, "test.swon", &mut actions).unwrap();
+    let tree = parser::parse2::<
+        parol_runtime::parser::parse_tree_type::SynTree2<grammar::Grammar<'_>>,
+    >(input, "test.swon", &mut actions)
+    .unwrap();
     let result = tree.walk().fold(String::new(), |mut acc, node| {
         if !node.has_children() {
-            println!("{}", node.value());
+            println!("{:?}", node.value());
             let span = node.span();
             acc.push_str(&input[span.start as usize..span.end as usize]);
         }

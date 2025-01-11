@@ -4,4 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rowan = "0.15.16"
+syntree = { workspace = true }
+ahash = { workspace = true }

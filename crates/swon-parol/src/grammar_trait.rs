@@ -13,6 +13,7 @@ use parol_runtime::derive_builder::Builder;
 use parol_runtime::log::trace;
 #[allow(unused_imports)]
 use parol_runtime::parol_macros::{pop_and_reverse_item, pop_item};
+use parol_runtime::parser::parse_tree_type::{NonTerminalEnum, TerminalEnum};
 use parol_runtime::parser::{ParseTreeType, UserActionsTrait};
 use parol_runtime::{ParserError, Result, Token};
 use parol_runtime::{Span, ToSpan};
@@ -252,6 +253,7 @@ pub struct BindingsValueBinding<'t> {
     pub value_binding: ValueBinding<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for BindingsValueBinding<'t> {
     fn span(&self) -> Span {
         self.value_binding.span()
@@ -270,6 +272,7 @@ pub struct BindingsSectionBinding<'t> {
     pub section_binding: SectionBinding<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for BindingsSectionBinding<'t> {
     fn span(&self) -> Span {
         self.section_binding.span()
@@ -288,6 +291,7 @@ pub struct BindingsTextBinding<'t> {
     pub text_binding: TextBinding<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for BindingsTextBinding<'t> {
     fn span(&self) -> Span {
         self.text_binding.span()
@@ -306,6 +310,7 @@ pub struct KeyBaseIdent<'t> {
     pub ident: Ident<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for KeyBaseIdent<'t> {
     fn span(&self) -> Span {
         self.ident.span()
@@ -324,6 +329,7 @@ pub struct KeyBaseExtensionNameSpace<'t> {
     pub extension_name_space: ExtensionNameSpace<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for KeyBaseExtensionNameSpace<'t> {
     fn span(&self) -> Span {
         self.extension_name_space.span()
@@ -342,6 +348,7 @@ pub struct KeyBaseStr<'t> {
     pub str: Str<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for KeyBaseStr<'t> {
     fn span(&self) -> Span {
         self.str.span()
@@ -360,6 +367,7 @@ pub struct ValueObject<'t> {
     pub object: Object<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for ValueObject<'t> {
     fn span(&self) -> Span {
         self.object.span()
@@ -378,6 +386,7 @@ pub struct ValueArray<'t> {
     pub array: Array<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for ValueArray<'t> {
     fn span(&self) -> Span {
         self.array.span()
@@ -396,6 +405,7 @@ pub struct ValueInteger<'t> {
     pub integer: Integer<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for ValueInteger<'t> {
     fn span(&self) -> Span {
         self.integer.span()
@@ -414,6 +424,7 @@ pub struct ValueBoolean<'t> {
     pub boolean: Boolean<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for ValueBoolean<'t> {
     fn span(&self) -> Span {
         self.boolean.span()
@@ -432,6 +443,7 @@ pub struct ValueNull<'t> {
     pub null: Null<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for ValueNull<'t> {
     fn span(&self) -> Span {
         self.null.span()
@@ -450,6 +462,7 @@ pub struct ValueStrContinues<'t> {
     pub str_continues: StrContinues<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for ValueStrContinues<'t> {
     fn span(&self) -> Span {
         self.str_continues.span()
@@ -468,6 +481,7 @@ pub struct ValueTypedStr<'t> {
     pub typed_str: TypedStr<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for ValueTypedStr<'t> {
     fn span(&self) -> Span {
         self.typed_str.span()
@@ -486,6 +500,7 @@ pub struct ValueHole<'t> {
     pub hole: Hole<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for ValueHole<'t> {
     fn span(&self) -> Span {
         self.hole.span()
@@ -504,6 +519,7 @@ pub struct BooleanTrue<'t> {
     pub r#true: True<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for BooleanTrue<'t> {
     fn span(&self) -> Span {
         self.r#true.span()
@@ -522,6 +538,7 @@ pub struct BooleanFalse<'t> {
     pub r#false: False<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for BooleanFalse<'t> {
     fn span(&self) -> Span {
         self.r#false.span()
@@ -545,6 +562,7 @@ pub struct Array<'t> {
     pub array_end: ArrayEnd<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Array<'t> {
     fn span(&self) -> Span {
         self.array_begin.span()
@@ -567,6 +585,7 @@ pub struct ArrayBegin<'t> {
     pub array_begin: Token<'t>, /* [ */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for ArrayBegin<'t> {
     fn span(&self) -> Span {
         self.array_begin.span()
@@ -583,6 +602,7 @@ pub struct ArrayEnd<'t> {
     pub array_end: Token<'t>, /* ] */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for ArrayEnd<'t> {
     fn span(&self) -> Span {
         self.array_end.span()
@@ -600,6 +620,7 @@ pub struct ArrayList<'t> {
     pub array_opt: Option<ArrayOpt<'t>>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for ArrayList<'t> {
     fn span(&self) -> Span {
         self.value.span()
@@ -622,6 +643,7 @@ pub struct ArrayMarker<'t> {
     pub array_end: ArrayEnd<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for ArrayMarker<'t> {
     fn span(&self) -> Span {
         self.array_begin.span()
@@ -643,6 +665,7 @@ pub struct ArrayMarkerOpt<'t> {
     pub integer: Integer<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for ArrayMarkerOpt<'t> {
     fn span(&self) -> Span {
         self.integer.span()
@@ -659,6 +682,7 @@ pub struct ArrayOpt<'t> {
     pub comma: Comma<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for ArrayOpt<'t> {
     fn span(&self) -> Span {
         self.comma.span()
@@ -675,6 +699,7 @@ pub struct At<'t> {
     pub at: Token<'t>, /* @ */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for At<'t> {
     fn span(&self) -> Span {
         self.at.span()
@@ -691,6 +716,7 @@ pub struct Begin<'t> {
     pub begin: Token<'t>, /* { */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Begin<'t> {
     fn span(&self) -> Span {
         self.begin.span()
@@ -707,6 +733,7 @@ pub struct Bind<'t> {
     pub bind: Token<'t>, /* = */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Bind<'t> {
     fn span(&self) -> Span {
         self.bind.span()
@@ -724,6 +751,7 @@ pub struct Binding<'t> {
     pub bindings: Bindings<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Binding<'t> {
     fn span(&self) -> Span {
         self.keys.span() + self.bindings.span()
@@ -741,6 +769,7 @@ pub enum Bindings<'t> {
     TextBinding(BindingsTextBinding<'t>),
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Bindings<'t> {
     fn span(&self) -> Span {
         match self {
@@ -761,6 +790,7 @@ pub enum Boolean<'t> {
     False(BooleanFalse<'t>),
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Boolean<'t> {
     fn span(&self) -> Span {
         match self {
@@ -780,6 +810,7 @@ pub struct Comma<'t> {
     pub comma: Token<'t>, /* , */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Comma<'t> {
     fn span(&self) -> Span {
         self.comma.span()
@@ -796,6 +827,7 @@ pub struct Continue<'t> {
     pub r#continue: Token<'t>, /* \\ */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Continue<'t> {
     fn span(&self) -> Span {
         self.r#continue.span()
@@ -812,6 +844,7 @@ pub struct Dot<'t> {
     pub dot: Token<'t>, /* . */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Dot<'t> {
     fn span(&self) -> Span {
         self.dot.span()
@@ -828,6 +861,7 @@ pub struct End<'t> {
     pub end: Token<'t>, /* } */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for End<'t> {
     fn span(&self) -> Span {
         self.end.span()
@@ -844,6 +878,7 @@ pub struct Ext<'t> {
     pub ext: Token<'t>, /* $ */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Ext<'t> {
     fn span(&self) -> Span {
         self.ext.span()
@@ -861,6 +896,7 @@ pub struct ExtensionNameSpace<'t> {
     pub ident: Ident<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for ExtensionNameSpace<'t> {
     fn span(&self) -> Span {
         self.ext.span() + self.ident.span()
@@ -877,6 +913,7 @@ pub struct False<'t> {
     pub r#false: Token<'t>, /* false */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for False<'t> {
     fn span(&self) -> Span {
         self.r#false.span()
@@ -893,6 +930,7 @@ pub struct Hole<'t> {
     pub hole: Token<'t>, /* ! */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Hole<'t> {
     fn span(&self) -> Span {
         self.hole.span()
@@ -909,6 +947,7 @@ pub struct Ident<'t> {
     pub ident: Token<'t>, /* [^ \t\n\r\x00-\x1F\x22\x7F:$]+ */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Ident<'t> {
     fn span(&self) -> Span {
         self.ident.span()
@@ -925,6 +964,7 @@ pub struct InStr<'t> {
     pub in_str: Token<'t>, /* (\\[nrt\\"0]|[^\\"\r\n])* */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for InStr<'t> {
     fn span(&self) -> Span {
         self.in_str.span()
@@ -941,6 +981,7 @@ pub struct Integer<'t> {
     pub integer: Token<'t>, /* \d[\d_]* */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Integer<'t> {
     fn span(&self) -> Span {
         self.integer.span()
@@ -958,6 +999,7 @@ pub struct Key<'t> {
     pub key_opt: Option<KeyOpt<'t>>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Key<'t> {
     fn span(&self) -> Span {
         self.key_base.span() + self.key_opt.as_ref().map_or(Span::default(), |o| o.span())
@@ -975,6 +1017,7 @@ pub enum KeyBase<'t> {
     Str(KeyBaseStr<'t>),
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for KeyBase<'t> {
     fn span(&self) -> Span {
         match self {
@@ -995,6 +1038,7 @@ pub struct KeyOpt<'t> {
     pub array_marker: ArrayMarker<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for KeyOpt<'t> {
     fn span(&self) -> Span {
         self.array_marker.span()
@@ -1012,6 +1056,7 @@ pub struct Keys<'t> {
     pub keys_list: Vec<KeysList<'t>>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Keys<'t> {
     fn span(&self) -> Span {
         self.key.span()
@@ -1031,6 +1076,7 @@ pub struct KeysList<'t> {
     pub key: Key<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for KeysList<'t> {
     fn span(&self) -> Span {
         self.dot.span() + self.key.span()
@@ -1047,6 +1093,7 @@ pub struct Newline<'t> {
     pub newline: Token<'t>, /* \r\n|\r|\n */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Newline<'t> {
     fn span(&self) -> Span {
         self.newline.span()
@@ -1063,6 +1110,7 @@ pub struct Null<'t> {
     pub null: Token<'t>, /* null */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Null<'t> {
     fn span(&self) -> Span {
         self.null.span()
@@ -1081,6 +1129,7 @@ pub struct Object<'t> {
     pub end: End<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Object<'t> {
     fn span(&self) -> Span {
         self.begin.span()
@@ -1109,6 +1158,7 @@ pub struct ObjectList<'t> {
     pub object_opt: Option<ObjectOpt<'t>>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for ObjectList<'t> {
     fn span(&self) -> Span {
         self.key.span()
@@ -1131,6 +1181,7 @@ pub struct ObjectOpt<'t> {
     pub comma: Comma<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for ObjectOpt<'t> {
     fn span(&self) -> Span {
         self.comma.span()
@@ -1147,6 +1198,7 @@ pub struct Quote<'t> {
     pub quote: Token<'t>, /* " */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Quote<'t> {
     fn span(&self) -> Span {
         self.quote.span()
@@ -1165,6 +1217,7 @@ pub struct Section<'t> {
     pub section_list: Vec<SectionList<'t>>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Section<'t> {
     fn span(&self) -> Span {
         self.at.span()
@@ -1192,6 +1245,7 @@ pub struct SectionBinding<'t> {
     pub end: End<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for SectionBinding<'t> {
     fn span(&self) -> Span {
         self.begin.span() + self.swon.span() + self.end.span()
@@ -1208,6 +1262,7 @@ pub struct SectionList<'t> {
     pub binding: Binding<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for SectionList<'t> {
     fn span(&self) -> Span {
         self.binding.span()
@@ -1226,6 +1281,7 @@ pub struct Str<'t> {
     pub quote0: Quote<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Str<'t> {
     fn span(&self) -> Span {
         self.quote.span() + self.in_str.span() + self.quote0.span()
@@ -1243,6 +1299,7 @@ pub struct StrContinues<'t> {
     pub str_continues_list: Vec<StrContinuesList<'t>>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for StrContinues<'t> {
     fn span(&self) -> Span {
         self.str.span()
@@ -1268,6 +1325,7 @@ pub struct StrContinuesList<'t> {
     pub str: Str<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for StrContinuesList<'t> {
     fn span(&self) -> Span {
         self.r#continue.span() + self.str.span()
@@ -1285,6 +1343,7 @@ pub struct Swon<'t> {
     pub swon_list0: Vec<SwonList0<'t>>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Swon<'t> {
     fn span(&self) -> Span {
         self.swon_list.first().map_or(Span::default(), |f| f.span())
@@ -1307,6 +1366,7 @@ pub struct SwonList<'t> {
     pub binding: Binding<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for SwonList<'t> {
     fn span(&self) -> Span {
         self.binding.span()
@@ -1323,6 +1383,7 @@ pub struct SwonList0<'t> {
     pub section: Section<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for SwonList0<'t> {
     fn span(&self) -> Span {
         self.section.span()
@@ -1339,6 +1400,7 @@ pub struct Text<'t> {
     pub text: Token<'t>, /* [^\\"\r\n]* */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Text<'t> {
     fn span(&self) -> Span {
         self.text.span()
@@ -1358,6 +1420,7 @@ pub struct TextBinding<'t> {
     pub newline: Newline<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for TextBinding<'t> {
     fn span(&self) -> Span {
         self.text_start.span()
@@ -1378,6 +1441,7 @@ impl<'t> ToSpan for TextBinding<'t> {
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct TextBindingOpt {}
 
+#[allow(clippy::needless_lifetimes)]
 impl ToSpan for TextBindingOpt {
     fn span(&self) -> Span {
         Span::default()
@@ -1394,6 +1458,7 @@ pub struct TextStart<'t> {
     pub text_start: Token<'t>, /* : */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for TextStart<'t> {
     fn span(&self) -> Span {
         self.text_start.span()
@@ -1410,6 +1475,7 @@ pub struct True<'t> {
     pub r#true: Token<'t>, /* true */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for True<'t> {
     fn span(&self) -> Span {
         self.r#true.span()
@@ -1426,6 +1492,7 @@ pub struct TypedQuote<'t> {
     pub typed_quote: Token<'t>, /* [^ \t\n\r\x00-\x1F\x22\x7F]+" */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for TypedQuote<'t> {
     fn span(&self) -> Span {
         self.typed_quote.span()
@@ -1444,6 +1511,7 @@ pub struct TypedStr<'t> {
     pub quote: Quote<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for TypedStr<'t> {
     fn span(&self) -> Span {
         self.typed_quote.span() + self.in_str.span() + self.quote.span()
@@ -1466,6 +1534,7 @@ pub enum Value<'t> {
     Hole(ValueHole<'t>),
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Value<'t> {
     fn span(&self) -> Span {
         match self {
@@ -1492,6 +1561,7 @@ pub struct ValueBinding<'t> {
     pub value: Value<'t>,
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for ValueBinding<'t> {
     fn span(&self) -> Span {
         self.bind.span() + self.value.span()
@@ -1508,6 +1578,7 @@ pub struct Ws<'t> {
     pub ws: Token<'t>, /* [\s--\r\n]+ */
 }
 
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for Ws<'t> {
     fn span(&self) -> Span {
         self.ws.span()
@@ -1577,6 +1648,7 @@ pub enum ASTType<'t> {
     ValueBinding(ValueBinding<'t>),
     Ws(Ws<'t>),
 }
+#[allow(clippy::needless_lifetimes)]
 impl<'t> ToSpan for ASTType<'t> {
     fn span(&self) -> Span {
         match self {
@@ -1658,6 +1730,200 @@ impl<'t> ToSpan for ASTType<'t> {
         }
     }
 }
+
+// -------------------------------------------------------------------------------------------------
+
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum NonTerminalKind {
+    Array,
+    ArrayBegin,
+    ArrayEnd,
+    ArrayList,
+    ArrayMarker,
+    ArrayMarkerOpt,
+    ArrayOpt,
+    At,
+    Begin,
+    Bind,
+    Binding,
+    Bindings,
+    Boolean,
+    Comma,
+    Continue,
+    Dot,
+    End,
+    Ext,
+    ExtensionNameSpace,
+    False,
+    Hole,
+    Ident,
+    InStr,
+    Integer,
+    Key,
+    KeyBase,
+    KeyOpt,
+    Keys,
+    KeysList,
+    Newline,
+    Null,
+    Object,
+    ObjectList,
+    ObjectOpt,
+    Quote,
+    Section,
+    SectionBinding,
+    SectionList,
+    Str,
+    StrContinues,
+    StrContinuesList,
+    Swon,
+    SwonList,
+    SwonList0,
+    Text,
+    TextBinding,
+    TextBindingOpt,
+    TextStart,
+    True,
+    TypedQuote,
+    TypedStr,
+    Value,
+    ValueBinding,
+    Ws,
+    Root,
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum TerminalKind {
+    NewLine,
+    Whitespace,
+    LineComment,
+    BlockComment,
+    Integer,
+    True,
+    False,
+    Null,
+    Hole,
+    Quote,
+    TypedQuote,
+    InStr,
+    Text,
+    Newline,
+    Ws,
+    At,
+    Dollar,
+    Dot,
+    LBrace,
+    RBrace,
+    LBracket,
+    RBracket,
+    Bind,
+    Comma,
+    Esc,
+    TextStart,
+    Ident,
+}
+
+impl TerminalEnum for TerminalKind {
+    fn from_terminal_index(index: u16) -> Self {
+        match index {
+            1 => Self::NewLine,
+            2 => Self::Whitespace,
+            3 => Self::LineComment,
+            4 => Self::BlockComment,
+            5 => Self::Integer,
+            6 => Self::True,
+            7 => Self::False,
+            8 => Self::Null,
+            9 => Self::Hole,
+            10 => Self::Quote,
+            11 => Self::TypedQuote,
+            12 => Self::InStr,
+            13 => Self::Text,
+            14 => Self::Newline,
+            15 => Self::Ws,
+            16 => Self::At,
+            17 => Self::Dollar,
+            18 => Self::Dot,
+            19 => Self::LBrace,
+            20 => Self::RBrace,
+            21 => Self::LBracket,
+            22 => Self::RBracket,
+            23 => Self::Bind,
+            24 => Self::Comma,
+            25 => Self::Esc,
+            26 => Self::TextStart,
+            27 => Self::Ident,
+            _ => panic!("Invalid terminal index: {}", index),
+        }
+    }
+}
+
+impl NonTerminalEnum for NonTerminalKind {
+    fn from_non_terminal_name(name: &str) -> Self {
+        match name {
+            "Array" => Self::Array,
+            "ArrayBegin" => Self::ArrayBegin,
+            "ArrayEnd" => Self::ArrayEnd,
+            "ArrayList" => Self::ArrayList,
+            "ArrayMarker" => Self::ArrayMarker,
+            "ArrayMarkerOpt" => Self::ArrayMarkerOpt,
+            "ArrayOpt" => Self::ArrayOpt,
+            "At" => Self::At,
+            "Begin" => Self::Begin,
+            "Bind" => Self::Bind,
+            "Binding" => Self::Binding,
+            "Bindings" => Self::Bindings,
+            "Boolean" => Self::Boolean,
+            "Comma" => Self::Comma,
+            "Continue" => Self::Continue,
+            "Dot" => Self::Dot,
+            "End" => Self::End,
+            "Ext" => Self::Ext,
+            "ExtensionNameSpace" => Self::ExtensionNameSpace,
+            "False" => Self::False,
+            "Hole" => Self::Hole,
+            "Ident" => Self::Ident,
+            "InStr" => Self::InStr,
+            "Integer" => Self::Integer,
+            "Key" => Self::Key,
+            "KeyBase" => Self::KeyBase,
+            "KeyOpt" => Self::KeyOpt,
+            "Keys" => Self::Keys,
+            "KeysList" => Self::KeysList,
+            "Newline" => Self::Newline,
+            "Null" => Self::Null,
+            "Object" => Self::Object,
+            "ObjectList" => Self::ObjectList,
+            "ObjectOpt" => Self::ObjectOpt,
+            "Quote" => Self::Quote,
+            "Section" => Self::Section,
+            "SectionBinding" => Self::SectionBinding,
+            "SectionList" => Self::SectionList,
+            "Str" => Self::Str,
+            "StrContinues" => Self::StrContinues,
+            "StrContinuesList" => Self::StrContinuesList,
+            "Swon" => Self::Swon,
+            "SwonList" => Self::SwonList,
+            "SwonList0" => Self::SwonList0,
+            "Text" => Self::Text,
+            "TextBinding" => Self::TextBinding,
+            "TextBindingOpt" => Self::TextBindingOpt,
+            "TextStart" => Self::TextStart,
+            "True" => Self::True,
+            "TypedQuote" => Self::TypedQuote,
+            "TypedStr" => Self::TypedStr,
+            "Value" => Self::Value,
+            "ValueBinding" => Self::ValueBinding,
+            "Ws" => Self::Ws,
+            "" => Self::Root,
+            _ => panic!("Invalid non-terminal name: {}", name),
+        }
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
 
 /// Auto-implemented adapter grammar
 ///

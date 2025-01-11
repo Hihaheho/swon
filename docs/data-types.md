@@ -16,6 +16,7 @@
 - `tuple`
 - `unit`
 - `null`
+- `path`
 
 ## Officially Provided Types
 
@@ -88,3 +89,10 @@ Notation as type: `"object"`
 ## Null
 
 ## Datetime
+
+## Path
+
+Same syntax as section path and binding path.
+
+Notation as value: `path = .[0].a.b.c`
+Notation as type: `"path"`

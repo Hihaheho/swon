@@ -4,11 +4,14 @@ resolver = "2"
 members = ["crates/*"]
 
 [workspace.dependencies]
-parol_runtime = { version = "2.0" }
-parol = { version = "2.0" }
+parol_runtime = { path = "../parol/crates/parol_runtime" }
+parol = { path = "../parol/crates/parol" }
 serde = "1"
 serde_json = "1"
 anyhow = "1"
+syntree = "0.18"
+ahash = "0.8.11"
+thisisplural = "0.4"
 
 # For faster parser generation
 [profile.dev.package.parol]

@@ -1,14 +1,78 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
+use syntree::Span;
+
+pub enum NodeData {
+    NonTerminal(NonTerminal),
+    Terminal { terminal: Terminal, token: Token },
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub enum Token {
+    /// A token from the original input.
+    Input(Span<u32>),
+    /// A token that was added after parsing.
+    Added(String),
+}
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+pub enum Terminal {
+    Ws,
+    Newline,
+    Ident,
+    Extension,
+    BlockComment,
+    LineComment,
+    Text,
+    Code,
+    Number,
+    Boolean,
+    Unit,
+    Null,
+}
+
+pub enum NonTerminal {
+    Swon,
+    Sections,
+    Bindings,
+    Section,
+    Binding,
+    Keys,
+    Key,
+    Array,
+    ArrayIndex,
+    Tuple,
+    List,
+    Map,
+}
+
+pub struct Swon {
+    pub sections: Vec<SwonSection>,
+    pub bindings: Vec<SwonBinding>,
+}
+
+pub struct SwonSection {
+    pub keys: Vec<SwonKey>,
+    pub bindings: Vec<SwonBinding>,
+}
+
+pub enum SwonKey {
+    Ident(String),
+    Extension(String),
+    Array,
+    ArrayIndex(usize),
+}
+
+pub enum SwonBinding {
+    Value(SwonValue),
+    Block(Swon),
+}
+
+pub enum SwonValue {
+    String(String),
+    Text(String),
+    Code { language: String, code: String },
+    Number(f64),
+    Boolean(bool),
+    Unit,
+    Tuple(Vec<SwonValue>),
+    List(Vec<SwonValue>),
+    Map(ahash::HashMap<String, SwonValue>),
+    Null,
 }
