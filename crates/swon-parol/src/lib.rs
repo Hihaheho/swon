@@ -3,27 +3,27 @@ pub mod grammar;
 #[allow(clippy::needless_lifetimes)]
 pub mod grammar_trait;
 pub mod parser;
-pub use parol_runtime;
-use parol_runtime::parser::parse_tree_type::GrammarEnums;
-pub use parol_runtime::syntree;
+pub mod syntree_node;
 
-impl GrammarEnums for grammar::Grammar<'_> {
-    type NonTerminalEnum = grammar_trait::NonTerminalKind;
-    type TerminalEnum = grammar_trait::TerminalKind;
-}
+pub use parol_runtime;
+pub use parol_runtime::syntree;
+use parol_runtime::{
+    derive_builder::Builder, parser::parser_types::SynTreeFlavor, syntree::Builder,
+};
 
 #[test]
 fn test_parse() {
+    use parol_runtime::parser::parse_tree_type::SynTree2;
+    use syntree_node::{NonTerminalKind, TerminalKind};
     let mut actions = grammar::Grammar::new();
     let input = r#"
     @ a.b.c
 	d = 1 # comment
     e = "aaa"
 	"#;
-    let tree = parser::parse2::<
-        parol_runtime::parser::parse_tree_type::SynTree2<grammar::Grammar<'_>>,
-    >(input, "test.swon", &mut actions)
-    .unwrap();
+    let tree_builder =
+        Builder::<SynTree2<TerminalKind, NonTerminalKind>, SynTreeFlavor>::new_with();
+    let tree = parser::parse_into(input, tree_builder, "test.swon", &mut actions).unwrap();
     let result = tree.walk().fold(String::new(), |mut acc, node| {
         if !node.has_children() {
             println!("{:?}", node.value());

@@ -13,7 +13,6 @@ use parol_runtime::derive_builder::Builder;
 use parol_runtime::log::trace;
 #[allow(unused_imports)]
 use parol_runtime::parol_macros::{pop_and_reverse_item, pop_item};
-use parol_runtime::parser::parse_tree_type::{NonTerminalEnum, TerminalEnum};
 use parol_runtime::parser::{ParseTreeType, UserActionsTrait};
 use parol_runtime::{ParserError, Result, Token};
 use parol_runtime::{Span, ToSpan};
@@ -944,7 +943,7 @@ impl<'t> ToSpan for Hole<'t> {
 #[derive(Builder, Debug, Clone)]
 #[builder(crate = "parol_runtime::derive_builder")]
 pub struct Ident<'t> {
-    pub ident: Token<'t>, /* [^ \t\n\r\x00-\x1F\x22\x7F:$]+ */
+    pub ident: Token<'t>, /* [a-zA-Z_\-0-9]+ */
 }
 
 #[allow(clippy::needless_lifetimes)]
@@ -1727,198 +1726,6 @@ impl<'t> ToSpan for ASTType<'t> {
             ASTType::Value(v) => v.span(),
             ASTType::ValueBinding(v) => v.span(),
             ASTType::Ws(v) => v.span(),
-        }
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-
-#[allow(dead_code)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum NonTerminalKind {
-    Array,
-    ArrayBegin,
-    ArrayEnd,
-    ArrayList,
-    ArrayMarker,
-    ArrayMarkerOpt,
-    ArrayOpt,
-    At,
-    Begin,
-    Bind,
-    Binding,
-    Bindings,
-    Boolean,
-    Comma,
-    Continue,
-    Dot,
-    End,
-    Ext,
-    ExtensionNameSpace,
-    False,
-    Hole,
-    Ident,
-    InStr,
-    Integer,
-    Key,
-    KeyBase,
-    KeyOpt,
-    Keys,
-    KeysList,
-    Newline,
-    Null,
-    Object,
-    ObjectList,
-    ObjectOpt,
-    Quote,
-    Section,
-    SectionBinding,
-    SectionList,
-    Str,
-    StrContinues,
-    StrContinuesList,
-    Swon,
-    SwonList,
-    SwonList0,
-    Text,
-    TextBinding,
-    TextBindingOpt,
-    TextStart,
-    True,
-    TypedQuote,
-    TypedStr,
-    Value,
-    ValueBinding,
-    Ws,
-    Root,
-}
-
-#[allow(dead_code)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum TerminalKind {
-    NewLine,
-    Whitespace,
-    LineComment,
-    BlockComment,
-    Integer,
-    True,
-    False,
-    Null,
-    Hole,
-    Quote,
-    TypedQuote,
-    InStr,
-    Text,
-    Newline,
-    Ws,
-    At,
-    Dollar,
-    Dot,
-    LBrace,
-    RBrace,
-    LBracket,
-    RBracket,
-    Bind,
-    Comma,
-    Esc,
-    TextStart,
-    Ident,
-}
-
-impl TerminalEnum for TerminalKind {
-    fn from_terminal_index(index: u16) -> Self {
-        match index {
-            1 => Self::NewLine,
-            2 => Self::Whitespace,
-            3 => Self::LineComment,
-            4 => Self::BlockComment,
-            5 => Self::Integer,
-            6 => Self::True,
-            7 => Self::False,
-            8 => Self::Null,
-            9 => Self::Hole,
-            10 => Self::Quote,
-            11 => Self::TypedQuote,
-            12 => Self::InStr,
-            13 => Self::Text,
-            14 => Self::Newline,
-            15 => Self::Ws,
-            16 => Self::At,
-            17 => Self::Dollar,
-            18 => Self::Dot,
-            19 => Self::LBrace,
-            20 => Self::RBrace,
-            21 => Self::LBracket,
-            22 => Self::RBracket,
-            23 => Self::Bind,
-            24 => Self::Comma,
-            25 => Self::Esc,
-            26 => Self::TextStart,
-            27 => Self::Ident,
-            _ => panic!("Invalid terminal index: {}", index),
-        }
-    }
-}
-
-impl NonTerminalEnum for NonTerminalKind {
-    fn from_non_terminal_name(name: &str) -> Self {
-        match name {
-            "Array" => Self::Array,
-            "ArrayBegin" => Self::ArrayBegin,
-            "ArrayEnd" => Self::ArrayEnd,
-            "ArrayList" => Self::ArrayList,
-            "ArrayMarker" => Self::ArrayMarker,
-            "ArrayMarkerOpt" => Self::ArrayMarkerOpt,
-            "ArrayOpt" => Self::ArrayOpt,
-            "At" => Self::At,
-            "Begin" => Self::Begin,
-            "Bind" => Self::Bind,
-            "Binding" => Self::Binding,
-            "Bindings" => Self::Bindings,
-            "Boolean" => Self::Boolean,
-            "Comma" => Self::Comma,
-            "Continue" => Self::Continue,
-            "Dot" => Self::Dot,
-            "End" => Self::End,
-            "Ext" => Self::Ext,
-            "ExtensionNameSpace" => Self::ExtensionNameSpace,
-            "False" => Self::False,
-            "Hole" => Self::Hole,
-            "Ident" => Self::Ident,
-            "InStr" => Self::InStr,
-            "Integer" => Self::Integer,
-            "Key" => Self::Key,
-            "KeyBase" => Self::KeyBase,
-            "KeyOpt" => Self::KeyOpt,
-            "Keys" => Self::Keys,
-            "KeysList" => Self::KeysList,
-            "Newline" => Self::Newline,
-            "Null" => Self::Null,
-            "Object" => Self::Object,
-            "ObjectList" => Self::ObjectList,
-            "ObjectOpt" => Self::ObjectOpt,
-            "Quote" => Self::Quote,
-            "Section" => Self::Section,
-            "SectionBinding" => Self::SectionBinding,
-            "SectionList" => Self::SectionList,
-            "Str" => Self::Str,
-            "StrContinues" => Self::StrContinues,
-            "StrContinuesList" => Self::StrContinuesList,
-            "Swon" => Self::Swon,
-            "SwonList" => Self::SwonList,
-            "SwonList0" => Self::SwonList0,
-            "Text" => Self::Text,
-            "TextBinding" => Self::TextBinding,
-            "TextBindingOpt" => Self::TextBindingOpt,
-            "TextStart" => Self::TextStart,
-            "True" => Self::True,
-            "TypedQuote" => Self::TypedQuote,
-            "TypedStr" => Self::TypedStr,
-            "Value" => Self::Value,
-            "ValueBinding" => Self::ValueBinding,
-            "Ws" => Self::Ws,
-            "" => Self::Root,
-            _ => panic!("Invalid non-terminal name: {}", name),
         }
     }
 }
@@ -3368,7 +3175,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 77:
     ///
-    /// `Ident: /[^ \t\n\r\x00-\x1F\x22\x7F:$]+/;`
+    /// `Ident: /[a-zA-Z_\-0-9]+/;`
     ///
     #[parol_runtime::function_name::named]
     fn ident(&mut self, ident: &ParseTreeType<'t>) -> Result<()> {

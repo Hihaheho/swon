@@ -1,11 +1,14 @@
 use clap::{Args, Parser, Subcommand};
 use std::fs;
 use swon_parol::grammar::Grammar;
-use swon_parol::parol_runtime::parser::parse_tree_type::{SynTree2, SynTreeTerminal, TerminalData};
+use swon_parol::parol_runtime::parser::parse_tree_type::{
+    ExpectedChildren, SynTree2, SynTreeTerminal, TerminalData,
+};
 use swon_parol::parol_runtime::parser::parser_types::SynTreeFlavor;
 use swon_parol::parol_runtime::ParolError;
-use swon_parol::parser::parse2;
-use swon_parol::syntree::Node;
+use swon_parol::parser::parse_into;
+use swon_parol::syntree::{Builder, Node};
+use swon_parol::syntree_node::{NonTerminalKind, TerminalKind};
 
 #[derive(Parser)]
 #[command(name = "swon", about = "SWON file utilities")]
@@ -40,7 +43,9 @@ fn main() {
             };
 
             let mut grammar = Grammar::new();
-            let tree = match parse2::<SynTree2<Grammar<'_>>>(&contents, &file, &mut grammar) {
+            let tree_builder =
+                Builder::<SynTree2<TerminalKind, NonTerminalKind>, SynTreeFlavor>::new_with();
+            let tree = match parse_into(&contents, tree_builder, &file, &mut grammar) {
                 Ok(tree) => tree,
                 Err(e) => {
                     match e {
@@ -53,13 +58,20 @@ fn main() {
             };
 
             for child in tree.children() {
+                if !child.value().expected_children().assert_node_syntax(child) {
+                    panic!("Expected children: {:?}", child.value().expected_children());
+                }
                 print_tree(&contents, &child, 0);
             }
         }
     }
 }
 
-fn print_tree(input: &str, node: &Node<SynTree2<Grammar<'_>>, SynTreeFlavor>, indent: usize) {
+fn print_tree(
+    input: &str,
+    node: &Node<SynTree2<TerminalKind, NonTerminalKind>, SynTreeFlavor>,
+    indent: usize,
+) {
     match node.value() {
         SynTree2::Terminal(t) => match t.data {
             TerminalData::Input(input_span) => println!(

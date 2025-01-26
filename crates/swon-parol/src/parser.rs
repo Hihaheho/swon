@@ -5,7 +5,7 @@
 // ---------------------------------------------------------
 
 use parol_runtime::once_cell::sync::Lazy;
-use parol_runtime::parser::parse_tree_type::SynTreeNode;
+use parol_runtime::parser::parse_tree_type::TreeConstruct;
 #[allow(unused_imports)]
 use parol_runtime::parser::{LLKParser, LookaheadDFA, ParseType, Production, Trans};
 use parol_runtime::{ParolError, ParseTree, TerminalIndex};
@@ -47,7 +47,7 @@ pub const TERMINALS: &[(&str, Option<(bool, &str)>); 29] = &[
     /* 24 */ (r",", None),
     /* 25 */ (r"\\\\", None),
     /* 26 */ (r":", None),
-    /* 27 */ (r"[^ \t\n\r\x00-\x1F\x22\x7F:$]+", None),
+    /* 27 */ (r"[a-zA-Z_\-0-9]+", None),
     /* 28 */ (ERROR_TOKEN, None),
 ];
 
@@ -1025,7 +1025,7 @@ pub const PRODUCTIONS: &[Production; 78] = &[
         lhs: 47,
         production: &[ParseType::T(26)],
     },
-    // 77 - Ident: /[^ \t\n\r\x00-\x1F\x22\x7F:$]+/;
+    // 77 - Ident: /[a-zA-Z_\-0-9]+/;
     Production {
         lhs: 21,
         production: &[ParseType::T(27)],
@@ -1079,11 +1079,15 @@ where
     )
 }
 #[allow(dead_code)]
-pub fn parse2<'t, T: SynTreeNode<'t>>(
+pub fn parse_into<'t, T: TreeConstruct<'t>>(
     input: &'t str,
+    mut tree_builder: T,
     file_name: impl AsRef<Path>,
     user_actions: &mut Grammar<'t>,
-) -> Result<ParseTree<T>, ParolError> {
+) -> Result<T::Tree, ParolError>
+where
+    ParolError: From<T::Error>,
+{
     let mut llk_parser = LLKParser::new(
         41,
         LOOKAHEAD_AUTOMATA,
@@ -1093,7 +1097,8 @@ pub fn parse2<'t, T: SynTreeNode<'t>>(
     );
     // Initialize wrapper
     let mut user_actions = GrammarAuto::new(user_actions);
-    llk_parser.parse::<T>(
+    llk_parser.parse_into::<T>(
+        tree_builder,
         TokenStream::new(input, file_name, &SCANNERS, MAX_K).unwrap(),
         &mut user_actions,
     )
