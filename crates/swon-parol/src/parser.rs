@@ -1064,24 +1064,16 @@ pub fn parse<'t, T>(
 where
     T: AsRef<Path>,
 {
-    let mut llk_parser = LLKParser::new(
-        41,
-        LOOKAHEAD_AUTOMATA,
-        PRODUCTIONS,
-        TERMINAL_NAMES,
-        NON_TERMINALS,
-    );
-    // Initialize wrapper
-    let mut user_actions = GrammarAuto::new(user_actions);
-    llk_parser.parse(
-        TokenStream::new(input, file_name, &SCANNERS, MAX_K).unwrap(),
-        &mut user_actions,
-    )
+    use parol_runtime::parser::parse_tree_type::SynTree;
+    use parol_runtime::parser::parser_types::SynTreeFlavor;
+    use parol_runtime::syntree::Builder;
+    let builder = Builder::<SynTree, SynTreeFlavor>::new_with();
+    parse_into(input, builder, file_name, user_actions)
 }
 #[allow(dead_code)]
 pub fn parse_into<'t, T: TreeConstruct<'t>>(
     input: &'t str,
-    mut tree_builder: T,
+    tree_builder: T,
     file_name: impl AsRef<Path>,
     user_actions: &mut Grammar<'t>,
 ) -> Result<T::Tree, ParolError>

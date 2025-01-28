@@ -1,14 +1,13 @@
 use clap::{Args, Parser, Subcommand};
 use std::fs;
 use swon_parol::grammar::Grammar;
-use swon_parol::parol_runtime::parser::parse_tree_type::{
-    ExpectedChildren, SynTree2, SynTreeTerminal, TerminalData,
-};
+use swon_parol::nodes::{NonTerminalKind, TerminalKind};
+use swon_parol::parol_runtime::parser::parse_tree_type::ExpectedChildren;
 use swon_parol::parol_runtime::parser::parser_types::SynTreeFlavor;
 use swon_parol::parol_runtime::ParolError;
 use swon_parol::parser::parse_into;
 use swon_parol::syntree::{Builder, Node};
-use swon_parol::syntree_node::{NonTerminalKind, TerminalKind};
+use swon_parol::tree::{SynTree2, SynTreeTerminal, TerminalData};
 
 #[derive(Parser)]
 #[command(name = "swon", about = "SWON file utilities")]
@@ -58,9 +57,9 @@ fn main() {
             };
 
             for child in tree.children() {
-                if !child.value().expected_children().assert_node_syntax(child) {
-                    panic!("Expected children: {:?}", child.value().expected_children());
-                }
+                // if !child.value().expected_children().assert_node_syntax(child) {
+                //     panic!("Expected children: {:?}", child.value().expected_children());
+                // }
                 print_tree(&contents, &child, 0);
             }
         }

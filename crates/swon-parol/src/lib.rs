@@ -2,19 +2,18 @@
 pub mod grammar;
 #[allow(clippy::needless_lifetimes)]
 pub mod grammar_trait;
+pub mod nodes;
 pub mod parser;
-pub mod syntree_node;
+pub mod tree;
 
 pub use parol_runtime;
 pub use parol_runtime::syntree;
-use parol_runtime::{
-    derive_builder::Builder, parser::parser_types::SynTreeFlavor, syntree::Builder,
-};
 
 #[test]
 fn test_parse() {
-    use parol_runtime::parser::parse_tree_type::SynTree2;
-    use syntree_node::{NonTerminalKind, TerminalKind};
+    use nodes::{NonTerminalKind, TerminalKind};
+    use parol_runtime::{parser::parser_types::SynTreeFlavor, syntree::Builder};
+    use tree::SynTree2;
     let mut actions = grammar::Grammar::new();
     let input = r#"
     @ a.b.c
