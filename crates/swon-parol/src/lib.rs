@@ -34,6 +34,31 @@ fn test_parse() {
     assert_eq!(input, result);
 }
 
+#[test]
+fn test_concrete_syntax_tree() {
+    use nodes::{NonTerminalKind, TerminalKind};
+    use tree::CstBuilder;
+    
+    let mut actions = grammar::Grammar::new();
+    let input = r#"
+    @ a.b.c
+	d = 1 # comment
+    e = "aaa"
+	"#;
+    
+    let tree_builder = CstBuilder::<TerminalKind, NonTerminalKind>::new();
+    let tree = parser::parse_into(input, tree_builder, "test.swon", &mut actions).unwrap();
+    
+    assert!(tree.root.is_some());
+    
+    assert!(tree.graph.node_count() > 0);
+    
+    if let Some(root) = tree.root {
+        let children = tree.children(root);
+        assert!(!children.is_empty());
+    }
+}
+
 // use grammar_trait::*;
 
 // trait Reconstruct {
