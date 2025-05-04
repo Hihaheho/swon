@@ -1,6 +1,6 @@
 mod semantic_tokens;
 
-use lsp_types::request::DocumentHighlightRequest;
+// use lsp_types::request::DocumentHighlightRequest;
 use lsp_types::{
     InitializeParams, SemanticTokensFullOptions, SemanticTokensLegend, SemanticTokensOptions,
     ServerCapabilities,
@@ -88,6 +88,7 @@ impl ServerContext {
         Ok(self.connection.sender.send(Message::Response(resp))?)
     }
 
+    #[expect(dead_code)]
     fn handle_request<R>(
         &mut self,
         req: Request,

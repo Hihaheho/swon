@@ -679,7 +679,10 @@ impl ExpectedChildren<TerminalKind, NonTerminalKind> for NonTerminalKind {
                     attribute: ChildAttribute::Normal,
                 },
             ]),
-            Self::TextBindingOpt => ExpectedChildrenKinds::Option(&[]),
+            Self::TextBindingOpt => ExpectedChildrenKinds::Option(&[ChildKind {
+                kind: NodeKind::NonTerminal(NonTerminalKind::Ws),
+                attribute: ChildAttribute::Clipped,
+            }]),
             Self::TextStart => ExpectedChildrenKinds::Sequence(&[ChildKind {
                 kind: NodeKind::Terminal(TerminalKind::TextStart),
                 attribute: ChildAttribute::Normal,
