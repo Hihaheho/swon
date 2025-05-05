@@ -1,9 +1,10 @@
 {
   "name": "swon-ls",
   "version": "1.0.0",
-  "main": "out/main",
+  "main": "out/main.js",
+  "publisher": "swon",
   "scripts": {
-    "package": "vsce package -o swon-ls.vsix",
+    "package": "npm run build && vsce package -o swon-ls.vsix",
     "build-base": "esbuild ./src/main.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node --target=node16",
     "build": "npm run build-base -- --sourcemap",
     "watch": "npm run build-base -- --sourcemap --watch"
@@ -26,18 +27,15 @@
     "vscode-languageclient": "^9.0.1"
   },
   "engines": {
-    "vscode": "^1.78.0"
+    "vscode": "^1.92.0"
   },
-  "activationEvents": [
-    "workspaceContains:*/*.swon"
-  ],
   "devDependencies": {
     "@tsconfig/strictest": "^2.0.5",
-    "@types/node": "^22.5.0",
+    "@types/node": "^22.15.3",
     "@types/vscode": "^1.92.0",
-    "@vscode/vsce": "^3.0.0",
-    "esbuild": "^0.23.1",
-    "typescript": "^5.5.4"
+    "@vscode/vsce": "^3.3.2",
+    "esbuild": "^0.25.3",
+    "typescript": "^5.8.3"
   },
   "contributes": {
     "commands": [
@@ -57,8 +55,13 @@
     "languages": [
       {
         "id": "swon",
-        "extensions": [".swon"],
-        "aliases": ["Swon", "swon"],
+        "extensions": [
+          ".swon"
+        ],
+        "aliases": [
+          "Swon",
+          "swon"
+        ],
         "filenames": [],
         "configuration": "language-configuration.json",
         "icon": {

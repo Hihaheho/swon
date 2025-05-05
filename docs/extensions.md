@@ -16,6 +16,7 @@ schema: https://swon.dev/schemas/swon-schema/v1
 - `$swon-lint.config = "https://swon.dev/default-configs/swon-lint/v1"`
 - `$swon-fmt.config = "https://swon.dev/default-configs/swon-fmt/v1"`
 - `$root = "script"` to indicate the root key of this section
+- `$data-model = "json"` to limit the data types that can be used in a data model, like path data in JSON.
 
 ## $variant
 

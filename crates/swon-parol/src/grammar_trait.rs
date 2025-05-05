@@ -9,7 +9,6 @@
 #![allow(clippy::large_enum_variant)]
 #![allow(clippy::upper_case_acronyms)]
 
-use parol_runtime::derive_builder::Builder;
 use parol_runtime::log::trace;
 #[allow(unused_imports)]
 use parol_runtime::parol_macros::{pop_and_reverse_item, pop_item};
@@ -246,14 +245,12 @@ pub trait GrammarTrait<'t> {
 /// `Bindings: ValueBinding;`
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct BindingsValueBinding<'t> {
     pub value_binding: ValueBinding<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for BindingsValueBinding<'t> {
+impl ToSpan for BindingsValueBinding<'_> {
     fn span(&self) -> Span {
         self.value_binding.span()
     }
@@ -265,14 +262,12 @@ impl<'t> ToSpan for BindingsValueBinding<'t> {
 /// `Bindings: SectionBinding;`
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct BindingsSectionBinding<'t> {
     pub section_binding: SectionBinding<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for BindingsSectionBinding<'t> {
+impl ToSpan for BindingsSectionBinding<'_> {
     fn span(&self) -> Span {
         self.section_binding.span()
     }
@@ -284,14 +279,12 @@ impl<'t> ToSpan for BindingsSectionBinding<'t> {
 /// `Bindings: TextBinding;`
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct BindingsTextBinding<'t> {
     pub text_binding: TextBinding<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for BindingsTextBinding<'t> {
+impl ToSpan for BindingsTextBinding<'_> {
     fn span(&self) -> Span {
         self.text_binding.span()
     }
@@ -303,14 +296,12 @@ impl<'t> ToSpan for BindingsTextBinding<'t> {
 /// `KeyBase: Ident;`
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct KeyBaseIdent<'t> {
     pub ident: Ident<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for KeyBaseIdent<'t> {
+impl ToSpan for KeyBaseIdent<'_> {
     fn span(&self) -> Span {
         self.ident.span()
     }
@@ -322,14 +313,12 @@ impl<'t> ToSpan for KeyBaseIdent<'t> {
 /// `KeyBase: ExtensionNameSpace;`
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct KeyBaseExtensionNameSpace<'t> {
     pub extension_name_space: ExtensionNameSpace<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for KeyBaseExtensionNameSpace<'t> {
+impl ToSpan for KeyBaseExtensionNameSpace<'_> {
     fn span(&self) -> Span {
         self.extension_name_space.span()
     }
@@ -341,14 +330,12 @@ impl<'t> ToSpan for KeyBaseExtensionNameSpace<'t> {
 /// `KeyBase: Str;`
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct KeyBaseStr<'t> {
     pub str: Str<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for KeyBaseStr<'t> {
+impl ToSpan for KeyBaseStr<'_> {
     fn span(&self) -> Span {
         self.str.span()
     }
@@ -360,14 +347,12 @@ impl<'t> ToSpan for KeyBaseStr<'t> {
 /// `Value: Object;`
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct ValueObject<'t> {
     pub object: Object<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for ValueObject<'t> {
+impl ToSpan for ValueObject<'_> {
     fn span(&self) -> Span {
         self.object.span()
     }
@@ -379,14 +364,12 @@ impl<'t> ToSpan for ValueObject<'t> {
 /// `Value: Array;`
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct ValueArray<'t> {
     pub array: Array<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for ValueArray<'t> {
+impl ToSpan for ValueArray<'_> {
     fn span(&self) -> Span {
         self.array.span()
     }
@@ -398,14 +381,12 @@ impl<'t> ToSpan for ValueArray<'t> {
 /// `Value: Integer;`
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct ValueInteger<'t> {
     pub integer: Integer<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for ValueInteger<'t> {
+impl ToSpan for ValueInteger<'_> {
     fn span(&self) -> Span {
         self.integer.span()
     }
@@ -417,14 +398,12 @@ impl<'t> ToSpan for ValueInteger<'t> {
 /// `Value: Boolean;`
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct ValueBoolean<'t> {
     pub boolean: Boolean<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for ValueBoolean<'t> {
+impl ToSpan for ValueBoolean<'_> {
     fn span(&self) -> Span {
         self.boolean.span()
     }
@@ -436,14 +415,12 @@ impl<'t> ToSpan for ValueBoolean<'t> {
 /// `Value: Null;`
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct ValueNull<'t> {
     pub null: Null<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for ValueNull<'t> {
+impl ToSpan for ValueNull<'_> {
     fn span(&self) -> Span {
         self.null.span()
     }
@@ -455,14 +432,12 @@ impl<'t> ToSpan for ValueNull<'t> {
 /// `Value: StrContinues;`
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct ValueStrContinues<'t> {
     pub str_continues: StrContinues<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for ValueStrContinues<'t> {
+impl ToSpan for ValueStrContinues<'_> {
     fn span(&self) -> Span {
         self.str_continues.span()
     }
@@ -474,14 +449,12 @@ impl<'t> ToSpan for ValueStrContinues<'t> {
 /// `Value: TypedStr;`
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct ValueTypedStr<'t> {
     pub typed_str: TypedStr<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for ValueTypedStr<'t> {
+impl ToSpan for ValueTypedStr<'_> {
     fn span(&self) -> Span {
         self.typed_str.span()
     }
@@ -493,14 +466,12 @@ impl<'t> ToSpan for ValueTypedStr<'t> {
 /// `Value: Hole;`
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct ValueHole<'t> {
     pub hole: Hole<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for ValueHole<'t> {
+impl ToSpan for ValueHole<'_> {
     fn span(&self) -> Span {
         self.hole.span()
     }
@@ -512,14 +483,12 @@ impl<'t> ToSpan for ValueHole<'t> {
 /// `Boolean: True;`
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct BooleanTrue<'t> {
     pub r#true: True<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for BooleanTrue<'t> {
+impl ToSpan for BooleanTrue<'_> {
     fn span(&self) -> Span {
         self.r#true.span()
     }
@@ -531,14 +500,12 @@ impl<'t> ToSpan for BooleanTrue<'t> {
 /// `Boolean: False;`
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct BooleanFalse<'t> {
     pub r#false: False<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for BooleanFalse<'t> {
+impl ToSpan for BooleanFalse<'_> {
     fn span(&self) -> Span {
         self.r#false.span()
     }
@@ -553,16 +520,14 @@ impl<'t> ToSpan for BooleanFalse<'t> {
 /// Type derived for non-terminal Array
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Array<'t> {
     pub array_begin: ArrayBegin<'t>,
     pub array_list: Vec<ArrayList<'t>>,
     pub array_end: ArrayEnd<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Array<'t> {
+impl ToSpan for Array<'_> {
     fn span(&self) -> Span {
         self.array_begin.span()
             + self
@@ -578,14 +543,12 @@ impl<'t> ToSpan for Array<'t> {
 /// Type derived for non-terminal ArrayBegin
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct ArrayBegin<'t> {
     pub array_begin: Token<'t>, /* [ */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for ArrayBegin<'t> {
+impl ToSpan for ArrayBegin<'_> {
     fn span(&self) -> Span {
         self.array_begin.span()
     }
@@ -595,14 +558,12 @@ impl<'t> ToSpan for ArrayBegin<'t> {
 /// Type derived for non-terminal ArrayEnd
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct ArrayEnd<'t> {
     pub array_end: Token<'t>, /* ] */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for ArrayEnd<'t> {
+impl ToSpan for ArrayEnd<'_> {
     fn span(&self) -> Span {
         self.array_end.span()
     }
@@ -612,15 +573,13 @@ impl<'t> ToSpan for ArrayEnd<'t> {
 /// Type derived for non-terminal ArrayList
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct ArrayList<'t> {
     pub value: Value<'t>,
     pub array_opt: Option<ArrayOpt<'t>>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for ArrayList<'t> {
+impl ToSpan for ArrayList<'_> {
     fn span(&self) -> Span {
         self.value.span()
             + self
@@ -634,16 +593,14 @@ impl<'t> ToSpan for ArrayList<'t> {
 /// Type derived for non-terminal ArrayMarker
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct ArrayMarker<'t> {
     pub array_begin: ArrayBegin<'t>,
     pub array_marker_opt: Option<ArrayMarkerOpt<'t>>,
     pub array_end: ArrayEnd<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for ArrayMarker<'t> {
+impl ToSpan for ArrayMarker<'_> {
     fn span(&self) -> Span {
         self.array_begin.span()
             + self
@@ -658,14 +615,12 @@ impl<'t> ToSpan for ArrayMarker<'t> {
 /// Type derived for non-terminal ArrayMarkerOpt
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct ArrayMarkerOpt<'t> {
     pub integer: Integer<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for ArrayMarkerOpt<'t> {
+impl ToSpan for ArrayMarkerOpt<'_> {
     fn span(&self) -> Span {
         self.integer.span()
     }
@@ -675,14 +630,12 @@ impl<'t> ToSpan for ArrayMarkerOpt<'t> {
 /// Type derived for non-terminal ArrayOpt
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct ArrayOpt<'t> {
     pub comma: Comma<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for ArrayOpt<'t> {
+impl ToSpan for ArrayOpt<'_> {
     fn span(&self) -> Span {
         self.comma.span()
     }
@@ -692,14 +645,12 @@ impl<'t> ToSpan for ArrayOpt<'t> {
 /// Type derived for non-terminal At
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct At<'t> {
     pub at: Token<'t>, /* @ */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for At<'t> {
+impl ToSpan for At<'_> {
     fn span(&self) -> Span {
         self.at.span()
     }
@@ -709,14 +660,12 @@ impl<'t> ToSpan for At<'t> {
 /// Type derived for non-terminal Begin
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Begin<'t> {
     pub begin: Token<'t>, /* { */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Begin<'t> {
+impl ToSpan for Begin<'_> {
     fn span(&self) -> Span {
         self.begin.span()
     }
@@ -726,14 +675,12 @@ impl<'t> ToSpan for Begin<'t> {
 /// Type derived for non-terminal Bind
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Bind<'t> {
     pub bind: Token<'t>, /* = */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Bind<'t> {
+impl ToSpan for Bind<'_> {
     fn span(&self) -> Span {
         self.bind.span()
     }
@@ -743,15 +690,13 @@ impl<'t> ToSpan for Bind<'t> {
 /// Type derived for non-terminal Binding
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Binding<'t> {
     pub keys: Keys<'t>,
     pub bindings: Bindings<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Binding<'t> {
+impl ToSpan for Binding<'_> {
     fn span(&self) -> Span {
         self.keys.span() + self.bindings.span()
     }
@@ -768,8 +713,7 @@ pub enum Bindings<'t> {
     TextBinding(BindingsTextBinding<'t>),
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Bindings<'t> {
+impl ToSpan for Bindings<'_> {
     fn span(&self) -> Span {
         match self {
             Bindings::ValueBinding(v) => v.span(),
@@ -789,8 +733,7 @@ pub enum Boolean<'t> {
     False(BooleanFalse<'t>),
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Boolean<'t> {
+impl ToSpan for Boolean<'_> {
     fn span(&self) -> Span {
         match self {
             Boolean::True(v) => v.span(),
@@ -803,14 +746,12 @@ impl<'t> ToSpan for Boolean<'t> {
 /// Type derived for non-terminal Comma
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Comma<'t> {
     pub comma: Token<'t>, /* , */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Comma<'t> {
+impl ToSpan for Comma<'_> {
     fn span(&self) -> Span {
         self.comma.span()
     }
@@ -820,14 +761,12 @@ impl<'t> ToSpan for Comma<'t> {
 /// Type derived for non-terminal Continue
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Continue<'t> {
     pub r#continue: Token<'t>, /* \\ */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Continue<'t> {
+impl ToSpan for Continue<'_> {
     fn span(&self) -> Span {
         self.r#continue.span()
     }
@@ -837,14 +776,12 @@ impl<'t> ToSpan for Continue<'t> {
 /// Type derived for non-terminal Dot
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Dot<'t> {
     pub dot: Token<'t>, /* . */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Dot<'t> {
+impl ToSpan for Dot<'_> {
     fn span(&self) -> Span {
         self.dot.span()
     }
@@ -854,14 +791,12 @@ impl<'t> ToSpan for Dot<'t> {
 /// Type derived for non-terminal End
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct End<'t> {
     pub end: Token<'t>, /* } */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for End<'t> {
+impl ToSpan for End<'_> {
     fn span(&self) -> Span {
         self.end.span()
     }
@@ -871,14 +806,12 @@ impl<'t> ToSpan for End<'t> {
 /// Type derived for non-terminal Ext
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Ext<'t> {
     pub ext: Token<'t>, /* $ */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Ext<'t> {
+impl ToSpan for Ext<'_> {
     fn span(&self) -> Span {
         self.ext.span()
     }
@@ -888,15 +821,13 @@ impl<'t> ToSpan for Ext<'t> {
 /// Type derived for non-terminal ExtensionNameSpace
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct ExtensionNameSpace<'t> {
     pub ext: Ext<'t>,
     pub ident: Ident<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for ExtensionNameSpace<'t> {
+impl ToSpan for ExtensionNameSpace<'_> {
     fn span(&self) -> Span {
         self.ext.span() + self.ident.span()
     }
@@ -906,14 +837,12 @@ impl<'t> ToSpan for ExtensionNameSpace<'t> {
 /// Type derived for non-terminal False
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct False<'t> {
     pub r#false: Token<'t>, /* false */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for False<'t> {
+impl ToSpan for False<'_> {
     fn span(&self) -> Span {
         self.r#false.span()
     }
@@ -923,14 +852,12 @@ impl<'t> ToSpan for False<'t> {
 /// Type derived for non-terminal Hole
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Hole<'t> {
     pub hole: Token<'t>, /* ! */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Hole<'t> {
+impl ToSpan for Hole<'_> {
     fn span(&self) -> Span {
         self.hole.span()
     }
@@ -940,14 +867,12 @@ impl<'t> ToSpan for Hole<'t> {
 /// Type derived for non-terminal Ident
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Ident<'t> {
     pub ident: Token<'t>, /* [a-zA-Z_\-0-9]+ */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Ident<'t> {
+impl ToSpan for Ident<'_> {
     fn span(&self) -> Span {
         self.ident.span()
     }
@@ -957,14 +882,12 @@ impl<'t> ToSpan for Ident<'t> {
 /// Type derived for non-terminal InStr
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct InStr<'t> {
     pub in_str: Token<'t>, /* (\\[nrt\\"0]|[^\\"\r\n])* */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for InStr<'t> {
+impl ToSpan for InStr<'_> {
     fn span(&self) -> Span {
         self.in_str.span()
     }
@@ -974,14 +897,12 @@ impl<'t> ToSpan for InStr<'t> {
 /// Type derived for non-terminal Integer
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Integer<'t> {
     pub integer: Token<'t>, /* \d[\d_]* */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Integer<'t> {
+impl ToSpan for Integer<'_> {
     fn span(&self) -> Span {
         self.integer.span()
     }
@@ -991,15 +912,13 @@ impl<'t> ToSpan for Integer<'t> {
 /// Type derived for non-terminal Key
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Key<'t> {
     pub key_base: KeyBase<'t>,
     pub key_opt: Option<KeyOpt<'t>>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Key<'t> {
+impl ToSpan for Key<'_> {
     fn span(&self) -> Span {
         self.key_base.span() + self.key_opt.as_ref().map_or(Span::default(), |o| o.span())
     }
@@ -1016,8 +935,7 @@ pub enum KeyBase<'t> {
     Str(KeyBaseStr<'t>),
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for KeyBase<'t> {
+impl ToSpan for KeyBase<'_> {
     fn span(&self) -> Span {
         match self {
             KeyBase::Ident(v) => v.span(),
@@ -1031,14 +949,12 @@ impl<'t> ToSpan for KeyBase<'t> {
 /// Type derived for non-terminal KeyOpt
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct KeyOpt<'t> {
     pub array_marker: ArrayMarker<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for KeyOpt<'t> {
+impl ToSpan for KeyOpt<'_> {
     fn span(&self) -> Span {
         self.array_marker.span()
     }
@@ -1048,15 +964,13 @@ impl<'t> ToSpan for KeyOpt<'t> {
 /// Type derived for non-terminal Keys
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Keys<'t> {
     pub key: Key<'t>,
     pub keys_list: Vec<KeysList<'t>>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Keys<'t> {
+impl ToSpan for Keys<'_> {
     fn span(&self) -> Span {
         self.key.span()
             + self.keys_list.first().map_or(Span::default(), |f| f.span())
@@ -1068,15 +982,13 @@ impl<'t> ToSpan for Keys<'t> {
 /// Type derived for non-terminal KeysList
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct KeysList<'t> {
     pub dot: Dot<'t>,
     pub key: Key<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for KeysList<'t> {
+impl ToSpan for KeysList<'_> {
     fn span(&self) -> Span {
         self.dot.span() + self.key.span()
     }
@@ -1086,14 +998,12 @@ impl<'t> ToSpan for KeysList<'t> {
 /// Type derived for non-terminal Newline
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Newline<'t> {
     pub newline: Token<'t>, /* \r\n|\r|\n */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Newline<'t> {
+impl ToSpan for Newline<'_> {
     fn span(&self) -> Span {
         self.newline.span()
     }
@@ -1103,14 +1013,12 @@ impl<'t> ToSpan for Newline<'t> {
 /// Type derived for non-terminal Null
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Null<'t> {
     pub null: Token<'t>, /* null */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Null<'t> {
+impl ToSpan for Null<'_> {
     fn span(&self) -> Span {
         self.null.span()
     }
@@ -1120,16 +1028,14 @@ impl<'t> ToSpan for Null<'t> {
 /// Type derived for non-terminal Object
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Object<'t> {
     pub begin: Begin<'t>,
     pub object_list: Vec<ObjectList<'t>>,
     pub end: End<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Object<'t> {
+impl ToSpan for Object<'_> {
     fn span(&self) -> Span {
         self.begin.span()
             + self
@@ -1148,8 +1054,7 @@ impl<'t> ToSpan for Object<'t> {
 /// Type derived for non-terminal ObjectList
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct ObjectList<'t> {
     pub key: Key<'t>,
     pub bind: Bind<'t>,
@@ -1157,8 +1062,7 @@ pub struct ObjectList<'t> {
     pub object_opt: Option<ObjectOpt<'t>>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for ObjectList<'t> {
+impl ToSpan for ObjectList<'_> {
     fn span(&self) -> Span {
         self.key.span()
             + self.bind.span()
@@ -1174,14 +1078,12 @@ impl<'t> ToSpan for ObjectList<'t> {
 /// Type derived for non-terminal ObjectOpt
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct ObjectOpt<'t> {
     pub comma: Comma<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for ObjectOpt<'t> {
+impl ToSpan for ObjectOpt<'_> {
     fn span(&self) -> Span {
         self.comma.span()
     }
@@ -1191,14 +1093,12 @@ impl<'t> ToSpan for ObjectOpt<'t> {
 /// Type derived for non-terminal Quote
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Quote<'t> {
     pub quote: Token<'t>, /* " */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Quote<'t> {
+impl ToSpan for Quote<'_> {
     fn span(&self) -> Span {
         self.quote.span()
     }
@@ -1208,16 +1108,14 @@ impl<'t> ToSpan for Quote<'t> {
 /// Type derived for non-terminal Section
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Section<'t> {
     pub at: At<'t>,
     pub keys: Keys<'t>,
     pub section_list: Vec<SectionList<'t>>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Section<'t> {
+impl ToSpan for Section<'_> {
     fn span(&self) -> Span {
         self.at.span()
             + self.keys.span()
@@ -1236,16 +1134,14 @@ impl<'t> ToSpan for Section<'t> {
 /// Type derived for non-terminal SectionBinding
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct SectionBinding<'t> {
     pub begin: Begin<'t>,
     pub swon: Swon<'t>,
     pub end: End<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for SectionBinding<'t> {
+impl ToSpan for SectionBinding<'_> {
     fn span(&self) -> Span {
         self.begin.span() + self.swon.span() + self.end.span()
     }
@@ -1255,14 +1151,12 @@ impl<'t> ToSpan for SectionBinding<'t> {
 /// Type derived for non-terminal SectionList
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct SectionList<'t> {
     pub binding: Binding<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for SectionList<'t> {
+impl ToSpan for SectionList<'_> {
     fn span(&self) -> Span {
         self.binding.span()
     }
@@ -1272,16 +1166,14 @@ impl<'t> ToSpan for SectionList<'t> {
 /// Type derived for non-terminal Str
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Str<'t> {
     pub quote: Quote<'t>,
     pub in_str: InStr<'t>,
     pub quote0: Quote<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Str<'t> {
+impl ToSpan for Str<'_> {
     fn span(&self) -> Span {
         self.quote.span() + self.in_str.span() + self.quote0.span()
     }
@@ -1291,15 +1183,13 @@ impl<'t> ToSpan for Str<'t> {
 /// Type derived for non-terminal StrContinues
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct StrContinues<'t> {
     pub str: Str<'t>,
     pub str_continues_list: Vec<StrContinuesList<'t>>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for StrContinues<'t> {
+impl ToSpan for StrContinues<'_> {
     fn span(&self) -> Span {
         self.str.span()
             + self
@@ -1317,15 +1207,13 @@ impl<'t> ToSpan for StrContinues<'t> {
 /// Type derived for non-terminal StrContinuesList
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct StrContinuesList<'t> {
     pub r#continue: Continue<'t>,
     pub str: Str<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for StrContinuesList<'t> {
+impl ToSpan for StrContinuesList<'_> {
     fn span(&self) -> Span {
         self.r#continue.span() + self.str.span()
     }
@@ -1335,15 +1223,13 @@ impl<'t> ToSpan for StrContinuesList<'t> {
 /// Type derived for non-terminal Swon
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Swon<'t> {
     pub swon_list: Vec<SwonList<'t>>,
     pub swon_list0: Vec<SwonList0<'t>>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Swon<'t> {
+impl ToSpan for Swon<'_> {
     fn span(&self) -> Span {
         self.swon_list.first().map_or(Span::default(), |f| f.span())
             + self.swon_list.last().map_or(Span::default(), |l| l.span())
@@ -1359,14 +1245,12 @@ impl<'t> ToSpan for Swon<'t> {
 /// Type derived for non-terminal SwonList
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct SwonList<'t> {
     pub binding: Binding<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for SwonList<'t> {
+impl ToSpan for SwonList<'_> {
     fn span(&self) -> Span {
         self.binding.span()
     }
@@ -1376,14 +1260,12 @@ impl<'t> ToSpan for SwonList<'t> {
 /// Type derived for non-terminal SwonList0
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct SwonList0<'t> {
     pub section: Section<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for SwonList0<'t> {
+impl ToSpan for SwonList0<'_> {
     fn span(&self) -> Span {
         self.section.span()
     }
@@ -1393,14 +1275,12 @@ impl<'t> ToSpan for SwonList0<'t> {
 /// Type derived for non-terminal Text
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Text<'t> {
     pub text: Token<'t>, /* [^\\"\r\n]* */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Text<'t> {
+impl ToSpan for Text<'_> {
     fn span(&self) -> Span {
         self.text.span()
     }
@@ -1410,8 +1290,7 @@ impl<'t> ToSpan for Text<'t> {
 /// Type derived for non-terminal TextBinding
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct TextBinding<'t> {
     pub text_start: TextStart<'t>,
     pub text_binding_opt: Option<TextBindingOpt>,
@@ -1419,8 +1298,7 @@ pub struct TextBinding<'t> {
     pub newline: Newline<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for TextBinding<'t> {
+impl ToSpan for TextBinding<'_> {
     fn span(&self) -> Span {
         self.text_start.span()
             + self
@@ -1436,11 +1314,9 @@ impl<'t> ToSpan for TextBinding<'t> {
 /// Type derived for non-terminal TextBindingOpt
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct TextBindingOpt {}
 
-#[allow(clippy::needless_lifetimes)]
 impl ToSpan for TextBindingOpt {
     fn span(&self) -> Span {
         Span::default()
@@ -1451,14 +1327,12 @@ impl ToSpan for TextBindingOpt {
 /// Type derived for non-terminal TextStart
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct TextStart<'t> {
     pub text_start: Token<'t>, /* : */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for TextStart<'t> {
+impl ToSpan for TextStart<'_> {
     fn span(&self) -> Span {
         self.text_start.span()
     }
@@ -1468,14 +1342,12 @@ impl<'t> ToSpan for TextStart<'t> {
 /// Type derived for non-terminal True
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct True<'t> {
     pub r#true: Token<'t>, /* true */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for True<'t> {
+impl ToSpan for True<'_> {
     fn span(&self) -> Span {
         self.r#true.span()
     }
@@ -1485,14 +1357,12 @@ impl<'t> ToSpan for True<'t> {
 /// Type derived for non-terminal TypedQuote
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct TypedQuote<'t> {
     pub typed_quote: Token<'t>, /* [^ \t\n\r\x00-\x1F\x22\x7F]+" */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for TypedQuote<'t> {
+impl ToSpan for TypedQuote<'_> {
     fn span(&self) -> Span {
         self.typed_quote.span()
     }
@@ -1502,16 +1372,14 @@ impl<'t> ToSpan for TypedQuote<'t> {
 /// Type derived for non-terminal TypedStr
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct TypedStr<'t> {
     pub typed_quote: TypedQuote<'t>,
     pub in_str: InStr<'t>,
     pub quote: Quote<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for TypedStr<'t> {
+impl ToSpan for TypedStr<'_> {
     fn span(&self) -> Span {
         self.typed_quote.span() + self.in_str.span() + self.quote.span()
     }
@@ -1533,8 +1401,7 @@ pub enum Value<'t> {
     Hole(ValueHole<'t>),
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Value<'t> {
+impl ToSpan for Value<'_> {
     fn span(&self) -> Span {
         match self {
             Value::Object(v) => v.span(),
@@ -1553,15 +1420,13 @@ impl<'t> ToSpan for Value<'t> {
 /// Type derived for non-terminal ValueBinding
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct ValueBinding<'t> {
     pub bind: Bind<'t>,
     pub value: Value<'t>,
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for ValueBinding<'t> {
+impl ToSpan for ValueBinding<'_> {
     fn span(&self) -> Span {
         self.bind.span() + self.value.span()
     }
@@ -1571,14 +1436,12 @@ impl<'t> ToSpan for ValueBinding<'t> {
 /// Type derived for non-terminal Ws
 ///
 #[allow(dead_code)]
-#[derive(Builder, Debug, Clone)]
-#[builder(crate = "parol_runtime::derive_builder")]
+#[derive(Debug, Clone)]
 pub struct Ws<'t> {
     pub ws: Token<'t>, /* [\s--\r\n]+ */
 }
 
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for Ws<'t> {
+impl ToSpan for Ws<'_> {
     fn span(&self) -> Span {
         self.ws.span()
     }
@@ -1647,8 +1510,7 @@ pub enum ASTType<'t> {
     ValueBinding(ValueBinding<'t>),
     Ws(Ws<'t>),
 }
-#[allow(clippy::needless_lifetimes)]
-impl<'t> ToSpan for ASTType<'t> {
+impl ToSpan for ASTType<'_> {
     fn span(&self) -> Span {
         match self {
             ASTType::Array(v) => v.span(),

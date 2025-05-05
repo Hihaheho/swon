@@ -5,6 +5,8 @@ out
 !package.json
 !tsconfig.json
 !src/**/*.ts
+!LICENSE
 
 !language-configuration.json
-!swon.tmLanguage.json
+
+*.vsix

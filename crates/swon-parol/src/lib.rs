@@ -6,100 +6,59 @@ pub mod nodes;
 pub mod parser;
 pub mod tree;
 
+use nodes::{NonTerminalKind, TerminalKind};
 pub use parol_runtime;
-pub use parol_runtime::syntree;
+use tree::{ConcreteSyntaxTree, CstNodeData};
 
-#[test]
-fn test_parse() {
-    use nodes::{NonTerminalKind, TerminalKind};
-    use tree::CstBuilder;
-    let mut actions = grammar::Grammar::new();
-    let input = r#"
-    @ a.b.c
-	d = 1 # comment
-    e = "aaa"
-	"#;
-    let tree_builder =
-        CstBuilder::<TerminalKind, NonTerminalKind>::new();
-    let tree = parser::parse_into(input, tree_builder, "test.swon", &mut actions).unwrap();
-    
-    assert!(tree.root.is_some());
-    assert!(tree.graph.node_count() > 0);
-}
+pub type Cst = ConcreteSyntaxTree<TerminalKind, NonTerminalKind>;
+pub type CstNode = CstNodeData<TerminalKind, NonTerminalKind>;
+
+pub use parol_runtime::parser::parse_tree_type::TreeConstruct;
 
 #[test]
 fn test_concrete_syntax_tree() {
     use nodes::{NonTerminalKind, TerminalKind};
     use tree::CstBuilder;
-    
+
     let mut actions = grammar::Grammar::new();
     let input = r#"
     @ a.b.c
 	d = 1 # comment
     e = "aaa"
 	"#;
-    
-    let tree_builder = CstBuilder::<TerminalKind, NonTerminalKind>::new();
-    let tree = parser::parse_into(input, tree_builder, "test.swon", &mut actions).unwrap();
-    
-    assert!(tree.root.is_some());
-    
-    assert!(tree.graph.node_count() > 0);
-    
-    if let Some(root) = tree.root {
-        let children = tree.children(root);
-        assert!(!children.is_empty());
-    }
+
+    let mut tree_builder = CstBuilder::<TerminalKind, NonTerminalKind>::new();
+    parser::parse_into(input, &mut tree_builder, "test.swon", &mut actions).unwrap();
+    let tree = tree_builder.build().unwrap();
+
+    let mut out = String::new();
+    tree.write(input, &mut out).unwrap();
+    assert_eq!(out, input);
 }
 
-// use grammar_trait::*;
+#[test]
+fn test_concrete_syntax_tree_with_syntax_error() {
+    use nodes::{NonTerminalKind, TerminalKind};
+    use tree::CstBuilder;
 
-// trait Reconstruct {
-//     fn reconstruct<W: std::fmt::Write>(&self, writer: &mut W) -> String;
-// }
+    let mut actions = grammar::Grammar::new();
 
-// impl Grammar<'_> {
-//     pub fn reconstruct(&self) -> String {
-//         let mut writer = String::new();
-//         self.swon.reconstruct(&mut writer);
-//         writer
-//     }
-// }
+    let input = r#"
+    @ a
+    @ !!
+    $variant"#;
 
-// impl<T> Reconstruct for Option<T>
-// where
-//     T: Reconstruct,
-// {
-//     fn reconstruct(&self) -> String {
-//         match self {
-//             Some(t) => t.reconstruct(),
-//             None => String::default(),
-//         }
-//     }
-// }
+    let mut tree_builder = CstBuilder::<TerminalKind, NonTerminalKind>::new();
+    assert!(parser::parse_into(input, &mut tree_builder, "test.swon", &mut actions).is_err());
+    let tree = tree_builder.build().unwrap();
 
-// impl<T> Reconstruct for Vec<T>
-// where
-//     T: Reconstruct,
-// {
-//     fn reconstruct(&self) -> String {
-//         self.iter()
-//             .map(|t| t.reconstruct())
-//             .collect::<Vec<_>>()
-//             .join("")
-//     }
-// }
-
-// impl Reconstruct for Swon<'_> {
-//     fn reconstruct(&self) -> String {
-//         self.swon_list0
-//             .iter()
-//             .map(|section| section.section.reconstruct())
-//     }
-// }
-
-// impl Reconstruct for Section<'_> {
-//     fn reconstruct(&self) -> String {
-//         todo!()
-//     }
-// }
+    let mut out = String::new();
+    tree.write(input, &mut out).unwrap();
+    assert_eq!(
+        out,
+        r#"
+    @ a
+    @ !!
+    $variant"#
+    );
+}
