@@ -2,12 +2,10 @@ use clap::{Args, Parser, Subcommand};
 use std::fs;
 use swon_parol::grammar::Grammar;
 use swon_parol::nodes::{NonTerminalKind, TerminalKind};
-// use swon_parol::parol_runtime::parser::parse_tree_type::ExpectedChildren;
-use swon_parol::parol_runtime::parser::parser_types::SynTreeFlavor;
 use swon_parol::parol_runtime::ParolError;
 use swon_parol::parser::parse_into;
-use swon_parol::syntree::{Builder, Node};
-use swon_parol::tree::{SynTree2, SynTreeTerminal, TerminalData};
+use swon_parol::tree::{CstBuilder, CstNodeData};
+use petgraph::graph::NodeIndex;
 
 #[derive(Parser)]
 #[command(name = "swon", about = "SWON file utilities")]
@@ -43,7 +41,7 @@ fn main() {
 
             let mut grammar = Grammar::new();
             let tree_builder =
-                Builder::<SynTree2<TerminalKind, NonTerminalKind>, SynTreeFlavor>::new_with();
+                CstBuilder::<TerminalKind, NonTerminalKind>::new();
             let tree = match parse_into(&contents, tree_builder, &file, &mut grammar) {
                 Ok(tree) => tree,
                 Err(e) => {
@@ -56,11 +54,8 @@ fn main() {
                 }
             };
 
-            for child in tree.children() {
-                // if !child.value().expected_children().assert_node_syntax(child) {
-                //     panic!("Expected children: {:?}", child.value().expected_children());
-                // }
-                print_tree(&contents, &child, 0);
+            if tree.root.is_some() {
+                print_tree(&contents, &tree, 0);
             }
         }
     }
@@ -68,33 +63,37 @@ fn main() {
 
 fn print_tree(
     input: &str,
-    node: &Node<SynTree2<TerminalKind, NonTerminalKind>, SynTreeFlavor>,
+    tree: &swon_parol::tree::ConcreteSyntaxTree<TerminalKind, NonTerminalKind>,
     indent: usize,
 ) {
-    match node.value() {
-        SynTree2::Terminal(t) => match t.data {
-            TerminalData::Input(input_span) => println!(
+    if let Some(root) = tree.root {
+        print_node(input, tree, root, indent);
+    }
+}
+
+fn print_node(
+    input: &str,
+    tree: &swon_parol::tree::ConcreteSyntaxTree<TerminalKind, NonTerminalKind>,
+    node_idx: petgraph::graph::NodeIndex,
+    indent: usize,
+) {
+    if let Some(node_data) = tree.node_data(node_idx) {
+        match node_data {
+            CstNodeData::Terminal(kind, input_span) => println!(
                 "{}{} ({:?})",
                 " ".repeat(indent),
                 &input[input_span.start as usize..input_span.end as usize]
                     .replace("\n", "\\n")
                     .replace("\t", "\\t")
                     .replace(" ", "_"),
-                t.kind,
+                kind,
             ),
-            TerminalData::Dynamic(_) => unreachable!(),
-        },
-        SynTree2::NonTerminal(n) => println!("{}{:?}", " ".repeat(indent), n.kind),
+            CstNodeData::NonTerminal(kind) => println!("{}{:?}", " ".repeat(indent), kind),
+            CstNodeData::DynamicToken(token_id) => println!("{}{:?} (dynamic)", " ".repeat(indent), token_id),
+        }
     }
-    if let SynTree2::Terminal(SynTreeTerminal {
-        data: TerminalData::Input(input_span),
-        ..
-    }) = node.value()
-    {
-        use swon_parol::syntree::Span;
-        assert_eq!(node.span(), Span::new(input_span.start, input_span.end));
-    }
-    for child in node.children() {
-        print_tree(input, &child, indent + 2);
+
+    for child in tree.children(node_idx) {
+        print_node(input, tree, child, indent + 2);
     }
 }

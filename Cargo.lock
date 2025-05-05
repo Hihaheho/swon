@@ -4525,6 +4525,7 @@ name = "swon-cli"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "petgraph 0.8.1",
  "swon-parol",
 ]
 
