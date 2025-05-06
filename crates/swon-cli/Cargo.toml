@@ -14,5 +14,5 @@ path = "src/main.rs"
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
-swon-parol = { path = "../swon-parol" }
+swon-parol = { workspace = true }
 petgraph = "0.8.1"

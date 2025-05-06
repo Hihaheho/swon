@@ -14,5 +14,5 @@ lsp-types = "0.97.0"
 serde.workspace = true
 serde_json.workspace = true
 anyhow.workspace = true
-swon-editor-support = { path = "../swon-editor-support", version = "0.1.0" }
+swon-editor-support = { workspace = true }
 swon-parol = { workspace = true }
