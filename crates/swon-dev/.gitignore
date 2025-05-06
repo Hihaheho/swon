@@ -4,3 +4,6 @@
 !assets/*.ico
 !assets/*.svg
 !assets/*.css
+
+assets/tailwind.css
+node_modules
