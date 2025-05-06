@@ -11,6 +11,8 @@ import {
 	ServerOptions,
 	TransportKind
 } from 'vscode-languageclient/node';
+import path from 'path';
+import { homedir } from 'os';
 
 let client: LanguageClient | undefined;
 
@@ -36,11 +38,11 @@ export function activate(context: ExtensionContext) {
 		// Otherwise the run options are used
 		const serverOptions: ServerOptions = {
 			run: {
-				command: "swon-ls",
+				command: path.join(homedir(), "/.cargo/bin/swon-ls"),
 				transport: TransportKind.stdio
 			},
 			debug: {
-				command: "swon-ls",
+				command: path.join(homedir(), "/.cargo/bin/swon-ls"),
 				transport: TransportKind.stdio
 			}
 		};

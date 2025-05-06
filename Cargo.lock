@@ -4654,7 +4654,6 @@ name = "swon-tree"
 version = "0.1.0"
 dependencies = [
  "ahash",
- "syntree",
 ]
 
 [[package]]

@@ -1,78 +1,33 @@
-use syntree::Span;
-
-pub enum NodeData {
-    NonTerminal(NonTerminal),
-    Terminal { terminal: Terminal, token: Token },
-}
-
-pub enum Token {
-    /// A token from the original input.
-    Input(Span<u32>),
-    /// A token that was added after parsing.
-    Added(String),
-}
-
-pub enum Terminal {
-    Ws,
-    Newline,
-    Ident,
-    Extension,
-    BlockComment,
-    LineComment,
-    Text,
-    Code,
-    Number,
-    Boolean,
-    Unit,
-    Null,
-}
-
-pub enum NonTerminal {
-    Swon,
-    Sections,
-    Bindings,
-    Section,
-    Binding,
-    Keys,
-    Key,
-    Array,
-    ArrayIndex,
-    Tuple,
-    List,
-    Map,
-}
-
-pub struct Swon {
-    pub sections: Vec<SwonSection>,
-    pub bindings: Vec<SwonBinding>,
+/// A data structure for representing a Swon document without any span information.
+pub struct SwonDocument {
+    sections: Vec<SwonSection>,
+    bindings: Vec<SwonBinding>,
 }
 
 pub struct SwonSection {
-    pub keys: Vec<SwonKey>,
-    pub bindings: Vec<SwonBinding>,
+    /// Whether the section has `{` and `}`
+    nested: bool,
+    keys: Vec<SwonKey>,
+}
+
+pub struct SwonBinding {
+    keys: Vec<SwonKey>,
+    value: SwonValue,
 }
 
 pub enum SwonKey {
     Ident(String),
+    String(String),
     Extension(String),
+    ArrayIndex(u32),
     Array,
-    ArrayIndex(usize),
-}
-
-pub enum SwonBinding {
-    Value(SwonValue),
-    Block(Swon),
+    TupleIndex(u8),
 }
 
 pub enum SwonValue {
     String(String),
-    Text(String),
-    Code { language: String, code: String },
     Number(f64),
     Boolean(bool),
-    Unit,
+    Array(Vec<SwonValue>),
     Tuple(Vec<SwonValue>),
-    List(Vec<SwonValue>),
-    Map(ahash::HashMap<String, SwonValue>),
-    Null,
 }

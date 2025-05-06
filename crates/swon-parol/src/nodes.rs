@@ -470,6 +470,10 @@ impl ExpectedChildren<TerminalKind, NonTerminalKind> for NonTerminalKind {
                     kind: NodeKind::NonTerminal(NonTerminalKind::Str),
                     attribute: ChildAttribute::Normal,
                 },
+                ChildKind {
+                    kind: NodeKind::NonTerminal(NonTerminalKind::Integer),
+                    attribute: ChildAttribute::Normal,
+                },
             ]),
             Self::KeyOpt => ExpectedChildrenKinds::Option(&[ChildKind {
                 kind: NodeKind::NonTerminal(NonTerminalKind::ArrayMarker),
@@ -1428,6 +1432,7 @@ pub enum KeyBase<T> {
     Ident(Ident<T>),
     ExtensionNameSpace(ExtensionNameSpace<T>),
     Str(Str<T>),
+    Integer(Integer<T>),
     Invalid(T),
 }
 #[allow(dead_code)]
@@ -1442,6 +1447,7 @@ where
                 Self::ExtensionNameSpace(ExtensionNameSpace::new(node))
             }
             NodeKind::NonTerminal(NonTerminalKind::Str) => Self::Str(Str::new(node)),
+            NodeKind::NonTerminal(NonTerminalKind::Integer) => Self::Integer(Integer::new(node)),
             _ => KeyBase::Invalid(node),
         }
     }
@@ -1450,6 +1456,7 @@ where
             Self::Ident(node) => node.node(),
             Self::ExtensionNameSpace(node) => node.node(),
             Self::Str(node) => node.node(),
+            Self::Integer(node) => node.node(),
             Self::Invalid(node) => node,
         }
     }
@@ -1458,6 +1465,7 @@ where
             Self::Ident(node) => node.node_mut(),
             Self::ExtensionNameSpace(node) => node.node_mut(),
             Self::Str(node) => node.node_mut(),
+            Self::Integer(node) => node.node_mut(),
             Self::Invalid(node) => node,
         }
     }

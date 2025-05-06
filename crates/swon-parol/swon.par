@@ -32,7 +32,7 @@ Section: At Keys { Binding } ;
   Keys: Key { Dot Key } ;
   Key: KeyBase [ ArrayMarker ] ;
   ArrayMarker: ArrayBegin [ Integer ] ArrayEnd ;
-  KeyBase: Ident | ExtensionNameSpace | Str ;
+  KeyBase: Ident | ExtensionNameSpace | Str | Integer ;
   // extension name must always be valid ident, not quoted ident
   ExtensionNameSpace: Ext Ident ;
 

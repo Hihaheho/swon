@@ -3,13 +3,14 @@
 
 use std::collections::HashMap;
 
+use lsp_types::notification::{Notification as _, PublishDiagnostics};
 use lsp_types::request::SemanticTokensFullRequest;
 use lsp_types::{
-    InitializeParams, SemanticTokensFullOptions, SemanticTokensLegend, SemanticTokensOptions,
-    SemanticTokensResult, ServerCapabilities,
+    Diagnostic, InitializeParams, PublishDiagnosticsParams, SemanticTokensFullOptions,
+    SemanticTokensLegend, SemanticTokensOptions, SemanticTokensResult, ServerCapabilities, Uri,
 };
-use swon_editor_support::semantic_tokens;
-use swon_parol::{parser, Cst};
+use swon_editor_support::{diagnostics, parser, semantic_tokens};
+use swon_parol::Cst;
 
 use lsp_server::{
     Connection, ErrorCode, ExtractError, Message, Notification, Request, Response, ResponseError,
@@ -34,6 +35,15 @@ fn main() -> anyhow::Result<()> {
         // Add textDocumentSync capability if not already present, needed for tracking documents
         text_document_sync: Some(lsp_types::TextDocumentSyncCapability::Kind(
             lsp_types::TextDocumentSyncKind::FULL, // Or INCREMENTAL if handled
+        )),
+        // Include diagnostic capability
+        diagnostic_provider: Some(lsp_types::DiagnosticServerCapabilities::Options(
+            lsp_types::DiagnosticOptions {
+                identifier: None,
+                workspace_diagnostics: false,
+                work_done_progress_options: Default::default(),
+                inter_file_dependencies: false,
+            },
         )),
         ..Default::default()
     })
@@ -123,48 +133,86 @@ impl ServerContext {
                             lsp_types::DidOpenTextDocumentParams,
                         >(not.params)
                         {
-                            let uri = params.text_document.uri.to_string();
+                            let uri = params.text_document.uri.clone();
                             let text = params.text_document.text;
+                            let version = params.text_document.version;
 
-                            // Try to parse the document to get the CST
-                            let cst = match parse_document(&text) {
-                                Ok(cst) => Some(cst),
-                                Err(e) => {
-                                    eprintln!("Failed to parse document: {}", e);
-                                    None
-                                }
-                            };
-
-                            // Store document
-                            self.documents.insert(uri, (cst, text));
+                            self.process_document(uri, text, Some(version))?;
                         }
                     } else if not.method == "textDocument/didChange" {
                         if let Ok(params) = serde_json::from_value::<
                             lsp_types::DidChangeTextDocumentParams,
                         >(not.params)
                         {
-                            let uri = params.text_document.uri.to_string();
+                            let uri = params.text_document.uri.clone();
+                            let version = params.text_document.version;
 
                             // For FULL sync, we just get the full content from the last change
                             if let Some(last_change) = params.content_changes.last() {
                                 let text = last_change.text.clone();
-                                // Try to parse the document to get the CST
-                                let cst = match parse_document(&text) {
-                                    Ok(cst) => Some(cst),
-                                    Err(e) => {
-                                        eprintln!("Failed to parse document: {}", e);
-                                        None
-                                    }
-                                };
-
-                                // Update document
-                                self.documents.insert(uri, (cst, text));
+                                self.process_document(uri, text, Some(version))?;
                             }
                         }
                     }
                 }
             }
         }
+    }
+
+    // Process a document: parse it, store it, and publish diagnostics
+    fn process_document(
+        &mut self,
+        uri: Uri,
+        text: String,
+        version: Option<i32>,
+    ) -> anyhow::Result<()> {
+        // Try to parse the document using swon-editor-support
+        let uri_string = uri.to_string();
+        let parse_result = parser::parse_document(&text);
+
+        // Prepare diagnostics and store CST based on parse result
+        let (cst, diagnostics) = match parse_result {
+            parser::ParseResult::Ok(cst) => {
+                // Success case - store CST and clear diagnostics
+                (Some(cst), Vec::new())
+            }
+            parser::ParseResult::ErrWithCst { cst, error } => {
+                // We have both a partial CST and an error
+                (Some(cst), diagnostics::error_to_diagnostic(&error))
+            }
+        };
+
+        // Store document in our map
+        self.documents.insert(uri_string, (cst, text));
+
+        // Publish diagnostics
+        self.publish_diagnostics(uri, diagnostics, version)?;
+
+        Ok(())
+    }
+
+    // Publish diagnostics to the client
+    fn publish_diagnostics(
+        &self,
+        uri: Uri,
+        diagnostics: Vec<Diagnostic>,
+        version: Option<i32>,
+    ) -> anyhow::Result<()> {
+        let params = PublishDiagnosticsParams {
+            uri,
+            diagnostics,
+            version,
+        };
+
+        let notification = Notification {
+            method: PublishDiagnostics::METHOD.to_string(),
+            params: serde_json::to_value(params)?,
+        };
+
+        self.connection
+            .sender
+            .send(Message::Notification(notification))?;
+        Ok(())
     }
 
     // Handler for textDocument/semanticTokens/full
@@ -246,17 +294,4 @@ impl ServerContext {
         self.send_response(resp)?;
         Ok(Some(())) // Signal that the request was handled
     }
-}
-
-// Helper function to parse a document and return a CST
-fn parse_document(text: &str) -> anyhow::Result<Cst> {
-    use swon_parol::nodes::{NonTerminalKind, TerminalKind};
-    use swon_parol::tree::CstBuilder;
-    use swon_parol::TreeConstruct;
-
-    let mut actions = swon_parol::grammar::Grammar::new();
-    let mut tree_builder = CstBuilder::<TerminalKind, NonTerminalKind>::new();
-    let _ = parser::parse_into(text, &mut tree_builder, "document.swon", &mut actions);
-    let cst = tree_builder.build()?;
-    Ok(cst)
 }
