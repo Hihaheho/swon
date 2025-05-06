@@ -1,6 +1,8 @@
-# swon-json-schema
+# swon-schema
 
-JSON Schema compatibility for SWON (SWan Object Notation).
+Schema definition and validation for SWON (SWan Object Notation).
+
+This crate provides a schema system for SWON files, allowing for validation, type checking, and enhanced editor support.
 
 **This crate is still under development and published for name reservation purpose.**
 

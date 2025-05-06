@@ -1,3 +1,5 @@
+use thisisplural::Plural;
+
 /// A data structure for representing a Swon document without any span information.
 pub struct SwonDocument {
     sections: Vec<SwonSection>,
@@ -15,6 +17,10 @@ pub struct SwonBinding {
     value: SwonValue,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Plural)]
+pub struct SwonKeys(Vec<SwonKey>);
+
+#[derive(Debug, Clone, PartialEq, Eq, Ord, PartialOrd, Hash)]
 pub enum SwonKey {
     Ident(String),
     String(String),
@@ -27,7 +33,10 @@ pub enum SwonKey {
 pub enum SwonValue {
     String(String),
     Number(f64),
+    Integer(i64),
     Boolean(bool),
     Array(Vec<SwonValue>),
     Tuple(Vec<SwonValue>),
+    Map(ahash::HashMap<SwonValue, SwonValue>),
+    Swon(SwonDocument),
 }

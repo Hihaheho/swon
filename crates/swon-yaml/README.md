@@ -1,6 +1,6 @@
-# swon-json-schema
+# swon-yaml
 
-JSON Schema compatibility for SWON (SWan Object Notation).
+YAML conversion support for SWON (SWan Object Notation).
 
 **This crate is still under development and published for name reservation purpose.**
 

@@ -1,6 +1,8 @@
-# swon-json-schema
+# serde-swon
 
-JSON Schema compatibility for SWON (SWan Object Notation).
+Serde support for the SWON (SWan Object Notation) format.
+
+This crate provides serialization and deserialization support for SWON using Serde, allowing you to easily convert between Rust data structures and SWON.
 
 **This crate is still under development and published for name reservation purpose.**
 

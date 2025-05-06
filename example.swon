@@ -1,4 +1,5 @@
 $swon {
+  data-model: swon
 }
 
 @ script
@@ -13,6 +14,12 @@ lines = [
   "aaa",
   "bbb",
 ]
+code1 = rust`let a = 1;`
+code2 = ```rust
+fn main() {
+  println!("Hello, world!");
+}
+```
 
 # comment
 

@@ -1,7 +1,7 @@
 mod span;
 
 use parol_runtime::{
-    parser::parse_tree_type::{NonTerminalEnum, TerminalEnum, TreeConstruct},
+    parser::parse_tree_type::{NodeKind, NonTerminalEnum, TerminalEnum, TreeConstruct},
     ParolError, Token,
 };
 use petgraph::{
@@ -10,6 +10,7 @@ use petgraph::{
     Direction,
 };
 use std::collections::BTreeMap;
+use thiserror::Error;
 
 pub use span::*;
 
@@ -29,6 +30,12 @@ pub enum CstNodeData<T, Nt> {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Ord, PartialOrd)]
 pub struct CstNodeId(pub NodeIndex);
+
+impl std::fmt::Display for CstNodeId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0.index())
+    }
+}
 
 /// A generic concrete syntax tree that doesn't know about SWON-specific ordering issues
 #[derive(Debug, Clone)]
@@ -333,4 +340,53 @@ where
 
         Ok(())
     }
+}
+
+#[derive(Debug, Clone, Error)]
+/// Error that occurs when constructing a view from a [NonTerminalHandle].
+pub enum ViewConstructionError<T, Nt> {
+    /// Expected a specific kind of terminal node, but got an invalid node
+    #[error("Unexpected node for expected terminal: {terminal}")]
+    UnexpectedTerminal {
+        /// The index of the node.
+        node: CstNodeId,
+        /// The expected terminal.
+        terminal: T,
+    },
+    /// Expected a specific kind of non-terminal node, but got an invalid node
+    #[error("Unexpected node for expected non-terminal: {non_terminal}")]
+    UnexpectedNonTerminal {
+        /// The index of the node.
+        node: CstNodeId,
+        /// The expected non-terminal.
+        non_terminal: Nt,
+    },
+    /// Expected an extra node, but got an invalid node
+    #[error("Unexpected extra node")]
+    UnexpectedExtraNode {
+        /// The index of the node.
+        node: CstNodeId,
+    },
+    /// The node ID not found in the tree
+    #[error("Node ID not found in the tree: {node}")]
+    NodeIdNotFound {
+        /// The index of the node.
+        node: CstNodeId,
+    },
+}
+
+/// A trait that all generated non-terminal handles implements.
+pub trait NonTerminalHandle<'a, N, T, Nt> {
+    /// The type of the view for this non-terminal.
+    type View;
+    /// Create a new non-terminal handle from a node.
+    fn new(index: CstNodeId, kind: NodeKind<T, Nt>) -> Result<Self, ViewConstructionError<T, Nt>>
+    where
+        Self: Sized;
+
+    /// Get the view of the non-terminal.
+    fn get_view(
+        &self,
+        tree: &ConcreteSyntaxTree<T, Nt>,
+    ) -> Result<Self::View, ViewConstructionError<T, Nt>>;
 }

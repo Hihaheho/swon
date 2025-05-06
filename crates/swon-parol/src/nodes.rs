@@ -18,6 +18,13 @@ pub enum NonTerminalKind {
     Binding,
     Bindings,
     Boolean,
+    Code,
+    CodeBlock,
+    CodeBlockDelimiter,
+    CodeBlockLine,
+    CodeBlockTailCommon,
+    CodeBlockTailCommonList,
+    CodeBlockTailCommonOpt,
     Comma,
     Continue,
     Dot,
@@ -34,6 +41,9 @@ pub enum NonTerminalKind {
     KeyOpt,
     Keys,
     KeysList,
+    NamedCode,
+    NamedCodeBlock,
+    NamedCodeBlockBegin,
     Newline,
     Null,
     Object,
@@ -77,6 +87,8 @@ pub enum TerminalKind {
     TypedQuote,
     InStr,
     Text,
+    NamedCode,
+    Code,
     Newline,
     Ws,
     At,
@@ -91,6 +103,9 @@ pub enum TerminalKind {
     Esc,
     TextStart,
     Ident,
+    NamedCodeBlockBegin,
+    CodeBlockDelimiter,
+    CodeBlockLine,
 }
 impl TerminalEnum for TerminalKind {
     fn from_terminal_index(index: u16) -> Self {
@@ -108,20 +123,25 @@ impl TerminalEnum for TerminalKind {
             11 => Self::TypedQuote,
             12 => Self::InStr,
             13 => Self::Text,
-            14 => Self::Newline,
-            15 => Self::Ws,
-            16 => Self::At,
-            17 => Self::Dollar,
-            18 => Self::Dot,
-            19 => Self::LBrace,
-            20 => Self::RBrace,
-            21 => Self::LBracket,
-            22 => Self::RBracket,
-            23 => Self::Bind,
-            24 => Self::Comma,
-            25 => Self::Esc,
-            26 => Self::TextStart,
-            27 => Self::Ident,
+            14 => Self::NamedCode,
+            15 => Self::Code,
+            16 => Self::Newline,
+            17 => Self::Ws,
+            18 => Self::At,
+            19 => Self::Dollar,
+            20 => Self::Dot,
+            21 => Self::LBrace,
+            22 => Self::RBrace,
+            23 => Self::LBracket,
+            24 => Self::RBracket,
+            25 => Self::Bind,
+            26 => Self::Comma,
+            27 => Self::Esc,
+            28 => Self::TextStart,
+            29 => Self::Ident,
+            30 => Self::NamedCodeBlockBegin,
+            31 => Self::CodeBlockDelimiter,
+            32 => Self::CodeBlockLine,
             _ => panic!("Invalid terminal index: {}", index),
         }
     }
@@ -149,6 +169,13 @@ impl NonTerminalEnum for NonTerminalKind {
             "Binding" => Self::Binding,
             "Bindings" => Self::Bindings,
             "Boolean" => Self::Boolean,
+            "Code" => Self::Code,
+            "CodeBlock" => Self::CodeBlock,
+            "CodeBlockDelimiter" => Self::CodeBlockDelimiter,
+            "CodeBlockLine" => Self::CodeBlockLine,
+            "CodeBlockTailCommon" => Self::CodeBlockTailCommon,
+            "CodeBlockTailCommonList" => Self::CodeBlockTailCommonList,
+            "CodeBlockTailCommonOpt" => Self::CodeBlockTailCommonOpt,
             "Comma" => Self::Comma,
             "Continue" => Self::Continue,
             "Dot" => Self::Dot,
@@ -165,6 +192,9 @@ impl NonTerminalEnum for NonTerminalKind {
             "KeyOpt" => Self::KeyOpt,
             "Keys" => Self::Keys,
             "KeysList" => Self::KeysList,
+            "NamedCode" => Self::NamedCode,
+            "NamedCodeBlock" => Self::NamedCodeBlock,
+            "NamedCodeBlockBegin" => Self::NamedCodeBlockBegin,
             "Newline" => Self::Newline,
             "Null" => Self::Null,
             "Object" => Self::Object,
@@ -211,6 +241,8 @@ impl std::fmt::Display for TerminalKind {
             Self::TypedQuote => write!(f, stringify!(TypedQuote)),
             Self::InStr => write!(f, stringify!(InStr)),
             Self::Text => write!(f, stringify!(Text)),
+            Self::NamedCode => write!(f, stringify!(NamedCode)),
+            Self::Code => write!(f, stringify!(Code)),
             Self::Newline => write!(f, stringify!(Newline)),
             Self::Ws => write!(f, stringify!(Ws)),
             Self::At => write!(f, stringify!(At)),
@@ -225,6 +257,9 @@ impl std::fmt::Display for TerminalKind {
             Self::Esc => write!(f, stringify!(Esc)),
             Self::TextStart => write!(f, stringify!(TextStart)),
             Self::Ident => write!(f, stringify!(Ident)),
+            Self::NamedCodeBlockBegin => write!(f, stringify!(NamedCodeBlockBegin)),
+            Self::CodeBlockDelimiter => write!(f, stringify!(CodeBlockDelimiter)),
+            Self::CodeBlockLine => write!(f, stringify!(CodeBlockLine)),
         }
     }
 }
@@ -245,6 +280,13 @@ impl std::fmt::Display for NonTerminalKind {
             Self::Binding => write!(f, stringify!(Binding)),
             Self::Bindings => write!(f, stringify!(Bindings)),
             Self::Boolean => write!(f, stringify!(Boolean)),
+            Self::Code => write!(f, stringify!(Code)),
+            Self::CodeBlock => write!(f, stringify!(CodeBlock)),
+            Self::CodeBlockDelimiter => write!(f, stringify!(CodeBlockDelimiter)),
+            Self::CodeBlockLine => write!(f, stringify!(CodeBlockLine)),
+            Self::CodeBlockTailCommon => write!(f, stringify!(CodeBlockTailCommon)),
+            Self::CodeBlockTailCommonList => write!(f, stringify!(CodeBlockTailCommonList)),
+            Self::CodeBlockTailCommonOpt => write!(f, stringify!(CodeBlockTailCommonOpt)),
             Self::Comma => write!(f, stringify!(Comma)),
             Self::Continue => write!(f, stringify!(Continue)),
             Self::Dot => write!(f, stringify!(Dot)),
@@ -261,6 +303,9 @@ impl std::fmt::Display for NonTerminalKind {
             Self::KeyOpt => write!(f, stringify!(KeyOpt)),
             Self::Keys => write!(f, stringify!(Keys)),
             Self::KeysList => write!(f, stringify!(KeysList)),
+            Self::NamedCode => write!(f, stringify!(NamedCode)),
+            Self::NamedCodeBlock => write!(f, stringify!(NamedCodeBlock)),
+            Self::NamedCodeBlockBegin => write!(f, stringify!(NamedCodeBlockBegin)),
             Self::Newline => write!(f, stringify!(Newline)),
             Self::Null => write!(f, stringify!(Null)),
             Self::Object => write!(f, stringify!(Object)),
@@ -397,6 +442,64 @@ impl ExpectedChildren<TerminalKind, NonTerminalKind> for NonTerminalKind {
                     attribute: ChildAttribute::Normal,
                 },
             ]),
+            Self::Code => ExpectedChildrenKinds::Sequence(&[ChildKind {
+                kind: NodeKind::Terminal(TerminalKind::Code),
+                attribute: ChildAttribute::Normal,
+            }]),
+            Self::CodeBlock => ExpectedChildrenKinds::Sequence(&[
+                ChildKind {
+                    kind: NodeKind::NonTerminal(NonTerminalKind::CodeBlockDelimiter),
+                    attribute: ChildAttribute::Normal,
+                },
+                ChildKind {
+                    kind: NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommon),
+                    attribute: ChildAttribute::Normal,
+                },
+            ]),
+            Self::CodeBlockDelimiter => ExpectedChildrenKinds::Sequence(&[ChildKind {
+                kind: NodeKind::Terminal(TerminalKind::CodeBlockDelimiter),
+                attribute: ChildAttribute::Normal,
+            }]),
+            Self::CodeBlockLine => ExpectedChildrenKinds::Sequence(&[ChildKind {
+                kind: NodeKind::Terminal(TerminalKind::CodeBlockLine),
+                attribute: ChildAttribute::Normal,
+            }]),
+            Self::CodeBlockTailCommon => ExpectedChildrenKinds::Sequence(&[
+                ChildKind {
+                    kind: NodeKind::NonTerminal(NonTerminalKind::Newline),
+                    attribute: ChildAttribute::Normal,
+                },
+                ChildKind {
+                    kind: NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonList),
+                    attribute: ChildAttribute::Vec,
+                },
+                ChildKind {
+                    kind: NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonOpt),
+                    attribute: ChildAttribute::Optional,
+                },
+                ChildKind {
+                    kind: NodeKind::NonTerminal(NonTerminalKind::CodeBlockDelimiter),
+                    attribute: ChildAttribute::Normal,
+                },
+            ]),
+            Self::CodeBlockTailCommonList => ExpectedChildrenKinds::Recursion(&[
+                ChildKind {
+                    kind: NodeKind::NonTerminal(NonTerminalKind::CodeBlockLine),
+                    attribute: ChildAttribute::Normal,
+                },
+                ChildKind {
+                    kind: NodeKind::NonTerminal(NonTerminalKind::Newline),
+                    attribute: ChildAttribute::Normal,
+                },
+                ChildKind {
+                    kind: NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonList),
+                    attribute: ChildAttribute::Normal,
+                },
+            ]),
+            Self::CodeBlockTailCommonOpt => ExpectedChildrenKinds::Option(&[ChildKind {
+                kind: NodeKind::NonTerminal(NonTerminalKind::Ws),
+                attribute: ChildAttribute::Normal,
+            }]),
             Self::Comma => ExpectedChildrenKinds::Sequence(&[ChildKind {
                 kind: NodeKind::Terminal(TerminalKind::Comma),
                 attribute: ChildAttribute::Normal,
@@ -503,6 +606,24 @@ impl ExpectedChildren<TerminalKind, NonTerminalKind> for NonTerminalKind {
                     attribute: ChildAttribute::Normal,
                 },
             ]),
+            Self::NamedCode => ExpectedChildrenKinds::Sequence(&[ChildKind {
+                kind: NodeKind::Terminal(TerminalKind::NamedCode),
+                attribute: ChildAttribute::Normal,
+            }]),
+            Self::NamedCodeBlock => ExpectedChildrenKinds::Sequence(&[
+                ChildKind {
+                    kind: NodeKind::NonTerminal(NonTerminalKind::NamedCodeBlockBegin),
+                    attribute: ChildAttribute::Normal,
+                },
+                ChildKind {
+                    kind: NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommon),
+                    attribute: ChildAttribute::Normal,
+                },
+            ]),
+            Self::NamedCodeBlockBegin => ExpectedChildrenKinds::Sequence(&[ChildKind {
+                kind: NodeKind::Terminal(TerminalKind::NamedCodeBlockBegin),
+                attribute: ChildAttribute::Normal,
+            }]),
             Self::Newline => ExpectedChildrenKinds::Sequence(&[ChildKind {
                 kind: NodeKind::Terminal(TerminalKind::Newline),
                 attribute: ChildAttribute::Normal,
@@ -744,6 +865,22 @@ impl ExpectedChildren<TerminalKind, NonTerminalKind> for NonTerminalKind {
                 },
                 ChildKind {
                     kind: NodeKind::NonTerminal(NonTerminalKind::Hole),
+                    attribute: ChildAttribute::Normal,
+                },
+                ChildKind {
+                    kind: NodeKind::NonTerminal(NonTerminalKind::NamedCodeBlock),
+                    attribute: ChildAttribute::Normal,
+                },
+                ChildKind {
+                    kind: NodeKind::NonTerminal(NonTerminalKind::CodeBlock),
+                    attribute: ChildAttribute::Normal,
+                },
+                ChildKind {
+                    kind: NodeKind::NonTerminal(NonTerminalKind::NamedCode),
+                    attribute: ChildAttribute::Normal,
+                },
+                ChildKind {
+                    kind: NodeKind::NonTerminal(NonTerminalKind::Code),
                     attribute: ChildAttribute::Normal,
                 },
             ]),
@@ -1138,6 +1275,251 @@ where
             Self::False(node) => node.node_mut(),
             Self::Invalid(node) => node,
         }
+    }
+}
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Code<T>(T);
+#[allow(dead_code)]
+impl<'a, N> Code<N>
+where
+    N: Node<'a, TerminalKind, NonTerminalKind>,
+{
+    pub fn new(node: N) -> Self {
+        Code(node)
+    }
+    pub fn node(&self) -> &N {
+        &self.0
+    }
+    pub fn node_mut(&mut self) -> &mut N {
+        &mut self.0
+    }
+    pub fn find_code(&self, cursor: usize) -> Result<Option<(usize, Code<N>)>, N> {
+        self.0
+            .find_child(cursor, NodeKind::Terminal(TerminalKind::Code))
+            .map(|option| option.map(|(i, node)| (i, Code::new(node))))
+    }
+}
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct CodeBlock<T>(T);
+#[allow(dead_code)]
+impl<'a, N> CodeBlock<N>
+where
+    N: Node<'a, TerminalKind, NonTerminalKind>,
+{
+    pub fn new(node: N) -> Self {
+        CodeBlock(node)
+    }
+    pub fn node(&self) -> &N {
+        &self.0
+    }
+    pub fn node_mut(&mut self) -> &mut N {
+        &mut self.0
+    }
+    pub fn find_code_block_delimiter(
+        &self,
+        cursor: usize,
+    ) -> Result<Option<(usize, CodeBlock<N>)>, N> {
+        self.0
+            .find_child(
+                cursor,
+                NodeKind::NonTerminal(NonTerminalKind::CodeBlockDelimiter),
+            )
+            .map(|option| option.map(|(i, node)| (i, CodeBlock::new(node))))
+    }
+    pub fn find_code_block_tail_common(
+        &self,
+        cursor: usize,
+    ) -> Result<Option<(usize, CodeBlock<N>)>, N> {
+        self.0
+            .find_child(
+                cursor,
+                NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommon),
+            )
+            .map(|option| option.map(|(i, node)| (i, CodeBlock::new(node))))
+    }
+}
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct CodeBlockDelimiter<T>(T);
+#[allow(dead_code)]
+impl<'a, N> CodeBlockDelimiter<N>
+where
+    N: Node<'a, TerminalKind, NonTerminalKind>,
+{
+    pub fn new(node: N) -> Self {
+        CodeBlockDelimiter(node)
+    }
+    pub fn node(&self) -> &N {
+        &self.0
+    }
+    pub fn node_mut(&mut self) -> &mut N {
+        &mut self.0
+    }
+    pub fn find_code_block_delimiter(
+        &self,
+        cursor: usize,
+    ) -> Result<Option<(usize, CodeBlockDelimiter<N>)>, N> {
+        self.0
+            .find_child(cursor, NodeKind::Terminal(TerminalKind::CodeBlockDelimiter))
+            .map(|option| option.map(|(i, node)| (i, CodeBlockDelimiter::new(node))))
+    }
+}
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct CodeBlockLine<T>(T);
+#[allow(dead_code)]
+impl<'a, N> CodeBlockLine<N>
+where
+    N: Node<'a, TerminalKind, NonTerminalKind>,
+{
+    pub fn new(node: N) -> Self {
+        CodeBlockLine(node)
+    }
+    pub fn node(&self) -> &N {
+        &self.0
+    }
+    pub fn node_mut(&mut self) -> &mut N {
+        &mut self.0
+    }
+    pub fn find_code_block_line(
+        &self,
+        cursor: usize,
+    ) -> Result<Option<(usize, CodeBlockLine<N>)>, N> {
+        self.0
+            .find_child(cursor, NodeKind::Terminal(TerminalKind::CodeBlockLine))
+            .map(|option| option.map(|(i, node)| (i, CodeBlockLine::new(node))))
+    }
+}
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct CodeBlockTailCommon<T>(T);
+#[allow(dead_code)]
+impl<'a, N> CodeBlockTailCommon<N>
+where
+    N: Node<'a, TerminalKind, NonTerminalKind>,
+{
+    pub fn new(node: N) -> Self {
+        CodeBlockTailCommon(node)
+    }
+    pub fn node(&self) -> &N {
+        &self.0
+    }
+    pub fn node_mut(&mut self) -> &mut N {
+        &mut self.0
+    }
+    pub fn find_newline(
+        &self,
+        cursor: usize,
+    ) -> Result<Option<(usize, CodeBlockTailCommon<N>)>, N> {
+        self.0
+            .find_child(cursor, NodeKind::NonTerminal(NonTerminalKind::Newline))
+            .map(|option| option.map(|(i, node)| (i, CodeBlockTailCommon::new(node))))
+    }
+    pub fn find_code_block_tail_common_list(
+        &self,
+        cursor: usize,
+    ) -> Result<Option<(usize, CodeBlockTailCommon<N>)>, N> {
+        self.0
+            .find_child(
+                cursor,
+                NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonList),
+            )
+            .map(|option| option.map(|(i, node)| (i, CodeBlockTailCommon::new(node))))
+    }
+    pub fn find_code_block_tail_common_opt(
+        &self,
+        cursor: usize,
+    ) -> Result<Option<(usize, CodeBlockTailCommon<N>)>, N> {
+        self.0
+            .find_child(
+                cursor,
+                NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonOpt),
+            )
+            .map(|option| option.map(|(i, node)| (i, CodeBlockTailCommon::new(node))))
+    }
+    pub fn find_code_block_delimiter(
+        &self,
+        cursor: usize,
+    ) -> Result<Option<(usize, CodeBlockTailCommon<N>)>, N> {
+        self.0
+            .find_child(
+                cursor,
+                NodeKind::NonTerminal(NonTerminalKind::CodeBlockDelimiter),
+            )
+            .map(|option| option.map(|(i, node)| (i, CodeBlockTailCommon::new(node))))
+    }
+}
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct CodeBlockTailCommonList<T>(T);
+#[allow(dead_code)]
+impl<'a, N> CodeBlockTailCommonList<N>
+where
+    N: Node<'a, TerminalKind, NonTerminalKind>,
+{
+    pub fn new(node: N) -> Self {
+        CodeBlockTailCommonList(node)
+    }
+    pub fn node(&self) -> &N {
+        &self.0
+    }
+    pub fn node_mut(&mut self) -> &mut N {
+        &mut self.0
+    }
+    pub fn find_code_block_line(
+        &self,
+        cursor: usize,
+    ) -> Result<Option<(usize, CodeBlockTailCommonList<N>)>, N> {
+        self.0
+            .find_child(
+                cursor,
+                NodeKind::NonTerminal(NonTerminalKind::CodeBlockLine),
+            )
+            .map(|option| option.map(|(i, node)| (i, CodeBlockTailCommonList::new(node))))
+    }
+    pub fn find_newline(
+        &self,
+        cursor: usize,
+    ) -> Result<Option<(usize, CodeBlockTailCommonList<N>)>, N> {
+        self.0
+            .find_child(cursor, NodeKind::NonTerminal(NonTerminalKind::Newline))
+            .map(|option| option.map(|(i, node)| (i, CodeBlockTailCommonList::new(node))))
+    }
+    pub fn find_code_block_tail_common_list(
+        &self,
+        cursor: usize,
+    ) -> Result<Option<(usize, CodeBlockTailCommonList<N>)>, N> {
+        self.0
+            .find_child(
+                cursor,
+                NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonList),
+            )
+            .map(|option| option.map(|(i, node)| (i, CodeBlockTailCommonList::new(node))))
+    }
+}
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct CodeBlockTailCommonOpt<T>(T);
+#[allow(dead_code)]
+impl<'a, N> CodeBlockTailCommonOpt<N>
+where
+    N: Node<'a, TerminalKind, NonTerminalKind>,
+{
+    pub fn new(node: N) -> Self {
+        CodeBlockTailCommonOpt(node)
+    }
+    pub fn node(&self) -> &N {
+        &self.0
+    }
+    pub fn node_mut(&mut self) -> &mut N {
+        &mut self.0
+    }
+    pub fn find_ws(&self, cursor: usize) -> Result<Option<(usize, CodeBlockTailCommonOpt<N>)>, N> {
+        self.0
+            .find_child(cursor, NodeKind::NonTerminal(NonTerminalKind::Ws))
+            .map(|option| option.map(|(i, node)| (i, CodeBlockTailCommonOpt::new(node))))
     }
 }
 #[allow(dead_code)]
@@ -1552,6 +1934,98 @@ where
         self.0
             .find_child(cursor, NodeKind::NonTerminal(NonTerminalKind::KeysList))
             .map(|option| option.map(|(i, node)| (i, KeysList::new(node))))
+    }
+}
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct NamedCode<T>(T);
+#[allow(dead_code)]
+impl<'a, N> NamedCode<N>
+where
+    N: Node<'a, TerminalKind, NonTerminalKind>,
+{
+    pub fn new(node: N) -> Self {
+        NamedCode(node)
+    }
+    pub fn node(&self) -> &N {
+        &self.0
+    }
+    pub fn node_mut(&mut self) -> &mut N {
+        &mut self.0
+    }
+    pub fn find_named_code(&self, cursor: usize) -> Result<Option<(usize, NamedCode<N>)>, N> {
+        self.0
+            .find_child(cursor, NodeKind::Terminal(TerminalKind::NamedCode))
+            .map(|option| option.map(|(i, node)| (i, NamedCode::new(node))))
+    }
+}
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct NamedCodeBlock<T>(T);
+#[allow(dead_code)]
+impl<'a, N> NamedCodeBlock<N>
+where
+    N: Node<'a, TerminalKind, NonTerminalKind>,
+{
+    pub fn new(node: N) -> Self {
+        NamedCodeBlock(node)
+    }
+    pub fn node(&self) -> &N {
+        &self.0
+    }
+    pub fn node_mut(&mut self) -> &mut N {
+        &mut self.0
+    }
+    pub fn find_named_code_block_begin(
+        &self,
+        cursor: usize,
+    ) -> Result<Option<(usize, NamedCodeBlock<N>)>, N> {
+        self.0
+            .find_child(
+                cursor,
+                NodeKind::NonTerminal(NonTerminalKind::NamedCodeBlockBegin),
+            )
+            .map(|option| option.map(|(i, node)| (i, NamedCodeBlock::new(node))))
+    }
+    pub fn find_code_block_tail_common(
+        &self,
+        cursor: usize,
+    ) -> Result<Option<(usize, NamedCodeBlock<N>)>, N> {
+        self.0
+            .find_child(
+                cursor,
+                NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommon),
+            )
+            .map(|option| option.map(|(i, node)| (i, NamedCodeBlock::new(node))))
+    }
+}
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct NamedCodeBlockBegin<T>(T);
+#[allow(dead_code)]
+impl<'a, N> NamedCodeBlockBegin<N>
+where
+    N: Node<'a, TerminalKind, NonTerminalKind>,
+{
+    pub fn new(node: N) -> Self {
+        NamedCodeBlockBegin(node)
+    }
+    pub fn node(&self) -> &N {
+        &self.0
+    }
+    pub fn node_mut(&mut self) -> &mut N {
+        &mut self.0
+    }
+    pub fn find_named_code_block_begin(
+        &self,
+        cursor: usize,
+    ) -> Result<Option<(usize, NamedCodeBlockBegin<N>)>, N> {
+        self.0
+            .find_child(
+                cursor,
+                NodeKind::Terminal(TerminalKind::NamedCodeBlockBegin),
+            )
+            .map(|option| option.map(|(i, node)| (i, NamedCodeBlockBegin::new(node))))
     }
 }
 #[allow(dead_code)]
@@ -2199,6 +2673,10 @@ pub enum Value<T> {
     StrContinues(StrContinues<T>),
     TypedStr(TypedStr<T>),
     Hole(Hole<T>),
+    NamedCodeBlock(NamedCodeBlock<T>),
+    CodeBlock(CodeBlock<T>),
+    NamedCode(NamedCode<T>),
+    Code(Code<T>),
     Invalid(T),
 }
 #[allow(dead_code)]
@@ -2218,6 +2696,16 @@ where
             }
             NodeKind::NonTerminal(NonTerminalKind::TypedStr) => Self::TypedStr(TypedStr::new(node)),
             NodeKind::NonTerminal(NonTerminalKind::Hole) => Self::Hole(Hole::new(node)),
+            NodeKind::NonTerminal(NonTerminalKind::NamedCodeBlock) => {
+                Self::NamedCodeBlock(NamedCodeBlock::new(node))
+            }
+            NodeKind::NonTerminal(NonTerminalKind::CodeBlock) => {
+                Self::CodeBlock(CodeBlock::new(node))
+            }
+            NodeKind::NonTerminal(NonTerminalKind::NamedCode) => {
+                Self::NamedCode(NamedCode::new(node))
+            }
+            NodeKind::NonTerminal(NonTerminalKind::Code) => Self::Code(Code::new(node)),
             _ => Value::Invalid(node),
         }
     }
@@ -2231,6 +2719,10 @@ where
             Self::StrContinues(node) => node.node(),
             Self::TypedStr(node) => node.node(),
             Self::Hole(node) => node.node(),
+            Self::NamedCodeBlock(node) => node.node(),
+            Self::CodeBlock(node) => node.node(),
+            Self::NamedCode(node) => node.node(),
+            Self::Code(node) => node.node(),
             Self::Invalid(node) => node,
         }
     }
@@ -2244,6 +2736,10 @@ where
             Self::StrContinues(node) => node.node_mut(),
             Self::TypedStr(node) => node.node_mut(),
             Self::Hole(node) => node.node_mut(),
+            Self::NamedCodeBlock(node) => node.node_mut(),
+            Self::CodeBlock(node) => node.node_mut(),
+            Self::NamedCode(node) => node.node_mut(),
+            Self::Code(node) => node.node_mut(),
             Self::Invalid(node) => node,
         }
     }

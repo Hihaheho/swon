@@ -1,6 +1,8 @@
-# swon-json-schema
+# swon-cli
 
-JSON Schema compatibility for SWON (SWan Object Notation).
+Command-line interface for working with SWON (SWan Object Notation) files.
+
+This crate provides utilities for converting SWON to other formats, validating SWON files, and more.
 
 **This crate is still under development and published for name reservation purpose.**
 

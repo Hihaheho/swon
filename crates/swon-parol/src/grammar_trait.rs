@@ -159,6 +159,31 @@ pub trait GrammarTrait<'t> {
         Ok(())
     }
 
+    /// Semantic action for non-terminal 'NamedCodeBlock'
+    fn named_code_block(&mut self, _arg: &NamedCodeBlock<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'CodeBlock'
+    fn code_block(&mut self, _arg: &CodeBlock<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'CodeBlockTailCommon'
+    fn code_block_tail_common(&mut self, _arg: &CodeBlockTailCommon<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'NamedCode'
+    fn named_code(&mut self, _arg: &NamedCode<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'Code'
+    fn code(&mut self, _arg: &Code<'t>) -> Result<()> {
+        Ok(())
+    }
+
     /// Semantic action for non-terminal 'Newline'
     fn newline(&mut self, _arg: &Newline<'t>) -> Result<()> {
         Ok(())
@@ -226,6 +251,21 @@ pub trait GrammarTrait<'t> {
 
     /// Semantic action for non-terminal 'Ident'
     fn ident(&mut self, _arg: &Ident<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'NamedCodeBlockBegin'
+    fn named_code_block_begin(&mut self, _arg: &NamedCodeBlockBegin<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'CodeBlockDelimiter'
+    fn code_block_delimiter(&mut self, _arg: &CodeBlockDelimiter<'t>) -> Result<()> {
+        Ok(())
+    }
+
+    /// Semantic action for non-terminal 'CodeBlockLine'
+    fn code_block_line(&mut self, _arg: &CodeBlockLine<'t>) -> Result<()> {
         Ok(())
     }
 
@@ -495,7 +535,75 @@ impl ToSpan for ValueHole<'_> {
 }
 
 ///
-/// Type derived for production 50
+/// Type derived for production 39
+///
+/// `Value: NamedCodeBlock;`
+///
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+pub struct ValueNamedCodeBlock<'t> {
+    pub named_code_block: NamedCodeBlock<'t>,
+}
+
+impl ToSpan for ValueNamedCodeBlock<'_> {
+    fn span(&self) -> Span {
+        self.named_code_block.span()
+    }
+}
+
+///
+/// Type derived for production 40
+///
+/// `Value: CodeBlock;`
+///
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+pub struct ValueCodeBlock<'t> {
+    pub code_block: CodeBlock<'t>,
+}
+
+impl ToSpan for ValueCodeBlock<'_> {
+    fn span(&self) -> Span {
+        self.code_block.span()
+    }
+}
+
+///
+/// Type derived for production 41
+///
+/// `Value: NamedCode;`
+///
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+pub struct ValueNamedCode<'t> {
+    pub named_code: NamedCode<'t>,
+}
+
+impl ToSpan for ValueNamedCode<'_> {
+    fn span(&self) -> Span {
+        self.named_code.span()
+    }
+}
+
+///
+/// Type derived for production 42
+///
+/// `Value: Code;`
+///
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+pub struct ValueCode<'t> {
+    pub code: Code<'t>,
+}
+
+impl ToSpan for ValueCode<'_> {
+    fn span(&self) -> Span {
+        self.code.span()
+    }
+}
+
+///
+/// Type derived for production 54
 ///
 /// `Boolean: True;`
 ///
@@ -512,7 +620,7 @@ impl ToSpan for BooleanTrue<'_> {
 }
 
 ///
-/// Type derived for production 51
+/// Type derived for production 55
 ///
 /// `Boolean: False;`
 ///
@@ -756,6 +864,129 @@ impl ToSpan for Boolean<'_> {
             Boolean::True(v) => v.span(),
             Boolean::False(v) => v.span(),
         }
+    }
+}
+
+///
+/// Type derived for non-terminal Code
+///
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+pub struct Code<'t> {
+    pub code: Token<'t>, /* `([^`\r\n]|\\`)*` */
+}
+
+impl ToSpan for Code<'_> {
+    fn span(&self) -> Span {
+        self.code.span()
+    }
+}
+
+///
+/// Type derived for non-terminal CodeBlock
+///
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+pub struct CodeBlock<'t> {
+    pub code_block_delimiter: CodeBlockDelimiter<'t>,
+    pub code_block_tail_common: CodeBlockTailCommon<'t>,
+}
+
+impl ToSpan for CodeBlock<'_> {
+    fn span(&self) -> Span {
+        self.code_block_delimiter.span() + self.code_block_tail_common.span()
+    }
+}
+
+///
+/// Type derived for non-terminal CodeBlockDelimiter
+///
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+pub struct CodeBlockDelimiter<'t> {
+    pub code_block_delimiter: Token<'t>, /* ``` */
+}
+
+impl ToSpan for CodeBlockDelimiter<'_> {
+    fn span(&self) -> Span {
+        self.code_block_delimiter.span()
+    }
+}
+
+///
+/// Type derived for non-terminal CodeBlockLine
+///
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+pub struct CodeBlockLine<'t> {
+    pub code_block_line: Token<'t>, /* [^\n]* */
+}
+
+impl ToSpan for CodeBlockLine<'_> {
+    fn span(&self) -> Span {
+        self.code_block_line.span()
+    }
+}
+
+///
+/// Type derived for non-terminal CodeBlockTailCommon
+///
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+pub struct CodeBlockTailCommon<'t> {
+    pub newline: Newline<'t>,
+    pub code_block_tail_common_list: Vec<CodeBlockTailCommonList<'t>>,
+    pub code_block_tail_common_opt: Option<CodeBlockTailCommonOpt<'t>>,
+    pub code_block_delimiter: CodeBlockDelimiter<'t>,
+}
+
+impl ToSpan for CodeBlockTailCommon<'_> {
+    fn span(&self) -> Span {
+        self.newline.span()
+            + self
+                .code_block_tail_common_list
+                .first()
+                .map_or(Span::default(), |f| f.span())
+            + self
+                .code_block_tail_common_list
+                .last()
+                .map_or(Span::default(), |l| l.span())
+            + self
+                .code_block_tail_common_opt
+                .as_ref()
+                .map_or(Span::default(), |o| o.span())
+            + self.code_block_delimiter.span()
+    }
+}
+
+///
+/// Type derived for non-terminal CodeBlockTailCommonList
+///
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+pub struct CodeBlockTailCommonList<'t> {
+    pub code_block_line: CodeBlockLine<'t>,
+    pub newline: Newline<'t>,
+}
+
+impl ToSpan for CodeBlockTailCommonList<'_> {
+    fn span(&self) -> Span {
+        self.code_block_line.span() + self.newline.span()
+    }
+}
+
+///
+/// Type derived for non-terminal CodeBlockTailCommonOpt
+///
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+pub struct CodeBlockTailCommonOpt<'t> {
+    pub ws: Ws<'t>,
+}
+
+impl ToSpan for CodeBlockTailCommonOpt<'_> {
+    fn span(&self) -> Span {
+        self.ws.span()
     }
 }
 
@@ -1010,6 +1241,52 @@ pub struct KeysList<'t> {
 impl ToSpan for KeysList<'_> {
     fn span(&self) -> Span {
         self.dot.span() + self.key.span()
+    }
+}
+
+///
+/// Type derived for non-terminal NamedCode
+///
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+pub struct NamedCode<'t> {
+    pub named_code: Token<'t>, /* [a-zA-Z0-9-_]+`([^`\r\n]|\\`)*` */
+}
+
+impl ToSpan for NamedCode<'_> {
+    fn span(&self) -> Span {
+        self.named_code.span()
+    }
+}
+
+///
+/// Type derived for non-terminal NamedCodeBlock
+///
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+pub struct NamedCodeBlock<'t> {
+    pub named_code_block_begin: NamedCodeBlockBegin<'t>,
+    pub code_block_tail_common: CodeBlockTailCommon<'t>,
+}
+
+impl ToSpan for NamedCodeBlock<'_> {
+    fn span(&self) -> Span {
+        self.named_code_block_begin.span() + self.code_block_tail_common.span()
+    }
+}
+
+///
+/// Type derived for non-terminal NamedCodeBlockBegin
+///
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+pub struct NamedCodeBlockBegin<'t> {
+    pub named_code_block_begin: Token<'t>, /* ```[a-zA-Z0-9-_]+ */
+}
+
+impl ToSpan for NamedCodeBlockBegin<'_> {
+    fn span(&self) -> Span {
+        self.named_code_block_begin.span()
     }
 }
 
@@ -1378,7 +1655,7 @@ impl ToSpan for True<'_> {
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct TypedQuote<'t> {
-    pub typed_quote: Token<'t>, /* [^ \t\n\r\x00-\x1F\x22\x7F]+" */
+    pub typed_quote: Token<'t>, /* [a-zA-Z0-9-_]+" */
 }
 
 impl ToSpan for TypedQuote<'_> {
@@ -1418,6 +1695,10 @@ pub enum Value<'t> {
     StrContinues(ValueStrContinues<'t>),
     TypedStr(ValueTypedStr<'t>),
     Hole(ValueHole<'t>),
+    NamedCodeBlock(ValueNamedCodeBlock<'t>),
+    CodeBlock(ValueCodeBlock<'t>),
+    NamedCode(ValueNamedCode<'t>),
+    Code(ValueCode<'t>),
 }
 
 impl ToSpan for Value<'_> {
@@ -1431,6 +1712,10 @@ impl ToSpan for Value<'_> {
             Value::StrContinues(v) => v.span(),
             Value::TypedStr(v) => v.span(),
             Value::Hole(v) => v.span(),
+            Value::NamedCodeBlock(v) => v.span(),
+            Value::CodeBlock(v) => v.span(),
+            Value::NamedCode(v) => v.span(),
+            Value::Code(v) => v.span(),
         }
     }
 }
@@ -1487,6 +1772,13 @@ pub enum ASTType<'t> {
     Binding(Binding<'t>),
     Bindings(Bindings<'t>),
     Boolean(Boolean<'t>),
+    Code(Code<'t>),
+    CodeBlock(CodeBlock<'t>),
+    CodeBlockDelimiter(CodeBlockDelimiter<'t>),
+    CodeBlockLine(CodeBlockLine<'t>),
+    CodeBlockTailCommon(CodeBlockTailCommon<'t>),
+    CodeBlockTailCommonList(Vec<CodeBlockTailCommonList<'t>>),
+    CodeBlockTailCommonOpt(Option<CodeBlockTailCommonOpt<'t>>),
     Comma(Comma<'t>),
     Continue(Continue<'t>),
     Dot(Dot<'t>),
@@ -1503,6 +1795,9 @@ pub enum ASTType<'t> {
     KeyOpt(Option<KeyOpt<'t>>),
     Keys(Keys<'t>),
     KeysList(Vec<KeysList<'t>>),
+    NamedCode(NamedCode<'t>),
+    NamedCodeBlock(NamedCodeBlock<'t>),
+    NamedCodeBlockBegin(NamedCodeBlockBegin<'t>),
     Newline(Newline<'t>),
     Null(Null<'t>),
     Object(Object<'t>),
@@ -1548,6 +1843,16 @@ impl ToSpan for ASTType<'_> {
             ASTType::Binding(v) => v.span(),
             ASTType::Bindings(v) => v.span(),
             ASTType::Boolean(v) => v.span(),
+            ASTType::Code(v) => v.span(),
+            ASTType::CodeBlock(v) => v.span(),
+            ASTType::CodeBlockDelimiter(v) => v.span(),
+            ASTType::CodeBlockLine(v) => v.span(),
+            ASTType::CodeBlockTailCommon(v) => v.span(),
+            ASTType::CodeBlockTailCommonList(v) => {
+                v.first().map_or(Span::default(), |f| f.span())
+                    + v.last().map_or(Span::default(), |l| l.span())
+            }
+            ASTType::CodeBlockTailCommonOpt(o) => o.as_ref().map_or(Span::default(), |o| o.span()),
             ASTType::Comma(v) => v.span(),
             ASTType::Continue(v) => v.span(),
             ASTType::Dot(v) => v.span(),
@@ -1567,6 +1872,9 @@ impl ToSpan for ASTType<'_> {
                 v.first().map_or(Span::default(), |f| f.span())
                     + v.last().map_or(Span::default(), |l| l.span())
             }
+            ASTType::NamedCode(v) => v.span(),
+            ASTType::NamedCodeBlock(v) => v.span(),
+            ASTType::NamedCodeBlockBegin(v) => v.span(),
             ASTType::Newline(v) => v.span(),
             ASTType::Null(v) => v.span(),
             ASTType::Object(v) => v.span(),
@@ -2382,6 +2690,74 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 39:
     ///
+    /// `Value: NamedCodeBlock;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn value_8(&mut self, _named_code_block: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let named_code_block = pop_item!(self, named_code_block, NamedCodeBlock, context);
+        let value_8_built = ValueNamedCodeBlock { named_code_block };
+        let value_8_built = Value::NamedCodeBlock(value_8_built);
+        // Calling user action here
+        self.user_grammar.value(&value_8_built)?;
+        self.push(ASTType::Value(value_8_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 40:
+    ///
+    /// `Value: CodeBlock;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn value_9(&mut self, _code_block: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let code_block = pop_item!(self, code_block, CodeBlock, context);
+        let value_9_built = ValueCodeBlock { code_block };
+        let value_9_built = Value::CodeBlock(value_9_built);
+        // Calling user action here
+        self.user_grammar.value(&value_9_built)?;
+        self.push(ASTType::Value(value_9_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 41:
+    ///
+    /// `Value: NamedCode;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn value_10(&mut self, _named_code: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let named_code = pop_item!(self, named_code, NamedCode, context);
+        let value_10_built = ValueNamedCode { named_code };
+        let value_10_built = Value::NamedCode(value_10_built);
+        // Calling user action here
+        self.user_grammar.value(&value_10_built)?;
+        self.push(ASTType::Value(value_10_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 42:
+    ///
+    /// `Value: Code;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn value_11(&mut self, _code: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let code = pop_item!(self, code, Code, context);
+        let value_11_built = ValueCode { code };
+        let value_11_built = Value::Code(value_11_built);
+        // Calling user action here
+        self.user_grammar.value(&value_11_built)?;
+        self.push(ASTType::Value(value_11_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 43:
+    ///
     /// `Object: Begin ObjectList /* Vec */ End;`
     ///
     #[parol_runtime::function_name::named]
@@ -2407,7 +2783,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 40:
+    /// Semantic action for production 44:
     ///
     /// `ObjectList /* Vec<T>::Push */: Key Bind Value ObjectOpt /* Option */ ObjectList;`
     ///
@@ -2439,7 +2815,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 41:
+    /// Semantic action for production 45:
     ///
     /// `ObjectList /* Vec<T>::New */: ;`
     ///
@@ -2452,7 +2828,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 42:
+    /// Semantic action for production 46:
     ///
     /// `ObjectOpt /* Option<T>::Some */: Comma;`
     ///
@@ -2466,7 +2842,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 43:
+    /// Semantic action for production 47:
     ///
     /// `ObjectOpt /* Option<T>::None */: ;`
     ///
@@ -2478,7 +2854,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 44:
+    /// Semantic action for production 48:
     ///
     /// `Array: ArrayBegin ArrayList /* Vec */ ArrayEnd;`
     ///
@@ -2505,7 +2881,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 45:
+    /// Semantic action for production 49:
     ///
     /// `ArrayList /* Vec<T>::Push */: Value ArrayOpt /* Option */ ArrayList;`
     ///
@@ -2528,7 +2904,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 46:
+    /// Semantic action for production 50:
     ///
     /// `ArrayList /* Vec<T>::New */: ;`
     ///
@@ -2541,7 +2917,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 47:
+    /// Semantic action for production 51:
     ///
     /// `ArrayOpt /* Option<T>::Some */: Comma;`
     ///
@@ -2555,7 +2931,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 48:
+    /// Semantic action for production 52:
     ///
     /// `ArrayOpt /* Option<T>::None */: ;`
     ///
@@ -2567,7 +2943,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 49:
+    /// Semantic action for production 53:
     ///
     /// `Integer: /\d[\d_]*/;`
     ///
@@ -2583,7 +2959,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 50:
+    /// Semantic action for production 54:
     ///
     /// `Boolean: True;`
     ///
@@ -2600,7 +2976,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 51:
+    /// Semantic action for production 55:
     ///
     /// `Boolean: False;`
     ///
@@ -2617,7 +2993,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 52:
+    /// Semantic action for production 56:
     ///
     /// `True: 'true';`
     ///
@@ -2633,7 +3009,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 53:
+    /// Semantic action for production 57:
     ///
     /// `False: 'false';`
     ///
@@ -2649,7 +3025,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 54:
+    /// Semantic action for production 58:
     ///
     /// `Null: 'null';`
     ///
@@ -2665,7 +3041,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 55:
+    /// Semantic action for production 59:
     ///
     /// `Hole: '!';`
     ///
@@ -2681,7 +3057,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 56:
+    /// Semantic action for production 60:
     ///
     /// `StrContinues: Str StrContinuesList /* Vec */;`
     ///
@@ -2706,7 +3082,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 57:
+    /// Semantic action for production 61:
     ///
     /// `StrContinuesList /* Vec<T>::Push */: Continue Str StrContinuesList;`
     ///
@@ -2729,7 +3105,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 58:
+    /// Semantic action for production 62:
     ///
     /// `StrContinuesList /* Vec<T>::New */: ;`
     ///
@@ -2745,7 +3121,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 59:
+    /// Semantic action for production 63:
     ///
     /// `Str: Quote InStr Quote;`
     ///
@@ -2772,7 +3148,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 60:
+    /// Semantic action for production 64:
     ///
     /// `TypedStr: TypedQuote InStr Quote;`
     ///
@@ -2799,7 +3175,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 61:
+    /// Semantic action for production 65:
     ///
     /// `Quote: <INITIAL, Str>'"';`
     ///
@@ -2815,9 +3191,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 62:
+    /// Semantic action for production 66:
     ///
-    /// `TypedQuote: /[^ \t\n\r\x00-\x1F\x22\x7F]+"/;`
+    /// `TypedQuote: /[a-zA-Z0-9-_]+"/;`
     ///
     #[parol_runtime::function_name::named]
     fn typed_quote(&mut self, typed_quote: &ParseTreeType<'t>) -> Result<()> {
@@ -2831,7 +3207,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 63:
+    /// Semantic action for production 67:
     ///
     /// `InStr: <Str>/(\\[nrt\\"0]|[^\\"\r\n])*/;`
     ///
@@ -2847,7 +3223,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 64:
+    /// Semantic action for production 68:
     ///
     /// `Text: <Text>/[^\\"\r\n]*/;`
     ///
@@ -2863,9 +3239,218 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 65:
+    /// Semantic action for production 69:
     ///
-    /// `Newline: <Text>/\r\n|\r|\n/;`
+    /// `NamedCodeBlock: NamedCodeBlockBegin CodeBlockTailCommon;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn named_code_block(
+        &mut self,
+        _named_code_block_begin: &ParseTreeType<'t>,
+        _code_block_tail_common: &ParseTreeType<'t>,
+    ) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let code_block_tail_common =
+            pop_item!(self, code_block_tail_common, CodeBlockTailCommon, context);
+        let named_code_block_begin =
+            pop_item!(self, named_code_block_begin, NamedCodeBlockBegin, context);
+        let named_code_block_built = NamedCodeBlock {
+            named_code_block_begin,
+            code_block_tail_common,
+        };
+        // Calling user action here
+        self.user_grammar
+            .named_code_block(&named_code_block_built)?;
+        self.push(ASTType::NamedCodeBlock(named_code_block_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 70:
+    ///
+    /// `CodeBlock: CodeBlockDelimiter CodeBlockTailCommon;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn code_block(
+        &mut self,
+        _code_block_delimiter: &ParseTreeType<'t>,
+        _code_block_tail_common: &ParseTreeType<'t>,
+    ) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let code_block_tail_common =
+            pop_item!(self, code_block_tail_common, CodeBlockTailCommon, context);
+        let code_block_delimiter =
+            pop_item!(self, code_block_delimiter, CodeBlockDelimiter, context);
+        let code_block_built = CodeBlock {
+            code_block_delimiter,
+            code_block_tail_common,
+        };
+        // Calling user action here
+        self.user_grammar.code_block(&code_block_built)?;
+        self.push(ASTType::CodeBlock(code_block_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 71:
+    ///
+    /// `CodeBlockTailCommon: Newline CodeBlockTailCommonList /* Vec */ CodeBlockTailCommonOpt /* Option */ CodeBlockDelimiter;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn code_block_tail_common(
+        &mut self,
+        _newline: &ParseTreeType<'t>,
+        _code_block_tail_common_list: &ParseTreeType<'t>,
+        _code_block_tail_common_opt: &ParseTreeType<'t>,
+        _code_block_delimiter: &ParseTreeType<'t>,
+    ) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let code_block_delimiter =
+            pop_item!(self, code_block_delimiter, CodeBlockDelimiter, context);
+        let code_block_tail_common_opt = pop_item!(
+            self,
+            code_block_tail_common_opt,
+            CodeBlockTailCommonOpt,
+            context
+        );
+        let code_block_tail_common_list = pop_and_reverse_item!(
+            self,
+            code_block_tail_common_list,
+            CodeBlockTailCommonList,
+            context
+        );
+        let newline = pop_item!(self, newline, Newline, context);
+        let code_block_tail_common_built = CodeBlockTailCommon {
+            newline,
+            code_block_tail_common_list,
+            code_block_tail_common_opt,
+            code_block_delimiter,
+        };
+        // Calling user action here
+        self.user_grammar
+            .code_block_tail_common(&code_block_tail_common_built)?;
+        self.push(
+            ASTType::CodeBlockTailCommon(code_block_tail_common_built),
+            context,
+        );
+        Ok(())
+    }
+
+    /// Semantic action for production 72:
+    ///
+    /// `CodeBlockTailCommonList /* Vec<T>::Push */: CodeBlockLine Newline CodeBlockTailCommonList;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn code_block_tail_common_list_0(
+        &mut self,
+        _code_block_line: &ParseTreeType<'t>,
+        _newline: &ParseTreeType<'t>,
+        _code_block_tail_common_list: &ParseTreeType<'t>,
+    ) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let mut code_block_tail_common_list = pop_item!(
+            self,
+            code_block_tail_common_list,
+            CodeBlockTailCommonList,
+            context
+        );
+        let newline = pop_item!(self, newline, Newline, context);
+        let code_block_line = pop_item!(self, code_block_line, CodeBlockLine, context);
+        let code_block_tail_common_list_0_built = CodeBlockTailCommonList {
+            newline,
+            code_block_line,
+        };
+        // Add an element to the vector
+        code_block_tail_common_list.push(code_block_tail_common_list_0_built);
+        self.push(
+            ASTType::CodeBlockTailCommonList(code_block_tail_common_list),
+            context,
+        );
+        Ok(())
+    }
+
+    /// Semantic action for production 73:
+    ///
+    /// `CodeBlockTailCommonList /* Vec<T>::New */: ;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn code_block_tail_common_list_1(&mut self) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let code_block_tail_common_list_1_built = Vec::new();
+        self.push(
+            ASTType::CodeBlockTailCommonList(code_block_tail_common_list_1_built),
+            context,
+        );
+        Ok(())
+    }
+
+    /// Semantic action for production 74:
+    ///
+    /// `CodeBlockTailCommonOpt /* Option<T>::Some */: Ws;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn code_block_tail_common_opt_0(&mut self, _ws: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let ws = pop_item!(self, ws, Ws, context);
+        let code_block_tail_common_opt_0_built = CodeBlockTailCommonOpt { ws };
+        self.push(
+            ASTType::CodeBlockTailCommonOpt(Some(code_block_tail_common_opt_0_built)),
+            context,
+        );
+        Ok(())
+    }
+
+    /// Semantic action for production 75:
+    ///
+    /// `CodeBlockTailCommonOpt /* Option<T>::None */: ;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn code_block_tail_common_opt_1(&mut self) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        self.push(ASTType::CodeBlockTailCommonOpt(None), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 76:
+    ///
+    /// `NamedCode: /[a-zA-Z0-9-_]+`([^`\r\n]|\\`)*`/;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn named_code(&mut self, named_code: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let named_code = named_code.token()?.clone();
+        let named_code_built = NamedCode { named_code };
+        // Calling user action here
+        self.user_grammar.named_code(&named_code_built)?;
+        self.push(ASTType::NamedCode(named_code_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 77:
+    ///
+    /// `Code: /`([^`\r\n]|\\`)*`/;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn code(&mut self, code: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let code = code.token()?.clone();
+        let code_built = Code { code };
+        // Calling user action here
+        self.user_grammar.code(&code_built)?;
+        self.push(ASTType::Code(code_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 78:
+    ///
+    /// `Newline: <CodeBlockState, Text>/\r\n|\r|\n/;`
     ///
     #[parol_runtime::function_name::named]
     fn newline(&mut self, newline: &ParseTreeType<'t>) -> Result<()> {
@@ -2879,9 +3464,9 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 66:
+    /// Semantic action for production 79:
     ///
-    /// `Ws: <Str, Text>/[\s--\r\n]+/;`
+    /// `Ws: <Str, CodeBlockState, Text>/[\s--\r\n]+/;`
     ///
     #[parol_runtime::function_name::named]
     fn ws(&mut self, ws: &ParseTreeType<'t>) -> Result<()> {
@@ -2895,7 +3480,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 67:
+    /// Semantic action for production 80:
     ///
     /// `At: '@';`
     ///
@@ -2911,7 +3496,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 68:
+    /// Semantic action for production 81:
     ///
     /// `Ext: '$';`
     ///
@@ -2927,7 +3512,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 69:
+    /// Semantic action for production 82:
     ///
     /// `Dot: '.';`
     ///
@@ -2943,7 +3528,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 70:
+    /// Semantic action for production 83:
     ///
     /// `Begin: '{';`
     ///
@@ -2959,7 +3544,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 71:
+    /// Semantic action for production 84:
     ///
     /// `End: '}';`
     ///
@@ -2975,7 +3560,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 72:
+    /// Semantic action for production 85:
     ///
     /// `ArrayBegin: '[';`
     ///
@@ -2991,7 +3576,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 73:
+    /// Semantic action for production 86:
     ///
     /// `ArrayEnd: ']';`
     ///
@@ -3007,7 +3592,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 74:
+    /// Semantic action for production 87:
     ///
     /// `Bind: '=';`
     ///
@@ -3023,7 +3608,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 75:
+    /// Semantic action for production 88:
     ///
     /// `Comma: ',';`
     ///
@@ -3039,7 +3624,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 76:
+    /// Semantic action for production 89:
     ///
     /// `Continue: '\\';`
     ///
@@ -3055,7 +3640,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 77:
+    /// Semantic action for production 90:
     ///
     /// `TextStart: ":";`
     ///
@@ -3071,7 +3656,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         Ok(())
     }
 
-    /// Semantic action for production 78:
+    /// Semantic action for production 91:
     ///
     /// `Ident: /[a-zA-Z_\-0-9]+/;`
     ///
@@ -3084,6 +3669,66 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
         // Calling user action here
         self.user_grammar.ident(&ident_built)?;
         self.push(ASTType::Ident(ident_built), context);
+        Ok(())
+    }
+
+    /// Semantic action for production 92:
+    ///
+    /// `NamedCodeBlockBegin: /```[a-zA-Z0-9-_]+/;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn named_code_block_begin(&mut self, named_code_block_begin: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let named_code_block_begin = named_code_block_begin.token()?.clone();
+        let named_code_block_begin_built = NamedCodeBlockBegin {
+            named_code_block_begin,
+        };
+        // Calling user action here
+        self.user_grammar
+            .named_code_block_begin(&named_code_block_begin_built)?;
+        self.push(
+            ASTType::NamedCodeBlockBegin(named_code_block_begin_built),
+            context,
+        );
+        Ok(())
+    }
+
+    /// Semantic action for production 93:
+    ///
+    /// `CodeBlockDelimiter: <INITIAL, CodeBlockState>/```/;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn code_block_delimiter(&mut self, code_block_delimiter: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let code_block_delimiter = code_block_delimiter.token()?.clone();
+        let code_block_delimiter_built = CodeBlockDelimiter {
+            code_block_delimiter,
+        };
+        // Calling user action here
+        self.user_grammar
+            .code_block_delimiter(&code_block_delimiter_built)?;
+        self.push(
+            ASTType::CodeBlockDelimiter(code_block_delimiter_built),
+            context,
+        );
+        Ok(())
+    }
+
+    /// Semantic action for production 94:
+    ///
+    /// `CodeBlockLine: <CodeBlockState>/[^\n]*/;`
+    ///
+    #[parol_runtime::function_name::named]
+    fn code_block_line(&mut self, code_block_line: &ParseTreeType<'t>) -> Result<()> {
+        let context = function_name!();
+        trace!("{}", self.trace_item_stack(context));
+        let code_block_line = code_block_line.token()?.clone();
+        let code_block_line_built = CodeBlockLine { code_block_line };
+        // Calling user action here
+        self.user_grammar.code_block_line(&code_block_line_built)?;
+        self.push(ASTType::CodeBlockLine(code_block_line_built), context);
         Ok(())
     }
 }
@@ -3137,52 +3782,70 @@ impl<'t> UserActionsTrait<'t> for GrammarAuto<'t, '_> {
             36 => self.value_5(&children[0]),
             37 => self.value_6(&children[0]),
             38 => self.value_7(&children[0]),
-            39 => self.object(&children[0], &children[1], &children[2]),
-            40 => self.object_list_0(
+            39 => self.value_8(&children[0]),
+            40 => self.value_9(&children[0]),
+            41 => self.value_10(&children[0]),
+            42 => self.value_11(&children[0]),
+            43 => self.object(&children[0], &children[1], &children[2]),
+            44 => self.object_list_0(
                 &children[0],
                 &children[1],
                 &children[2],
                 &children[3],
                 &children[4],
             ),
-            41 => self.object_list_1(),
-            42 => self.object_opt_0(&children[0]),
-            43 => self.object_opt_1(),
-            44 => self.array(&children[0], &children[1], &children[2]),
-            45 => self.array_list_0(&children[0], &children[1], &children[2]),
-            46 => self.array_list_1(),
-            47 => self.array_opt_0(&children[0]),
-            48 => self.array_opt_1(),
-            49 => self.integer(&children[0]),
-            50 => self.boolean_0(&children[0]),
-            51 => self.boolean_1(&children[0]),
-            52 => self.r#true(&children[0]),
-            53 => self.r#false(&children[0]),
-            54 => self.null(&children[0]),
-            55 => self.hole(&children[0]),
-            56 => self.str_continues(&children[0], &children[1]),
-            57 => self.str_continues_list_0(&children[0], &children[1], &children[2]),
-            58 => self.str_continues_list_1(),
-            59 => self.str(&children[0], &children[1], &children[2]),
-            60 => self.typed_str(&children[0], &children[1], &children[2]),
-            61 => self.quote(&children[0]),
-            62 => self.typed_quote(&children[0]),
-            63 => self.in_str(&children[0]),
-            64 => self.text(&children[0]),
-            65 => self.newline(&children[0]),
-            66 => self.ws(&children[0]),
-            67 => self.at(&children[0]),
-            68 => self.ext(&children[0]),
-            69 => self.dot(&children[0]),
-            70 => self.begin(&children[0]),
-            71 => self.end(&children[0]),
-            72 => self.array_begin(&children[0]),
-            73 => self.array_end(&children[0]),
-            74 => self.bind(&children[0]),
-            75 => self.comma(&children[0]),
-            76 => self.r#continue(&children[0]),
-            77 => self.text_start(&children[0]),
-            78 => self.ident(&children[0]),
+            45 => self.object_list_1(),
+            46 => self.object_opt_0(&children[0]),
+            47 => self.object_opt_1(),
+            48 => self.array(&children[0], &children[1], &children[2]),
+            49 => self.array_list_0(&children[0], &children[1], &children[2]),
+            50 => self.array_list_1(),
+            51 => self.array_opt_0(&children[0]),
+            52 => self.array_opt_1(),
+            53 => self.integer(&children[0]),
+            54 => self.boolean_0(&children[0]),
+            55 => self.boolean_1(&children[0]),
+            56 => self.r#true(&children[0]),
+            57 => self.r#false(&children[0]),
+            58 => self.null(&children[0]),
+            59 => self.hole(&children[0]),
+            60 => self.str_continues(&children[0], &children[1]),
+            61 => self.str_continues_list_0(&children[0], &children[1], &children[2]),
+            62 => self.str_continues_list_1(),
+            63 => self.str(&children[0], &children[1], &children[2]),
+            64 => self.typed_str(&children[0], &children[1], &children[2]),
+            65 => self.quote(&children[0]),
+            66 => self.typed_quote(&children[0]),
+            67 => self.in_str(&children[0]),
+            68 => self.text(&children[0]),
+            69 => self.named_code_block(&children[0], &children[1]),
+            70 => self.code_block(&children[0], &children[1]),
+            71 => {
+                self.code_block_tail_common(&children[0], &children[1], &children[2], &children[3])
+            }
+            72 => self.code_block_tail_common_list_0(&children[0], &children[1], &children[2]),
+            73 => self.code_block_tail_common_list_1(),
+            74 => self.code_block_tail_common_opt_0(&children[0]),
+            75 => self.code_block_tail_common_opt_1(),
+            76 => self.named_code(&children[0]),
+            77 => self.code(&children[0]),
+            78 => self.newline(&children[0]),
+            79 => self.ws(&children[0]),
+            80 => self.at(&children[0]),
+            81 => self.ext(&children[0]),
+            82 => self.dot(&children[0]),
+            83 => self.begin(&children[0]),
+            84 => self.end(&children[0]),
+            85 => self.array_begin(&children[0]),
+            86 => self.array_end(&children[0]),
+            87 => self.bind(&children[0]),
+            88 => self.comma(&children[0]),
+            89 => self.r#continue(&children[0]),
+            90 => self.text_start(&children[0]),
+            91 => self.ident(&children[0]),
+            92 => self.named_code_block_begin(&children[0]),
+            93 => self.code_block_delimiter(&children[0]),
+            94 => self.code_block_line(&children[0]),
             _ => Err(ParserError::InternalError(format!(
                 "Unhandled production number: {}",
                 prod_num

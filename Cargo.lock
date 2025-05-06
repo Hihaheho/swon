@@ -3414,7 +3414,6 @@ dependencies = [
 [[package]]
 name = "parol"
 version = "3.0.1"
-source = "git+https://github.com/ryo33/parol.git?branch=parse2#41c26928c1012e78a9610b2541ba550b22bd8f33"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -3451,12 +3450,10 @@ dependencies = [
 [[package]]
 name = "parol-macros"
 version = "1.0.0"
-source = "git+https://github.com/ryo33/parol.git?branch=parse2#41c26928c1012e78a9610b2541ba550b22bd8f33"
 
 [[package]]
 name = "parol_runtime"
 version = "3.0.0"
-source = "git+https://github.com/ryo33/parol.git?branch=parse2#41c26928c1012e78a9610b2541ba550b22bd8f33"
 dependencies = [
  "anyhow",
  "codespan-reporting",
@@ -4601,6 +4598,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "swon-json"
+version = "0.1.0"
+
+[[package]]
 name = "swon-json-schema"
 version = "0.1.0"
 
@@ -4628,6 +4629,7 @@ dependencies = [
  "parol_runtime",
  "petgraph 0.8.1",
  "syntree_layout",
+ "thiserror 2.0.9",
 ]
 
 [[package]]
@@ -4650,19 +4652,16 @@ name = "swon-toml"
 version = "0.1.0"
 
 [[package]]
-name = "swon-tree"
-version = "0.1.0"
-dependencies = [
- "ahash",
-]
-
-[[package]]
 name = "swon-value"
 version = "0.1.0"
 dependencies = [
  "ahash",
  "thisisplural",
 ]
+
+[[package]]
+name = "swon-yaml"
+version = "0.1.0"
 
 [[package]]
 name = "syn"

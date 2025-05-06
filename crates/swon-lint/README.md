@@ -1,6 +1,8 @@
-# swon-json-schema
+# swon-lint
 
-JSON Schema compatibility for SWON (SWan Object Notation).
+Linter for SWON (SWan Object Notation) files.
+
+This crate provides linting capabilities for SWON files, helping to enforce best practices and catch potential issues early.
 
 **This crate is still under development and published for name reservation purpose.**
 

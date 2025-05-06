@@ -1,6 +1,8 @@
-# swon-json-schema
+# swon-editor-support
 
-JSON Schema compatibility for SWON (SWan Object Notation).
+Editor support utilities for SWON (SWan Object Notation).
+
+This crate provides common functionality used by editor plugins and language servers to enhance the editing experience for SWON files.
 
 **This crate is still under development and published for name reservation purpose.**
 

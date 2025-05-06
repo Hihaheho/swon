@@ -124,6 +124,9 @@ fn process_terminal(
     tokens: &mut Vec<TokenData>,
     legend: &SemanticTokensLegend,
 ) {
+    let Some((line, start_char, length)) = span_to_line_char(span, line_numbers, text) else {
+        return;
+    };
     // Map terminal kind to semantic token type
     let token_type = match kind {
         TerminalKind::True | TerminalKind::False | TerminalKind::Null => SemanticTokenType::KEYWORD,
@@ -132,6 +135,27 @@ fn process_terminal(
         | TerminalKind::TypedQuote
         | TerminalKind::InStr
         | TerminalKind::Text => SemanticTokenType::STRING,
+        TerminalKind::CodeBlockLine => SemanticTokenType::STRING,
+        TerminalKind::NamedCode => {
+            let code_pos = text[span.start as usize..span.end as usize]
+                .find('`')
+                .expect("This token should contain `") as u32;
+            push_multiple_tokens_oneline(
+                legend,
+                tokens,
+                line,
+                start_char,
+                length,
+                [
+                    (code_pos, SemanticTokenType::NAMESPACE),
+                    (1, SemanticTokenType::OPERATOR),
+                    (length - code_pos - 2, SemanticTokenType::STRING),
+                    (1, SemanticTokenType::OPERATOR),
+                ],
+            );
+            return;
+        }
+        TerminalKind::Code => SemanticTokenType::STRING,
         TerminalKind::LineComment | TerminalKind::BlockComment => SemanticTokenType::COMMENT,
         TerminalKind::At => SemanticTokenType::NAMESPACE,
         TerminalKind::Dot
@@ -141,16 +165,32 @@ fn process_terminal(
         | TerminalKind::RBracket
         | TerminalKind::Bind
         | TerminalKind::Hole
-        | TerminalKind::Comma => SemanticTokenType::OPERATOR,
+        | TerminalKind::Comma
+        | TerminalKind::TextStart
+        | TerminalKind::CodeBlockDelimiter => SemanticTokenType::OPERATOR,
+        TerminalKind::NamedCodeBlockBegin => {
+            push_multiple_tokens_oneline(
+                legend,
+                tokens,
+                line,
+                start_char,
+                length,
+                [
+                    (3, SemanticTokenType::OPERATOR),
+                    (length - 3, SemanticTokenType::NAMESPACE),
+                ],
+            );
+            return;
+        }
         TerminalKind::Ident => SemanticTokenType::PROPERTY,
         TerminalKind::Dollar => SemanticTokenType::OPERATOR,
         TerminalKind::NewLine
         | TerminalKind::Whitespace
         | TerminalKind::Newline
         | TerminalKind::Ws
-        | TerminalKind::Esc
-        | TerminalKind::TextStart => return,
+        | TerminalKind::Esc => return,
     };
+    let token_type_idx = get_token_type_index(token_type, legend);
 
     // Skip tokens with zero length
     if span.start == span.end {
@@ -158,17 +198,37 @@ fn process_terminal(
     }
 
     // Calculate line and character for the span
-    if let Some((line, start_char, length)) = span_to_line_char(span, line_numbers, text) {
-        let token_type_idx = get_token_type_index(token_type, legend);
+    tokens.push(TokenData {
+        line,
+        start_char,
+        length,
+        token_type: token_type_idx,
+        token_modifiers: 0, // No modifiers for now
+    });
+}
 
+fn push_multiple_tokens_oneline(
+    legend: &SemanticTokensLegend,
+    tokens: &mut Vec<TokenData>,
+    line: u32,
+    start_char: u32,
+    length: u32,
+    iter: impl IntoIterator<Item = (u32, SemanticTokenType)>,
+) {
+    let mut start_char = start_char;
+    let mut rest_length = length;
+    for (length, token_type) in iter {
         tokens.push(TokenData {
             line,
             start_char,
             length,
-            token_type: token_type_idx,
-            token_modifiers: 0, // No modifiers for now
+            token_type: get_token_type_index(token_type, legend),
+            token_modifiers: 0,
         });
+        start_char += length;
+        rest_length -= length;
     }
+    assert_eq!(rest_length, 0);
 }
 
 /// Convert a span to line and character position

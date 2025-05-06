@@ -56,13 +56,18 @@ scene: scenes/room_a.scn.ron
 - [ ] swon-parol: Complete the grammar and parser
 - [ ] swon-ls: Syntax highlighting
 - [ ] swon-schema: SWON Schema specification
-- [ ] swon-ls: Schema validation
 - [ ] serde-swon: Serde support
 - [ ] swon-dev: Making the landing page on <https://swon.dev>
 - [ ] swon-fmt: Make the formatter
-- [ ] swon-cli: sub command to convert SWON to other formats
+- [ ] swon-cli: command to convert SWON to other formats
+- [ ] swon-check: SWON files validator
 - [ ] swon-lint: Some lint rules
 - [ ] swon-template: Templating extension for SWON files
+- [ ] swon-editor-support: Editor support for SWON files
+- [ ] swon-toml: TOML conversion support
+- [ ] swon-json: JSON conversion support
+- [ ] swon-yaml: YAML conversion support
+- [ ] swon-value: Type-safe data-type of SWON data-model
 
 ## Credits
 

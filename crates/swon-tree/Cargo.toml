@@ -1,7 +1,0 @@
-[package]
-name = "swon-tree"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-ahash = { workspace = true }

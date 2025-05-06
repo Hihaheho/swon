@@ -26,6 +26,7 @@ syntree = "0.18"
 ahash = "0.8.11"
 thisisplural = "0.4"
 lsp-types = "0.97.0"
+thiserror = "2.0"
 
 # For faster parser generation
 [profile.dev.package.parol]

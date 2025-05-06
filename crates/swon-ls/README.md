@@ -1,6 +1,8 @@
-# swon-json-schema
+# swon-ls
 
-JSON Schema compatibility for SWON (SWan Object Notation).
+Language Server Protocol (LSP) implementation for SWON (SWan Object Notation).
+
+This crate provides a language server that can be integrated with various code editors to provide rich features for working with SWON files.
 
 **This crate is still under development and published for name reservation purpose.**
 

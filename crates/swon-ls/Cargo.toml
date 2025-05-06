@@ -1,7 +1,12 @@
 [package]
 name = "swon-ls"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
+description = "Language Server Protocol implementation for SWON"
+license = "MIT OR Apache-2.0"
+homepage = "https://swon.dev"
+repository = "https://github.com/Hihaheho/swon"
+readme = "README.md"
 
 [dependencies]
 lsp-server = "0.7.6"

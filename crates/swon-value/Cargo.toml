@@ -1,7 +1,12 @@
 [package]
 name = "swon-value"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
+description = "Value type for SWON"
+license = "MIT OR Apache-2.0"
+homepage = "https://swon.dev"
+repository = "https://github.com/Hihaheho/swon"
+readme = "README.md"
 
 [dependencies]
 ahash = { workspace = true }

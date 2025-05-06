@@ -1,6 +1,8 @@
-# swon-json-schema
+# swon-fmt
 
-JSON Schema compatibility for SWON (SWan Object Notation).
+Formatter for SWON (SWan Object Notation) files.
+
+This crate provides formatting capabilities for SWON files, ensuring consistent style and readability.
 
 **This crate is still under development and published for name reservation purpose.**
 
