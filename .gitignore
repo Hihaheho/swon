@@ -14,3 +14,10 @@
 !crates/swon-parol/swon.par
 
 !example.swon
+
+!playground/**/*.json
+!playground/**/*.js
+!playground/**/*.ts
+!playground/**/*.html
+!playground/**/*.md
+!playground/**/.gitignore
