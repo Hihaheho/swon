@@ -10,3 +10,4 @@ out
 !language-configuration.json
 
 *.vsix
+*.wasm

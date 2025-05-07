@@ -686,6 +686,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "convert_case"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "baaaa0ecca5b51987b9423ccdc971514dd8b0bb7b4060b983d3664dad3f1f89f"
+dependencies = [
+ "unicode-segmentation",
+]
+
+[[package]]
 name = "core-foundation"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3414,7 +3423,6 @@ dependencies = [
 [[package]]
 name = "parol"
 version = "3.0.1"
-source = "git+https://github.com/ryo33/parol.git?branch=parse2#41c26928c1012e78a9610b2541ba550b22bd8f33"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -3451,12 +3459,10 @@ dependencies = [
 [[package]]
 name = "parol-macros"
 version = "1.0.0"
-source = "git+https://github.com/ryo33/parol.git?branch=parse2#41c26928c1012e78a9610b2541ba550b22bd8f33"
 
 [[package]]
 name = "parol_runtime"
 version = "3.0.0"
-source = "git+https://github.com/ryo33/parol.git?branch=parse2#41c26928c1012e78a9610b2541ba550b22bd8f33"
 dependencies = [
  "anyhow",
  "codespan-reporting",
@@ -3731,6 +3737,16 @@ checksum = "72dd2d6d381dfb73a193c7fca536518d7caee39fc8503f74e7dc0be0531b425c"
 dependencies = [
  "predicates-core",
  "termtree",
+]
+
+[[package]]
+name = "prettyplease"
+version = "0.2.32"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "664ec5419c51e34154eec046ebcba56312d5a2fc3b09a06da188e1ad21afadf6"
+dependencies = [
+ "proc-macro2",
+ "syn 2.0.101",
 ]
 
 [[package]]
@@ -4639,7 +4655,12 @@ dependencies = [
 name = "swon-parol-gen"
 version = "0.1.0"
 dependencies = [
+ "convert_case 0.8.0",
  "parol",
+ "prettyplease",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.101",
 ]
 
 [[package]]

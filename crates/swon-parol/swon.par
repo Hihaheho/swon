@@ -5,8 +5,7 @@
 
 %on Quote, TypedQuote %enter Str
 %on TextStart %enter Text
-%on CodeBlockDelimiter %enter CodeBlockState
-%on NamedCodeBlockBegin %enter CodeBlockState
+%on CodeBlockDelimiter, NamedCodeBlockBegin %enter CodeBlockState
 
 %scanner Str {
   %auto_newline_off

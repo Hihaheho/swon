@@ -1,6 +1,6 @@
 use swon_parol::{
-    tree::{CstNodeData, CstNodeId},
     Cst, CstNode,
+    tree::{CstNodeData, CstNodeId},
 };
 
 pub fn fmt(input: &str, cst: &mut Cst) {

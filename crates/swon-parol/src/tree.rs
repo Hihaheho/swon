@@ -1,18 +1,20 @@
 mod span;
 
 use parol_runtime::{
-    parser::parse_tree_type::{NodeKind, NonTerminalEnum, TerminalEnum, TreeConstruct},
     ParolError, Token,
+    parser::parse_tree_type::{NodeKind, NonTerminalEnum, TerminalEnum, TreeConstruct},
 };
 use petgraph::{
+    Direction,
     graph::{DiGraph, NodeIndex},
     visit::EdgeRef,
-    Direction,
 };
 use std::collections::BTreeMap;
 use thiserror::Error;
 
 pub use span::*;
+
+use crate::nodes::{NonTerminalKind, TerminalKind};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 /// A dynamic token id that provided by the user land.
@@ -28,6 +30,19 @@ pub enum CstNodeData<T, Nt> {
     DynamicToken(T, DynamicTokenId),
 }
 
+impl<T, Nt> CstNodeData<T, Nt>
+where
+    T: Copy,
+    Nt: Copy,
+{
+    pub fn node_kind(&self) -> NodeKind<T, Nt> {
+        match self {
+            CstNodeData::Terminal(kind, _) => NodeKind::Terminal(*kind),
+            CstNodeData::NonTerminal(kind) => NodeKind::NonTerminal(*kind),
+            CstNodeData::DynamicToken(kind, _) => NodeKind::Terminal(*kind),
+        }
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Ord, PartialOrd)]
 pub struct CstNodeId(pub NodeIndex);
 
@@ -59,11 +74,17 @@ impl<T, Nt> ConcreteSyntaxTree<T, Nt> {
         self.graph.add_edge(from.0, to.0, ());
     }
 
-    pub fn get_children(&self, node: CstNodeId) -> Vec<CstNodeId> {
+    pub fn has_no_children(&self, node: CstNodeId) -> bool {
+        self.graph
+            .edges_directed(node.0, Direction::Outgoing)
+            .next()
+            .is_none()
+    }
+
+    pub fn children(&self, node: CstNodeId) -> impl Iterator<Item = CstNodeId> {
         self.graph
             .edges_directed(node.0, Direction::Outgoing)
             .map(|edge| CstNodeId(edge.target()))
-            .collect()
     }
 
     pub fn parent(&self, node: CstNodeId) -> Option<CstNodeId> {
@@ -75,15 +96,6 @@ impl<T, Nt> ConcreteSyntaxTree<T, Nt> {
 
     pub fn node_data(&self, node: CstNodeId) -> Option<&CstNodeData<T, Nt>> {
         self.graph.node_weight(node.0)
-    }
-
-    /// Get all children of a node in source order - this handles the reversed nature of lists
-    /// by returning them in reverse order of insertion
-    pub fn children(&self, node: CstNodeId) -> Vec<CstNodeId> {
-        let mut children = self.get_children(node);
-        // Reverse to get source order for lists
-        children.reverse();
-        children
     }
 
     pub fn write(&self, input: &str, w: &mut impl std::fmt::Write) -> Result<(), std::fmt::Error> {
@@ -118,13 +130,86 @@ impl<T, Nt> ConcreteSyntaxTree<T, Nt> {
     }
 }
 
+impl TerminalKind {
+    fn auto_ws_is_off(&self) -> bool {
+        matches!(
+            self,
+            TerminalKind::Whitespace
+                | TerminalKind::Newline
+                | TerminalKind::InStr
+                | TerminalKind::Text
+                | TerminalKind::CodeBlockLine
+        )
+    }
+}
+
+impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
+    pub fn collect_nodes<const N: usize>(
+        &self,
+        parent: CstNodeId,
+        nodes: [NodeKind<TerminalKind, NonTerminalKind>; N],
+    ) -> Result<[CstNodeId; N], ViewConstructionError<TerminalKind, NonTerminalKind>> {
+        let mut children = self.children(parent);
+        let mut result = Vec::with_capacity(N);
+        'outer: for expected_kind in nodes {
+            'inner: for child in &mut children {
+                let child_data = self
+                    .node_data(child)
+                    .ok_or(ViewConstructionError::NodeIdNotFound { node: child })?;
+                match child_data {
+                    CstNodeData::Terminal(kind, _) | CstNodeData::DynamicToken(kind, _) => {
+                        if NodeKind::Terminal(*kind) == expected_kind {
+                            result.push(child);
+                            continue 'outer;
+                        } else if kind.is_builtin_whitespace() || kind.is_builtin_new_line() {
+                            if kind.auto_ws_is_off() {
+                                return Err(ViewConstructionError::UnexpectedTerminal {
+                                    node: child,
+                                    terminal: *kind,
+                                });
+                            }
+                            continue 'inner;
+                        } else {
+                            return Err(ViewConstructionError::UnexpectedTerminal {
+                                node: child,
+                                terminal: *kind,
+                            });
+                        }
+                    }
+                    CstNodeData::NonTerminal(kind) => {
+                        if NodeKind::NonTerminal(*kind) == expected_kind {
+                            result.push(child);
+                            continue 'outer;
+                        } else {
+                            return Err(ViewConstructionError::UnexpectedNonTerminal {
+                                node: child,
+                                non_terminal: *kind,
+                            });
+                        }
+                    }
+                }
+            }
+            return Err(ViewConstructionError::UnexpectedEndOfChildren { parent });
+        }
+        Ok(result
+            .try_into()
+            .expect("Result should have the same length as nodes"))
+    }
+}
+
 /// SWON-specific tree builder that handles the peculiarities of the SWON grammar,
 /// particularly the reversed ordering of list elements
 #[derive(Debug, Clone)]
 pub struct CstBuilder<T, Nt> {
     tree: DiGraph<CstNodeData<T, Nt>, ()>,
-    node_stack: Vec<NodeIndex>,
+    node_stack: Vec<NodeStackItem>,
     root_node_candidate: Option<NodeIndex>,
+}
+
+#[derive(Debug, Clone)]
+struct NodeStackItem {
+    node: CstNodeId,
+    children: Vec<CstNodeId>,
 }
 
 impl<T, Nt> Default for CstBuilder<T, Nt>
@@ -154,8 +239,8 @@ where
     fn add_terminal_node(&mut self, kind: T, span: InputSpan) -> NodeIndex {
         let node = self.tree.add_node(CstNodeData::Terminal(kind, span));
 
-        if let Some(&parent) = self.node_stack.last() {
-            self.tree.add_edge(parent, node, ());
+        if let Some(parent) = self.node_stack.last_mut() {
+            parent.children.push(CstNodeId(node));
         } else {
             // This is a root level node
             self.root_node_candidate = Some(node);
@@ -168,20 +253,30 @@ where
     fn open_non_terminal_node(&mut self, kind: Nt) -> NodeIndex {
         let node = self.tree.add_node(CstNodeData::NonTerminal(kind));
 
-        if let Some(&parent) = self.node_stack.last() {
-            self.tree.add_edge(parent, node, ());
+        if let Some(parent) = self.node_stack.last_mut() {
+            parent.children.push(CstNodeId(node));
         } else {
             // This is a root level node
             self.root_node_candidate = Some(node);
         }
 
-        self.node_stack.push(node);
+        self.node_stack.push(NodeStackItem {
+            node: CstNodeId(node),
+            children: Vec::new(),
+        });
         node
     }
 
     // Closes the current non-terminal
-    fn close_non_terminal_node(&mut self) -> Option<NodeIndex> {
-        self.node_stack.pop()
+    fn close_non_terminal_node(&mut self) -> Option<CstNodeId> {
+        let item = self.node_stack.pop();
+        if let Some(item) = &item {
+            let parent = item.node;
+            item.children.iter().rev().for_each(|node| {
+                self.tree.add_edge(parent.0, node.0, ());
+            });
+        }
+        item.map(|item| item.node)
     }
 }
 
@@ -367,6 +462,18 @@ pub enum ViewConstructionError<T, Nt> {
         /// The index of the node.
         node: CstNodeId,
     },
+    /// Unexpected end of children
+    #[error("Unexpected end of children")]
+    UnexpectedEndOfChildren {
+        /// The index of the node.
+        parent: CstNodeId,
+    },
+    /// Unexpected empty children for a non-terminal
+    #[error("Unexpected empty children for a non-terminal: {node}")]
+    UnexpectedEmptyChildren {
+        /// The index of the node.
+        node: CstNodeId,
+    },
     /// The node ID not found in the tree
     #[error("Node ID not found in the tree: {node}")]
     NodeIdNotFound {
@@ -375,8 +482,32 @@ pub enum ViewConstructionError<T, Nt> {
     },
 }
 
+pub fn assert_node_kind<T, Nt>(
+    node: CstNodeId,
+    kind: NodeKind<T, Nt>,
+    expected_kind: NodeKind<T, Nt>,
+) -> Result<(), ViewConstructionError<T, Nt>>
+where
+    T: PartialEq,
+    Nt: PartialEq,
+{
+    if kind == expected_kind {
+        Ok(())
+    } else {
+        match kind {
+            NodeKind::Terminal(k) => {
+                Err(ViewConstructionError::UnexpectedTerminal { node, terminal: k })
+            }
+            NodeKind::NonTerminal(k) => Err(ViewConstructionError::UnexpectedNonTerminal {
+                node,
+                non_terminal: k,
+            }),
+        }
+    }
+}
+
 /// A trait that all generated non-terminal handles implements.
-pub trait NonTerminalHandle<'a, N, T, Nt> {
+pub trait NonTerminalHandle<T, Nt> {
     /// The type of the view for this non-terminal.
     type View;
     /// Create a new non-terminal handle from a node.
