@@ -131,14 +131,19 @@ impl<T, Nt> ConcreteSyntaxTree<T, Nt> {
 }
 
 impl TerminalKind {
-    fn auto_ws_is_off(&self) -> bool {
+    fn auto_ws_is_off(&self, index: usize) -> bool {
+        // TODO: support CodeBlockDelimitor it's also used for beginning of CodeBlock and it's non-terminal so need more analysis to handle this case
         matches!(
-            self,
-            TerminalKind::Whitespace
-                | TerminalKind::Newline
-                | TerminalKind::InStr
-                | TerminalKind::Text
-                | TerminalKind::CodeBlockLine
+            (self, index),
+            (
+                TerminalKind::Whitespace
+                    | TerminalKind::Newline
+                    | TerminalKind::InStr
+                    | TerminalKind::Text
+                    | TerminalKind::CodeBlockLine
+                    | TerminalKind::Code,
+                _
+            ) | (TerminalKind::Quote, 2)
         )
     }
 }
@@ -152,7 +157,7 @@ impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
         let mut children = self.children(parent);
         let mut result = Vec::with_capacity(N);
         'outer: for expected_kind in nodes {
-            'inner: for child in &mut children {
+            'inner: for (idx, child) in children.by_ref().enumerate() {
                 let child_data = self
                     .node_data(child)
                     .ok_or(ViewConstructionError::NodeIdNotFound { node: child })?;
@@ -162,7 +167,7 @@ impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
                             result.push(child);
                             continue 'outer;
                         } else if kind.is_builtin_whitespace() || kind.is_builtin_new_line() {
-                            if kind.auto_ws_is_off() {
+                            if kind.auto_ws_is_off(idx) {
                                 return Err(ViewConstructionError::UnexpectedTerminal {
                                     node: child,
                                     terminal: *kind,
