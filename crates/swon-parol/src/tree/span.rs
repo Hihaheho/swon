@@ -74,6 +74,28 @@ pub struct InputSpan {
     pub end: u32,
 }
 
+impl InputSpan {
+    pub const EMPTY: Self = Self {
+        start: u32::MAX,
+        end: 0,
+    };
+
+    pub fn new(start: u32, end: u32) -> Self {
+        Self { start, end }
+    }
+
+    pub fn merge(self, other: Self) -> Self {
+        Self {
+            start: self.start.min(other.start),
+            end: self.end.max(other.end),
+        }
+    }
+
+    pub fn merge_many(self, others: impl IntoIterator<Item = Self>) -> Self {
+        others.into_iter().fold(self, |acc, other| acc.merge(other))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -184,7 +184,7 @@ pub const NON_TERMINALS: &[&str; 64] = &[
     /*  8 */ "Begin",
     /*  9 */ "Bind",
     /* 10 */ "Binding",
-    /* 11 */ "Bindings",
+    /* 11 */ "BindingRhs",
     /* 12 */ "Boolean",
     /* 13 */ "Code",
     /* 14 */ "CodeBlock",
@@ -337,7 +337,7 @@ pub const LOOKAHEAD_AUTOMATA: &[LookaheadDFA; 64] = &[
         transitions: &[],
         k: 0,
     },
-    /* 11 - "Bindings" */
+    /* 11 - "BindingRhs" */
     LookaheadDFA {
         prod0: -1,
         transitions: &[Trans(0, 21, 2, 7), Trans(0, 25, 1, 6), Trans(0, 28, 3, 8)],
@@ -782,22 +782,22 @@ pub const PRODUCTIONS: &[Production; 95] = &[
         lhs: 52,
         production: &[],
     },
-    // 5 - Binding: Keys Bindings;
+    // 5 - Binding: Keys BindingRhs;
     Production {
         lhs: 10,
         production: &[ParseType::N(11), ParseType::N(34)],
     },
-    // 6 - Bindings: ValueBinding;
+    // 6 - BindingRhs: ValueBinding;
     Production {
         lhs: 11,
         production: &[ParseType::N(62)],
     },
-    // 7 - Bindings: SectionBinding;
+    // 7 - BindingRhs: SectionBinding;
     Production {
         lhs: 11,
         production: &[ParseType::N(46)],
     },
-    // 8 - Bindings: TextBinding;
+    // 8 - BindingRhs: TextBinding;
     Production {
         lhs: 11,
         production: &[ParseType::N(55)],

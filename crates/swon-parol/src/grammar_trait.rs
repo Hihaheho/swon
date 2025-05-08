@@ -29,8 +29,8 @@ pub trait GrammarTrait<'t> {
         Ok(())
     }
 
-    /// Semantic action for non-terminal 'Bindings'
-    fn bindings(&mut self, _arg: &Bindings<'t>) -> Result<()> {
+    /// Semantic action for non-terminal 'BindingRhs'
+    fn binding_rhs(&mut self, _arg: &BindingRhs<'t>) -> Result<()> {
         Ok(())
     }
 
@@ -282,15 +282,15 @@ pub trait GrammarTrait<'t> {
 ///
 /// Type derived for production 6
 ///
-/// `Bindings: ValueBinding;`
+/// `BindingRhs: ValueBinding;`
 ///
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
-pub struct BindingsValueBinding<'t> {
+pub struct BindingRhsValueBinding<'t> {
     pub value_binding: ValueBinding<'t>,
 }
 
-impl ToSpan for BindingsValueBinding<'_> {
+impl ToSpan for BindingRhsValueBinding<'_> {
     fn span(&self) -> Span {
         self.value_binding.span()
     }
@@ -299,15 +299,15 @@ impl ToSpan for BindingsValueBinding<'_> {
 ///
 /// Type derived for production 7
 ///
-/// `Bindings: SectionBinding;`
+/// `BindingRhs: SectionBinding;`
 ///
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
-pub struct BindingsSectionBinding<'t> {
+pub struct BindingRhsSectionBinding<'t> {
     pub section_binding: SectionBinding<'t>,
 }
 
-impl ToSpan for BindingsSectionBinding<'_> {
+impl ToSpan for BindingRhsSectionBinding<'_> {
     fn span(&self) -> Span {
         self.section_binding.span()
     }
@@ -316,15 +316,15 @@ impl ToSpan for BindingsSectionBinding<'_> {
 ///
 /// Type derived for production 8
 ///
-/// `Bindings: TextBinding;`
+/// `BindingRhs: TextBinding;`
 ///
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
-pub struct BindingsTextBinding<'t> {
+pub struct BindingRhsTextBinding<'t> {
     pub text_binding: TextBinding<'t>,
 }
 
-impl ToSpan for BindingsTextBinding<'_> {
+impl ToSpan for BindingRhsTextBinding<'_> {
     fn span(&self) -> Span {
         self.text_binding.span()
     }
@@ -818,32 +818,32 @@ impl ToSpan for Bind<'_> {
 #[derive(Debug, Clone)]
 pub struct Binding<'t> {
     pub keys: Keys<'t>,
-    pub bindings: Bindings<'t>,
+    pub binding_rhs: BindingRhs<'t>,
 }
 
 impl ToSpan for Binding<'_> {
     fn span(&self) -> Span {
-        self.keys.span() + self.bindings.span()
+        self.keys.span() + self.binding_rhs.span()
     }
 }
 
 ///
-/// Type derived for non-terminal Bindings
+/// Type derived for non-terminal BindingRhs
 ///
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
-pub enum Bindings<'t> {
-    ValueBinding(BindingsValueBinding<'t>),
-    SectionBinding(BindingsSectionBinding<'t>),
-    TextBinding(BindingsTextBinding<'t>),
+pub enum BindingRhs<'t> {
+    ValueBinding(BindingRhsValueBinding<'t>),
+    SectionBinding(BindingRhsSectionBinding<'t>),
+    TextBinding(BindingRhsTextBinding<'t>),
 }
 
-impl ToSpan for Bindings<'_> {
+impl ToSpan for BindingRhs<'_> {
     fn span(&self) -> Span {
         match self {
-            Bindings::ValueBinding(v) => v.span(),
-            Bindings::SectionBinding(v) => v.span(),
-            Bindings::TextBinding(v) => v.span(),
+            BindingRhs::ValueBinding(v) => v.span(),
+            BindingRhs::SectionBinding(v) => v.span(),
+            BindingRhs::TextBinding(v) => v.span(),
         }
     }
 }
@@ -1770,7 +1770,7 @@ pub enum ASTType<'t> {
     Begin(Begin<'t>),
     Bind(Bind<'t>),
     Binding(Binding<'t>),
-    Bindings(Bindings<'t>),
+    BindingRhs(BindingRhs<'t>),
     Boolean(Boolean<'t>),
     Code(Code<'t>),
     CodeBlock(CodeBlock<'t>),
@@ -1841,7 +1841,7 @@ impl ToSpan for ASTType<'_> {
             ASTType::Begin(v) => v.span(),
             ASTType::Bind(v) => v.span(),
             ASTType::Binding(v) => v.span(),
-            ASTType::Bindings(v) => v.span(),
+            ASTType::BindingRhs(v) => v.span(),
             ASTType::Boolean(v) => v.span(),
             ASTType::Code(v) => v.span(),
             ASTType::CodeBlock(v) => v.span(),
@@ -2074,15 +2074,19 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 5:
     ///
-    /// `Binding: Keys Bindings;`
+    /// `Binding: Keys BindingRhs;`
     ///
     #[parol_runtime::function_name::named]
-    fn binding(&mut self, _keys: &ParseTreeType<'t>, _bindings: &ParseTreeType<'t>) -> Result<()> {
+    fn binding(
+        &mut self,
+        _keys: &ParseTreeType<'t>,
+        _binding_rhs: &ParseTreeType<'t>,
+    ) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
-        let bindings = pop_item!(self, bindings, Bindings, context);
+        let binding_rhs = pop_item!(self, binding_rhs, BindingRhs, context);
         let keys = pop_item!(self, keys, Keys, context);
-        let binding_built = Binding { keys, bindings };
+        let binding_built = Binding { keys, binding_rhs };
         // Calling user action here
         self.user_grammar.binding(&binding_built)?;
         self.push(ASTType::Binding(binding_built), context);
@@ -2091,52 +2095,52 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 6:
     ///
-    /// `Bindings: ValueBinding;`
+    /// `BindingRhs: ValueBinding;`
     ///
     #[parol_runtime::function_name::named]
-    fn bindings_0(&mut self, _value_binding: &ParseTreeType<'t>) -> Result<()> {
+    fn binding_rhs_0(&mut self, _value_binding: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let value_binding = pop_item!(self, value_binding, ValueBinding, context);
-        let bindings_0_built = BindingsValueBinding { value_binding };
-        let bindings_0_built = Bindings::ValueBinding(bindings_0_built);
+        let binding_rhs_0_built = BindingRhsValueBinding { value_binding };
+        let binding_rhs_0_built = BindingRhs::ValueBinding(binding_rhs_0_built);
         // Calling user action here
-        self.user_grammar.bindings(&bindings_0_built)?;
-        self.push(ASTType::Bindings(bindings_0_built), context);
+        self.user_grammar.binding_rhs(&binding_rhs_0_built)?;
+        self.push(ASTType::BindingRhs(binding_rhs_0_built), context);
         Ok(())
     }
 
     /// Semantic action for production 7:
     ///
-    /// `Bindings: SectionBinding;`
+    /// `BindingRhs: SectionBinding;`
     ///
     #[parol_runtime::function_name::named]
-    fn bindings_1(&mut self, _section_binding: &ParseTreeType<'t>) -> Result<()> {
+    fn binding_rhs_1(&mut self, _section_binding: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let section_binding = pop_item!(self, section_binding, SectionBinding, context);
-        let bindings_1_built = BindingsSectionBinding { section_binding };
-        let bindings_1_built = Bindings::SectionBinding(bindings_1_built);
+        let binding_rhs_1_built = BindingRhsSectionBinding { section_binding };
+        let binding_rhs_1_built = BindingRhs::SectionBinding(binding_rhs_1_built);
         // Calling user action here
-        self.user_grammar.bindings(&bindings_1_built)?;
-        self.push(ASTType::Bindings(bindings_1_built), context);
+        self.user_grammar.binding_rhs(&binding_rhs_1_built)?;
+        self.push(ASTType::BindingRhs(binding_rhs_1_built), context);
         Ok(())
     }
 
     /// Semantic action for production 8:
     ///
-    /// `Bindings: TextBinding;`
+    /// `BindingRhs: TextBinding;`
     ///
     #[parol_runtime::function_name::named]
-    fn bindings_2(&mut self, _text_binding: &ParseTreeType<'t>) -> Result<()> {
+    fn binding_rhs_2(&mut self, _text_binding: &ParseTreeType<'t>) -> Result<()> {
         let context = function_name!();
         trace!("{}", self.trace_item_stack(context));
         let text_binding = pop_item!(self, text_binding, TextBinding, context);
-        let bindings_2_built = BindingsTextBinding { text_binding };
-        let bindings_2_built = Bindings::TextBinding(bindings_2_built);
+        let binding_rhs_2_built = BindingRhsTextBinding { text_binding };
+        let binding_rhs_2_built = BindingRhs::TextBinding(binding_rhs_2_built);
         // Calling user action here
-        self.user_grammar.bindings(&bindings_2_built)?;
-        self.push(ASTType::Bindings(bindings_2_built), context);
+        self.user_grammar.binding_rhs(&binding_rhs_2_built)?;
+        self.push(ASTType::BindingRhs(binding_rhs_2_built), context);
         Ok(())
     }
 
@@ -3749,9 +3753,9 @@ impl<'t> UserActionsTrait<'t> for GrammarAuto<'t, '_> {
             3 => self.swon_list_0(&children[0], &children[1]),
             4 => self.swon_list_1(),
             5 => self.binding(&children[0], &children[1]),
-            6 => self.bindings_0(&children[0]),
-            7 => self.bindings_1(&children[0]),
-            8 => self.bindings_2(&children[0]),
+            6 => self.binding_rhs_0(&children[0]),
+            7 => self.binding_rhs_1(&children[0]),
+            8 => self.binding_rhs_2(&children[0]),
             9 => self.value_binding(&children[0], &children[1]),
             10 => self.section_binding(&children[0], &children[1], &children[2]),
             11 => self.text_binding(&children[0], &children[1], &children[2], &children[3]),

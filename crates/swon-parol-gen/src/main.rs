@@ -1,18 +1,16 @@
-use std::{
-    collections::BTreeMap,
-    path::{Path, PathBuf},
-};
+mod ast_type_generator;
+mod visitor_generator;
 
-use convert_case::{Case, Casing};
-use parol::generators::export_node_types::{
-    ChildrenType, NodeName, NodeTypesInfo, NonTerminalInfo, TerminalInfo,
-};
-use proc_macro2::TokenStream;
-use quote::{ToTokens, format_ident, quote};
-use syn::parse_quote;
+use std::path::Path;
+
+use ast_type_generator::AstTypeGenerator;
+use convert_case::{Case, Casing as _};
+use parol::generators::export_node_types::{NodeName, NodeTypesInfo};
+use quote::format_ident;
+use visitor_generator::VisitorGenerator;
 
 fn main() {
-    let node_info = parol::build::Builder::with_explicit_output_dir("crates/swon-parol")
+    let mut node_info = parol::build::Builder::with_explicit_output_dir("crates/swon-parol")
         .grammar_file("crates/swon-parol/swon.par")
         .parser_output_file("src/parser.rs")
         .actions_output_file("src/grammar_trait.rs")
@@ -30,9 +28,13 @@ fn main() {
         .unwrap();
 
     format_node_info(&node_info);
+    rename_non_terminal_names(&mut node_info);
     let mut ast_type_generator =
         AstTypeGenerator::new(Path::new("crates/swon-parol/src/ast.rs").into());
     ast_type_generator.generate(&node_info);
+    let visitor_generator =
+        VisitorGenerator::new(Path::new("crates/swon-parol/src/visitor.rs").into());
+    visitor_generator.generate(&node_info);
 }
 
 fn format_node_info(node_info: &NodeTypesInfo) {
@@ -52,519 +54,31 @@ fn format_node_info(node_info: &NodeTypesInfo) {
     }
 }
 
-pub struct AstTypeGenerator {
-    path: PathBuf,
-}
-
-impl AstTypeGenerator {
-    pub fn new(path: PathBuf) -> Self {
-        println!("path: {:?}", path);
-        Self { path }
-    }
-
-    pub fn generate(&mut self, node_info: &NodeTypesInfo) {
-        let imports = self.generate_imports();
-        let node_handles = self.generate_node_handles(node_info);
-        let terminals = self.generate_terminals(node_info);
-        let syn_file = syn::parse_file(
-            &quote! {
-                #imports
-                #node_handles
-                #terminals
-            }
-            .to_string(),
-        )
-        .unwrap();
-        std::fs::write(&self.path, prettyplease::unparse(&syn_file)).unwrap();
-    }
-
-    pub fn generate_terminals(&mut self, node_info: &NodeTypesInfo) -> proc_macro2::TokenStream {
-        let terminals = node_info
-            .terminals
-            .iter()
-            .map(|t| self.generate_terminal(t));
-        quote::quote!(#(#terminals)*)
-    }
-
-    pub fn generate_terminal(&mut self, terminal: &TerminalInfo) -> proc_macro2::TokenStream {
-        let struct_name = format_ident!("{}", terminal.name);
-
-        quote! {
-            #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-            pub struct #struct_name(pub CstNodeId);
-        }
-    }
-
-    pub fn generate_node_handles(&mut self, node_info: &NodeTypesInfo) -> proc_macro2::TokenStream {
-        let handles = node_info
-            .non_terminals
-            .iter()
-            .map(|nt| self.generate_node_handle(node_info, nt));
-        quote::quote!(#(#handles)*)
-    }
-
-    pub fn generate_imports(&self) -> proc_macro2::TokenStream {
-        quote! {
-            use super::tree::{NonTerminalHandle, CstNodeId, ViewConstructionError, assert_node_kind};
-            use crate::Cst;
-            use super::nodes::{TerminalKind, NonTerminalKind};
-            use parol_runtime::parser::parse_tree_type::NodeKind;
-        }
-    }
-
-    pub fn generate_node_handle(
-        &self,
-        info: &NodeTypesInfo,
-        nt: &NonTerminalInfo,
-    ) -> proc_macro2::TokenStream {
-        match nt.kind {
-            ChildrenType::Sequence => self
-                .generate_non_terminal_sequence(info, nt)
-                .to_token_stream(),
-            ChildrenType::OneOf => self.generate_one_of_handle(info, nt).to_token_stream(),
-            ChildrenType::Recursion => self.generate_recursion_handle(info, nt).to_token_stream(),
-            ChildrenType::Option => self.generate_option_handle(info, nt).to_token_stream(),
-        }
-    }
-
-    pub fn get_terminal_by_name<'a>(
-        &self,
-        info: &'a NodeTypesInfo,
-        name: &str,
-    ) -> &'a TerminalInfo {
-        info.terminals
-            .iter()
-            .find(|t| t.name == name)
-            .unwrap_or_else(|| panic!("Terminal {} not found", name))
-    }
-
-    pub fn get_non_terminal_by_name<'a>(
-        &self,
-        info: &'a NodeTypesInfo,
-        name: &str,
-    ) -> &'a NonTerminalInfo {
-        info.non_terminals
-            .iter()
-            .find(|nt| nt.name == name)
-            .unwrap_or_else(|| panic!("Non-terminal {} not found", name))
-    }
-
-    fn format_field_name(name: &str) -> syn::Ident {
-        let name = name.from_case(Case::Camel).to_case(Case::Snake);
-        match name.as_str() {
-            "true" => format_ident!("r#true"),
-            "false" => format_ident!("r#false"),
-            "continue" => format_ident!("r#continue"),
-            _ => format_ident!("{}", name),
-        }
-    }
-
-    fn generate_non_terminal_sequence(
-        &self,
-        info: &NodeTypesInfo,
-        nt: &NonTerminalInfo,
-    ) -> NonTerminalSequence {
-        let handle_name = format_ident!("{}Handle", nt.name);
-        let view_name = format_ident!("{}View", nt.name);
-        let variant_name = format_ident!("{}", nt.variant);
-        let fields = self.fields(info, nt);
-        let field_names = fields.iter().map(|f| &f.field_name).collect::<Vec<_>>();
-        let field_types = fields.iter().map(|f| &f.field_type).collect::<Vec<_>>();
-        let node_kinds = fields.iter().map(|f| &f.node_kind).collect::<Vec<_>>();
-        let item_struct = parse_quote! {
-            pub struct #handle_name(super::tree::CstNodeId);
-        };
-        let new_method = self.generate_handle_new_method(
-            quote!(NodeKind::NonTerminal(NonTerminalKind::#variant_name)),
-        );
-        let item_impl = parse_quote! {
-            impl NonTerminalHandle<TerminalKind, NonTerminalKind> for #handle_name {
-                type View = #view_name;
-                #new_method
-                fn get_view(&self, tree: &Cst) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-                    let [#(#field_names),*] = tree.collect_nodes(self.0, [#(#node_kinds),*])?;
-                    Ok(#view_name {
-                        #(#field_names: #field_types(#field_names),)*
-                    })
-                }
-            }
-        };
-        let view_struct = parse_quote! {
-            pub struct #view_name {
-                #(pub #field_names: #field_types),*
-            }
-        };
-        let view_impl = parse_quote! {
-            impl #view_name {}
-        };
-        NonTerminalSequence {
-            handle: item_struct,
-            handle_impl: item_impl,
-            view: view_struct,
-            view_impl,
-        }
-    }
-
-    fn fields(&self, info: &NodeTypesInfo, nt: &NonTerminalInfo) -> Vec<Field> {
-        let mut fields = nt
-            .children
-            .iter()
-            .map(|c| match &c.name {
-                NodeName::Terminal(name) => {
-                    let field_name = Self::format_field_name(&name.0);
-                    let field_type = format_ident!("{}", name.0);
-                    let terminal = self.get_terminal_by_name(info, &name.0);
-                    let variant_name = format_ident!("{}", terminal.variant);
-                    let node_kind = quote!(NodeKind::Terminal(TerminalKind::#variant_name));
-                    Field {
-                        field_name,
-                        field_type,
-                        node_kind,
-                    }
-                }
-                NodeName::NonTerminal(name) => {
-                    let field_name = Self::format_field_name(&name.0);
-                    let field_type = format_ident!("{}Handle", name.0);
-                    let non_terminal = self.get_non_terminal_by_name(info, &name.0);
-                    let variant_name = format_ident!("{}", non_terminal.variant);
-                    let node_kind = quote!(NodeKind::NonTerminal(NonTerminalKind::#variant_name));
-                    Field {
-                        field_name,
-                        field_type,
-                        node_kind,
-                    }
-                }
-            })
-            .collect::<Vec<_>>();
-        let mut existing_fields = BTreeMap::new();
-        for field in &mut fields {
-            let existing_count = existing_fields
-                .entry(field.field_name.to_string())
-                .or_insert(0);
-            if *existing_count > 0 {
-                field.field_name =
-                    format_ident!("{}{}", field.field_name, (*existing_count + 1).to_string());
-            }
-            *existing_count += 1;
-        }
-        fields
-    }
-
-    fn generate_one_of_handle(
-        &self,
-        info: &NodeTypesInfo,
-        nt: &NonTerminalInfo,
-    ) -> NonTerminalOneOf {
-        let handle_name = format_ident!("{}Handle", nt.name);
-        let view_name = format_ident!("{}View", nt.name);
-        let nt_variant_name = format_ident!("{}", nt.variant);
-
-        struct VariantInfo {
-            name: syn::Ident,
-            ty: proc_macro2::TokenStream,
-            expected_node_kind: proc_macro2::TokenStream,
-            view_constructor: proc_macro2::TokenStream,
-        }
-
-        let variants = nt.children.iter().map(|child_info| {
-            match &child_info.name {
-                NodeName::Terminal(name) => {
-                    let terminal = self.get_terminal_by_name(info, &name.0);
-                    let variant_ident = format_ident!("{}", terminal.name);
-                    let type_ident = format_ident!("{}", name.0);
-                    let terminal_kind_variant = format_ident!("{}", terminal.variant);
-
-                    VariantInfo {
-                        name: variant_ident,
-                        ty: quote!(#type_ident),
-                        expected_node_kind: quote!(NodeKind::Terminal(TerminalKind::#terminal_kind_variant)),
-                        view_constructor: quote!(#type_ident(child)),
-                    }
-                }
-                NodeName::NonTerminal(name) => {
-                    let non_terminal = self.get_non_terminal_by_name(info, &name.0);
-                    let variant_ident = format_ident!("{}", non_terminal.name);
-                    let handle_ident = format_ident!("{}Handle", name.0);
-                    let non_terminal_kind_variant = format_ident!("{}", non_terminal.variant);
-
-                    VariantInfo {
-                        name: variant_ident,
-                        ty: quote!(#handle_ident),
-                        expected_node_kind: quote!(NodeKind::NonTerminal(NonTerminalKind::#non_terminal_kind_variant)),
-                        view_constructor: quote!(#handle_ident(child)),
-                    }
-                }
-            }
-        }).collect::<Vec<_>>();
-
-        let view_enum_variants = variants.iter().map(|v_info| {
-            let name = &v_info.name;
-            let ty = &v_info.ty;
-            quote!(#name(#ty))
-        });
-
-        let get_view_match_arms = variants.iter().map(|v_info| {
-            let variant_name = &v_info.name;
-            let expected_kind = &v_info.expected_node_kind;
-            let constructor = &v_info.view_constructor;
-            quote! {
-                #expected_kind => #view_name::#variant_name(#constructor),
-            }
-        });
-
-        let item_struct: syn::ItemStruct = parse_quote! {
-            pub struct #handle_name(super::tree::CstNodeId);
-        };
-
-        let new_method = self.generate_handle_new_method(
-            quote!(NodeKind::NonTerminal(NonTerminalKind::#nt_variant_name)),
-        );
-        let item_impl: syn::ItemImpl = parse_quote! {
-            impl NonTerminalHandle<TerminalKind, NonTerminalKind> for #handle_name {
-                type View = #view_name;
-                #new_method
-                fn get_view(&self, tree: &Cst) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-                    let mut children = tree.children(self.0);
-                    let Some(child) = children.next() else {
-                        return Err(ViewConstructionError::UnexpectedEndOfChildren { parent: self.0 });
-                    };
-                    let Some(child_data) = tree.node_data(child) else {
-                        return Err(ViewConstructionError::NodeIdNotFound { node: child });
-                    };
-
-                    let variant = match child_data.node_kind() {
-                        #(#get_view_match_arms)*
-                        NodeKind::Terminal(kind) => {
-                            return Err(ViewConstructionError::UnexpectedTerminal {
-                                node: child,
-                                terminal: kind,
-                            });
-                        }
-                        NodeKind::NonTerminal(kind) => {
-                            return Err(ViewConstructionError::UnexpectedNonTerminal {
-                                node: child,
-                                non_terminal: kind,
-                            });
-                        }
-                    };
-                    if let Some(child) = children.next() {
-                        return Err(ViewConstructionError::UnexpectedExtraNode { node: child });
-                    }
-                    Ok(variant)
-                }
-            }
-        };
-
-        let view_enum: syn::ItemEnum = parse_quote! {
-            pub enum #view_name {
-                #(#view_enum_variants),*
-            }
-        };
-
-        let view_impl: syn::ItemImpl = parse_quote! {
-            impl #view_name {}
-        };
-
-        NonTerminalOneOf {
-            handle: item_struct,
-            handle_impl: item_impl,
-            view: view_enum,
-            view_impl,
-        }
-    }
-
-    fn generate_recursion_handle(
-        &self,
-        info: &NodeTypesInfo,
-        nt: &NonTerminalInfo,
-    ) -> NonTerminalRecursion {
-        let handle_name = format_ident!("{}Handle", nt.name);
-        let view_name = format_ident!("{}View", nt.name);
-        let variant_name = format_ident!("{}", nt.variant);
-
-        let fields = self.fields(info, nt);
-        let field_names = fields.iter().map(|f| &f.field_name).collect::<Vec<_>>();
-        let field_types = fields.iter().map(|f| &f.field_type).collect::<Vec<_>>();
-        let node_kinds = fields.iter().map(|f| &f.node_kind).collect::<Vec<_>>();
-
-        let item_struct: syn::ItemStruct = parse_quote! {
-            pub struct #handle_name(super::tree::CstNodeId);
-        };
-        let new_method = self.generate_handle_new_method(
-            quote!(NodeKind::NonTerminal(NonTerminalKind::#variant_name)),
-        );
-        let item_impl: syn::ItemImpl = parse_quote! {
-            impl NonTerminalHandle<TerminalKind, NonTerminalKind> for #handle_name {
-                type View = Option<#view_name>;
-                #new_method
-                fn get_view(&self, tree: &Cst) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-                    if tree.has_no_children(self.0) {
-                        return Ok(None);
-                    }
-                    let [#(#field_names),*] = tree.collect_nodes(self.0, [#(#node_kinds),*])?;
-                    Ok(Some(#view_name {
-                        #(#field_names: #field_types(#field_names),)*
-                    }))
-                }
-            }
-        };
-
-        let view_struct: syn::ItemStruct = parse_quote! {
-            pub struct #view_name {
-                #(pub #field_names: #field_types),*
-            }
-        };
-        let view_impl: syn::ItemImpl = parse_quote! {
-            impl #view_name {}
-        };
-
-        NonTerminalRecursion {
-            handle: item_struct,
-            handle_impl: item_impl,
-            view: view_struct,
-            view_impl,
-        }
-    }
-
-    fn generate_option_handle(
-        &self,
-        info: &NodeTypesInfo,
-        nt: &NonTerminalInfo,
-    ) -> NonTerminalOption {
-        let handle_name = format_ident!("{}Handle", nt.name);
-        let variant_name = format_ident!("{}", nt.variant);
-
-        if nt.children.len() != 1 {
-            panic!(
-                "Option non-terminal {} should have exactly one child, found {}",
-                nt.name,
-                nt.children.len()
-            );
-        }
-        let child_info = &nt.children[0];
-
-        let (child_handle_name, node_kind, constructor) = match &child_info.name {
-            NodeName::Terminal(name) => {
-                let terminal = self.get_terminal_by_name(info, &name.0);
-                let name = format_ident!("{}", terminal.name);
-                let kind_variant = format_ident!("{}", terminal.variant);
-                (
-                    quote!(#name),
-                    quote!(NodeKind::Terminal(TerminalKind::#kind_variant)),
-                    quote!(#name(child)),
-                )
-            }
-            NodeName::NonTerminal(name) => {
-                let non_terminal = self.get_non_terminal_by_name(info, &name.0);
-                let handle_name = format_ident!("{}Handle", non_terminal.name);
-                let kind_variant = format_ident!("{}", non_terminal.variant);
-                (
-                    quote!(#handle_name),
-                    quote!(NodeKind::NonTerminal(NonTerminalKind::#kind_variant)),
-                    quote!(#handle_name::new(child, NodeKind::NonTerminal(NonTerminalKind::#kind_variant))?),
-                )
-            }
-        };
-
-        let item_struct: syn::ItemStruct = parse_quote! {
-            pub struct #handle_name(super::tree::CstNodeId);
-        };
-        let new_method = self.generate_handle_new_method(
-            quote!(NodeKind::NonTerminal(NonTerminalKind::#variant_name)),
-        );
-
-        let item_impl: syn::ItemImpl = parse_quote! {
-            impl NonTerminalHandle<TerminalKind, NonTerminalKind> for #handle_name {
-                type View = Option<#child_handle_name>;
-                #new_method
-                fn get_view(&self, tree: &Cst) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-                    if tree.has_no_children(self.0) {
-                        return Ok(None);
-                    }
-                    let [child] = tree.collect_nodes(self.0, [#node_kind])?;
-                    Ok(Some(#constructor))
-                }
-            }
-        };
-
-        NonTerminalOption {
-            handle: item_struct,
-            handle_impl: item_impl,
-        }
-    }
-
-    fn generate_handle_new_method(&self, node_kind: TokenStream) -> proc_macro2::TokenStream {
-        parse_quote! {
-            fn new(index: CstNodeId, kind: NodeKind<TerminalKind, NonTerminalKind>) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-                assert_node_kind(index, kind, #node_kind)?;
-                Ok(Self(index))
-            }
-        }
+fn rename_non_terminal_name(name: &mut String) {
+    match name.as_str() {
+        "SwonList" => *name = "SwonBindings".to_string(),
+        "SwonList0" => *name = "SwonSections".to_string(),
+        _ => {}
     }
 }
 
-struct Field {
-    field_name: syn::Ident,
-    field_type: syn::Ident,
-    node_kind: TokenStream,
-}
-
-struct NonTerminalSequence {
-    handle: syn::ItemStruct,
-    handle_impl: syn::ItemImpl,
-    view: syn::ItemStruct,
-    view_impl: syn::ItemImpl,
-}
-
-impl ToTokens for NonTerminalSequence {
-    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        self.handle.to_tokens(tokens);
-        self.handle_impl.to_tokens(tokens);
-        self.view.to_tokens(tokens);
-        self.view_impl.to_tokens(tokens);
+fn format_snake_case(name: &str) -> syn::Ident {
+    let name = name.from_case(Case::Camel).to_case(Case::Snake);
+    match name.as_str() {
+        "true" => format_ident!("r#true"),
+        "false" => format_ident!("r#false"),
+        "continue" => format_ident!("r#continue"),
+        _ => format_ident!("{}", name),
     }
 }
 
-struct NonTerminalOneOf {
-    handle: syn::ItemStruct,
-    handle_impl: syn::ItemImpl,
-    view: syn::ItemEnum,
-    view_impl: syn::ItemImpl,
-}
-
-impl ToTokens for NonTerminalOneOf {
-    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        self.handle.to_tokens(tokens);
-        self.handle_impl.to_tokens(tokens);
-        self.view.to_tokens(tokens);
-        self.view_impl.to_tokens(tokens);
-    }
-}
-
-struct NonTerminalRecursion {
-    handle: syn::ItemStruct,
-    handle_impl: syn::ItemImpl,
-    view: syn::ItemStruct,
-    view_impl: syn::ItemImpl,
-}
-
-impl ToTokens for NonTerminalRecursion {
-    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        self.handle.to_tokens(tokens);
-        self.handle_impl.to_tokens(tokens);
-        self.view.to_tokens(tokens);
-        self.view_impl.to_tokens(tokens);
-    }
-}
-
-struct NonTerminalOption {
-    handle: syn::ItemStruct,
-    handle_impl: syn::ItemImpl,
-}
-
-impl ToTokens for NonTerminalOption {
-    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        self.handle.to_tokens(tokens);
-        self.handle_impl.to_tokens(tokens);
+fn rename_non_terminal_names(info: &mut NodeTypesInfo) {
+    for nt in &mut info.non_terminals {
+        rename_non_terminal_name(&mut nt.name);
+        for child in &mut nt.children {
+            if let NodeName::NonTerminal(name) = &mut child.name {
+                rename_non_terminal_name(&mut name.0);
+            }
+        }
     }
 }

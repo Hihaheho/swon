@@ -29,8 +29,8 @@
 
 Swon: { Binding } { Section } ;
 
-Binding: Keys Bindings ;
-  Bindings: ValueBinding | SectionBinding | TextBinding ;
+Binding: Keys BindingRhs ;
+  BindingRhs: ValueBinding | SectionBinding | TextBinding ;
   ValueBinding: Bind Value ;
   SectionBinding: Begin Swon End ;
   TextBinding: TextStart [Ws^] Text Newline ;

@@ -16,7 +16,7 @@ pub enum NonTerminalKind {
     Begin,
     Bind,
     Binding,
-    Bindings,
+    BindingRhs,
     Boolean,
     Code,
     CodeBlock,
@@ -145,11 +145,26 @@ impl TerminalEnum for TerminalKind {
             _ => panic!("Invalid terminal index: {}", index),
         }
     }
+    fn is_builtin_terminal(&self) -> bool {
+        matches!(
+            self,
+            TerminalKind::NewLine
+                | TerminalKind::Whitespace
+                | TerminalKind::LineComment
+                | TerminalKind::BlockComment
+        )
+    }
     fn is_builtin_new_line(&self) -> bool {
         matches!(self, TerminalKind::NewLine)
     }
     fn is_builtin_whitespace(&self) -> bool {
         matches!(self, TerminalKind::Whitespace)
+    }
+    fn is_builtin_line_comment(&self) -> bool {
+        matches!(self, TerminalKind::LineComment)
+    }
+    fn is_builtin_block_comment(&self) -> bool {
+        matches!(self, TerminalKind::BlockComment)
     }
 }
 
@@ -167,7 +182,7 @@ impl NonTerminalEnum for NonTerminalKind {
             "Begin" => Self::Begin,
             "Bind" => Self::Bind,
             "Binding" => Self::Binding,
-            "Bindings" => Self::Bindings,
+            "BindingRhs" => Self::BindingRhs,
             "Boolean" => Self::Boolean,
             "Code" => Self::Code,
             "CodeBlock" => Self::CodeBlock,
@@ -278,7 +293,7 @@ impl std::fmt::Display for NonTerminalKind {
             Self::Begin => write!(f, stringify!(Begin)),
             Self::Bind => write!(f, stringify!(Bind)),
             Self::Binding => write!(f, stringify!(Binding)),
-            Self::Bindings => write!(f, stringify!(Bindings)),
+            Self::BindingRhs => write!(f, stringify!(BindingRhs)),
             Self::Boolean => write!(f, stringify!(Boolean)),
             Self::Code => write!(f, stringify!(Code)),
             Self::CodeBlock => write!(f, stringify!(CodeBlock)),
@@ -414,11 +429,11 @@ impl ExpectedChildren<TerminalKind, NonTerminalKind> for NonTerminalKind {
                     attribute: ChildAttribute::Normal,
                 },
                 ChildKind {
-                    kind: NodeKind::NonTerminal(NonTerminalKind::Bindings),
+                    kind: NodeKind::NonTerminal(NonTerminalKind::BindingRhs),
                     attribute: ChildAttribute::Normal,
                 },
             ]),
-            Self::Bindings => ExpectedChildrenKinds::OneOf(&[
+            Self::BindingRhs => ExpectedChildrenKinds::OneOf(&[
                 ChildKind {
                     kind: NodeKind::NonTerminal(NonTerminalKind::ValueBinding),
                     attribute: ChildAttribute::Normal,
@@ -1193,22 +1208,22 @@ where
             .find_child(cursor, NodeKind::NonTerminal(NonTerminalKind::Keys))
             .map(|option| option.map(|(i, node)| (i, Binding::new(node))))
     }
-    pub fn find_bindings(&self, cursor: usize) -> Result<Option<(usize, Binding<N>)>, N> {
+    pub fn find_binding_rhs(&self, cursor: usize) -> Result<Option<(usize, Binding<N>)>, N> {
         self.0
-            .find_child(cursor, NodeKind::NonTerminal(NonTerminalKind::Bindings))
+            .find_child(cursor, NodeKind::NonTerminal(NonTerminalKind::BindingRhs))
             .map(|option| option.map(|(i, node)| (i, Binding::new(node))))
     }
 }
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Bindings<T> {
+pub enum BindingRhs<T> {
     ValueBinding(ValueBinding<T>),
     SectionBinding(SectionBinding<T>),
     TextBinding(TextBinding<T>),
     Invalid(T),
 }
 #[allow(dead_code)]
-impl<'a, N> Bindings<N>
+impl<'a, N> BindingRhs<N>
 where
     N: Node<'a, TerminalKind, NonTerminalKind>,
 {
@@ -1223,7 +1238,7 @@ where
             NodeKind::NonTerminal(NonTerminalKind::TextBinding) => {
                 Self::TextBinding(TextBinding::new(node))
             }
-            _ => Bindings::Invalid(node),
+            _ => BindingRhs::Invalid(node),
         }
     }
     pub fn node(&self) -> &N {
