@@ -15,11 +15,11 @@ use thiserror::Error;
 pub use span::*;
 
 use crate::{
-    CstConstructError,
-    ast::RootHandle,
+    Cst, CstConstructError,
+    ast::{BlockComment, LineComment, NewLine, RootHandle, Whitespace},
     common_visitors::{FormatVisitor, FormatVisitorError, InspectVisitor},
     nodes::{NonTerminalKind, TerminalKind},
-    visitor::CstHandleSuper as _,
+    visitor::{BuiltinTerminalVisitor, CstHandleSuper as _},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -126,6 +126,14 @@ impl<T, Nt> ConcreteSyntaxTree<T, Nt> {
         self.root
     }
 
+    pub fn root_nodes(&self) -> impl Iterator<Item = CstNodeId> {
+        let nodes = self.graph.node_indices().collect::<Vec<_>>();
+        nodes
+            .into_iter()
+            .filter(move |node| self.parent(CstNodeId(*node)).is_none())
+            .map(CstNodeId)
+    }
+
     pub fn add_node(&mut self, data: CstNodeData<T, Nt>) -> CstNodeId {
         let node = self.graph.add_node(data);
         CstNodeId(node)
@@ -189,14 +197,20 @@ impl TerminalKind {
 }
 
 impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
-    pub fn collect_nodes<const N: usize, E>(
+    pub fn collect_nodes<'v, const N: usize, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         parent: CstNodeId,
         nodes: [NodeKind<TerminalKind, NonTerminalKind>; N],
-        mut visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<[CstNodeId; N], CstConstructError<E>> {
-        let mut children = self.children(parent);
+        mut visitor: impl FnMut(
+            [CstNodeId; N],
+            &'v mut V,
+        ) -> Result<(O, &'v mut V), CstConstructError<E>>,
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        let children = self.children(parent).collect::<Vec<_>>();
+        let mut children = children.into_iter();
         let mut result = Vec::with_capacity(N);
+        let mut ignored = Vec::with_capacity(N); // This N is just heuristic, we can have more than N ignored nodes
         'outer: for expected_kind in nodes {
             'inner: for (idx, child) in children.by_ref().enumerate() {
                 let child_data = self
@@ -209,18 +223,16 @@ impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
                             continue 'outer;
                         } else if kind.is_builtin_whitespace() || kind.is_builtin_new_line() {
                             if kind.auto_ws_is_off(idx) {
-                                println!("auto_ws_is_off: {:?}", kind);
                                 return Err(ViewConstructionError::UnexpectedTerminal {
                                     node: child,
                                     terminal: kind,
                                 });
                             }
-                            visit_ignored(child, kind, data)?;
+                            ignored.push((child, kind, data));
                             continue 'inner;
                         } else if kind.is_builtin_line_comment() || kind.is_builtin_block_comment()
                         {
-                            // comments
-                            visit_ignored(child, kind, data)?;
+                            ignored.push((child, kind, data));
                             continue 'inner;
                         } else {
                             return Err(ViewConstructionError::UnexpectedTerminal {
@@ -244,6 +256,35 @@ impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
             }
             return Err(ViewConstructionError::UnexpectedEndOfChildren { parent });
         }
+        for (child, kind, data) in ignored {
+            match kind {
+                TerminalKind::Whitespace => visit_ignored.visit_builtin_whitespace_terminal(
+                    Whitespace(child),
+                    data,
+                    self,
+                )?,
+                TerminalKind::NewLine => {
+                    visit_ignored.visit_builtin_new_line_terminal(NewLine(child), data, self)?
+                }
+                TerminalKind::LineComment => visit_ignored.visit_builtin_line_comment_terminal(
+                    LineComment(child),
+                    data,
+                    self,
+                )?,
+                TerminalKind::BlockComment => visit_ignored.visit_builtin_block_comment_terminal(
+                    BlockComment(child),
+                    data,
+                    self,
+                )?,
+                _ => unreachable!(),
+            }
+        }
+        let (result, visit_ignored) = visitor(
+            result
+                .try_into()
+                .expect("Result should have the same length as nodes"),
+            visit_ignored,
+        )?;
         for child in children.by_ref() {
             let child_data = self
                 .node_data(child)
@@ -251,7 +292,25 @@ impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
             match child_data {
                 CstNodeData::Terminal { kind, data } => {
                     if kind.is_builtin_terminal() {
-                        visit_ignored(child, kind, data)?;
+                        match kind {
+                            TerminalKind::Whitespace => visit_ignored
+                                .visit_builtin_whitespace_terminal(Whitespace(child), data, self)?,
+                            TerminalKind::NewLine => visit_ignored
+                                .visit_builtin_new_line_terminal(NewLine(child), data, self)?,
+                            TerminalKind::LineComment => visit_ignored
+                                .visit_builtin_line_comment_terminal(
+                                    LineComment(child),
+                                    data,
+                                    self,
+                                )?,
+                            TerminalKind::BlockComment => visit_ignored
+                                .visit_builtin_block_comment_terminal(
+                                    BlockComment(child),
+                                    data,
+                                    self,
+                                )?,
+                            _ => unreachable!(),
+                        }
                     } else {
                         return Err(ViewConstructionError::UnexpectedTerminal {
                             node: child,
@@ -267,9 +326,7 @@ impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
                 }
             }
         }
-        Ok(result
-            .try_into()
-            .expect("Result should have the same length as nodes"))
+        Ok(result)
     }
 
     pub fn root_handle(&self) -> RootHandle {
@@ -300,10 +357,10 @@ impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
 /// SWON-specific tree builder that handles the peculiarities of the SWON grammar,
 /// particularly the reversed ordering of list elements
 #[derive(Debug, Clone)]
-pub struct CstBuilder<T, Nt> {
-    tree: DiGraph<CstNodeData<T, Nt>, ()>,
+pub struct CstBuilder {
+    tree: DiGraph<CstNodeData<TerminalKind, NonTerminalKind>, ()>,
     node_stack: Vec<NodeStackItem>,
-    root_node_candidate: Option<NodeIndex>,
+    root_node: Option<CstNodeId>,
 }
 
 #[derive(Debug, Clone)]
@@ -313,49 +370,37 @@ struct NodeStackItem {
     children: Vec<CstNodeId>,
 }
 
-impl<T, Nt> Default for CstBuilder<T, Nt>
-where
-    T: TerminalEnum + Copy,
-    Nt: NonTerminalEnum + Copy,
-{
+impl Default for CstBuilder {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T, Nt> CstBuilder<T, Nt>
-where
-    T: TerminalEnum + Copy,
-    Nt: NonTerminalEnum + Copy,
-{
+impl CstBuilder {
     pub fn new() -> Self {
         Self {
             tree: DiGraph::new(),
             node_stack: Vec::new(),
-            root_node_candidate: None,
+            root_node: None,
         }
     }
 
     // Adds a terminal node to the current non-terminal in the stack
-    fn add_terminal_node(&mut self, kind: T, span: InputSpan) -> NodeIndex {
+    fn add_terminal_node(&mut self, kind: TerminalKind, span: InputSpan) -> NodeIndex {
         let node = self.tree.add_node(CstNodeData::Terminal {
             kind,
             data: TerminalData::Input(span),
         });
 
-        if let Some(parent) = self.node_stack.last_mut() {
-            parent.children.push(CstNodeId(node));
-            parent.span = parent.span.merge(span);
-        } else {
-            // This is a root level node
-            self.root_node_candidate = Some(node);
-        }
+        let parent = self.node_stack.last_mut().expect("node stack is empty");
+        parent.children.push(CstNodeId(node));
+        parent.span = parent.span.merge(span);
 
         node
     }
 
     // Opens a new non-terminal and adds it to the stack
-    fn open_non_terminal_node(&mut self, kind: Nt) -> NodeIndex {
+    fn open_non_terminal_node(&mut self, kind: NonTerminalKind) -> NodeIndex {
         // span will be filled later
         let node = self.tree.add_node(CstNodeData::NonTerminal {
             kind,
@@ -366,7 +411,7 @@ where
             parent.children.push(CstNodeId(node));
         } else {
             // This is a root level node
-            self.root_node_candidate = Some(node);
+            self.root_node = Some(CstNodeId(node));
         }
 
         self.node_stack.push(NodeStackItem {
@@ -404,32 +449,28 @@ where
     }
 
     /// Builds the tree
-    pub fn build_tree(mut self) -> ConcreteSyntaxTree<T, Nt> {
+    pub fn build_tree(mut self) -> Cst {
         while !self.node_stack.is_empty() {
             self.close_non_terminal_node();
         }
         ConcreteSyntaxTree {
             graph: self.tree,
             dynamic_tokens: BTreeMap::new(),
-            root: CstNodeId(self.root_node_candidate.expect("Root node always provided")),
+            root: self.root_node.expect("Root node always provided"),
         }
     }
 }
 
-impl<'t, T, Nt> TreeConstruct<'t> for CstBuilder<T, Nt>
-where
-    T: TerminalEnum + Copy,
-    Nt: NonTerminalEnum + Copy,
-{
+impl<'t> TreeConstruct<'t> for CstBuilder {
     type Error = ParolError;
-    type Tree = ConcreteSyntaxTree<T, Nt>;
+    type Tree = Cst;
 
     fn open_non_terminal(
         &mut self,
         name: &'static str,
         _size_hint: Option<usize>,
     ) -> Result<(), Self::Error> {
-        let kind = Nt::from_non_terminal_name(name);
+        let kind = NonTerminalKind::from_non_terminal_name(name);
         self.open_non_terminal_node(kind);
         Ok(())
     }
@@ -440,7 +481,7 @@ where
     }
 
     fn add_token(&mut self, token: &Token<'t>) -> Result<(), Self::Error> {
-        let kind = T::from_terminal_index(token.token_type);
+        let kind = TerminalKind::from_terminal_index(token.token_type);
         let span = InputSpan {
             start: token.location.start,
             end: token.location.end,
@@ -577,30 +618,104 @@ where
     }
 }
 
+struct DummyTerminalVisitor;
+
+impl<E> BuiltinTerminalVisitor<E> for DummyTerminalVisitor {
+    fn visit_builtin_new_line_terminal(
+        &mut self,
+        _terminal: crate::ast::NewLine,
+        _data: TerminalData,
+        _tree: &crate::Cst,
+    ) -> Result<(), E> {
+        Ok(())
+    }
+
+    fn visit_builtin_whitespace_terminal(
+        &mut self,
+        _terminal: crate::ast::Whitespace,
+        _data: TerminalData,
+        _tree: &crate::Cst,
+    ) -> Result<(), E> {
+        Ok(())
+    }
+
+    fn visit_builtin_line_comment_terminal(
+        &mut self,
+        _terminal: crate::ast::LineComment,
+        _data: TerminalData,
+        _tree: &crate::Cst,
+    ) -> Result<(), E> {
+        Ok(())
+    }
+
+    fn visit_builtin_block_comment_terminal(
+        &mut self,
+        _terminal: crate::ast::BlockComment,
+        _data: TerminalData,
+        _tree: &crate::Cst,
+    ) -> Result<(), E> {
+        Ok(())
+    }
+}
+
 /// A trait that all generated non-terminal handles implements.
-pub trait NonTerminalHandle<T, Nt> {
+pub trait NonTerminalHandle {
     /// The type of the view for this non-terminal.
     type View;
+
+    fn node_id(&self) -> CstNodeId;
+
     /// Create a new non-terminal handle from a node.
-    fn new(index: CstNodeId, kind: NodeKind<T, Nt>) -> Result<Self, ViewConstructionError<T, Nt>>
+    fn new(index: CstNodeId, tree: &Cst) -> Result<Self, CstConstructError>
+    where
+        Self: Sized,
+    {
+        Self::new_with_visit(index, tree, &mut DummyTerminalVisitor)
+    }
+
+    fn new_with_visit<E>(
+        index: CstNodeId,
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>>
     where
         Self: Sized;
 
     /// Get the view of the non-terminal.
-    fn get_view(
-        &self,
-        tree: &ConcreteSyntaxTree<T, Nt>,
-    ) -> Result<Self::View, ViewConstructionError<T, Nt>> {
-        self.get_view_with_visit(tree, |_, _, _| Ok(()))
+    fn get_view(&self, tree: &Cst) -> Result<Self::View, CstConstructError> {
+        self.get_view_with_visit(
+            tree,
+            |view, visit_ignored| (view, visit_ignored),
+            &mut DummyTerminalVisitor,
+        )
     }
 
     /// Get the view of the non-terminal.
-    fn get_view_with_visit<E>(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
-        tree: &ConcreteSyntaxTree<T, Nt>,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, ViewConstructionError<T, Nt, E>>;
+        tree: &Cst,
+        visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>>;
 
     /// Get the kind of the non-terminal.
-    fn kind(&self) -> Nt;
+    fn kind(&self) -> NonTerminalKind;
+}
+
+/// A trait that generated recursive views implements.
+pub trait RecursiveView<T, Nt> {
+    /// The type of the item in the view.
+    type Item;
+    fn get_all(
+        &self,
+        tree: &ConcreteSyntaxTree<T, Nt>,
+    ) -> Result<Vec<Self::Item>, ViewConstructionError<T, Nt>> {
+        self.get_all_with_visit(tree, &mut DummyTerminalVisitor)
+    }
+
+    fn get_all_with_visit<E>(
+        &self,
+        tree: &ConcreteSyntaxTree<T, Nt>,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Vec<Self::Item>, ViewConstructionError<T, Nt, E>>;
 }

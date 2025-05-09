@@ -14,7 +14,9 @@ use std::convert::Infallible;
 use nodes::{NonTerminalKind, TerminalKind};
 pub use parol_runtime;
 use parol_runtime::ParolError;
-use tree::{ConcreteSyntaxTree, CstBuilder, ViewConstructionError};
+use tree::{
+    ConcreteSyntaxTree, CstBuilder, CstNodeData, CstNodeId, TerminalData, ViewConstructionError,
+};
 
 pub type Cst = ConcreteSyntaxTree<TerminalKind, NonTerminalKind>;
 pub type CstNode = tree::CstNodeData<TerminalKind, NonTerminalKind>;
@@ -23,38 +25,41 @@ pub type CstConstructError<E = Infallible> =
 pub type NodeKind = parol_runtime::parser::parse_tree_type::NodeKind<TerminalKind, NonTerminalKind>;
 
 pub use parol_runtime::parser::parse_tree_type::TreeConstruct;
+use visitor::{NodeVisitor, NodeVisitorSuper as _};
 
 pub fn parse(input: &str) -> Result<Cst, ParolError> {
     let mut actions = grammar::Grammar::new();
-    let mut tree_builder = CstBuilder::<TerminalKind, NonTerminalKind>::new();
+    let mut tree_builder = CstBuilder::new();
     parser::parse_into(input, &mut tree_builder, "test.swon", &mut actions).unwrap();
     Ok(tree_builder.build_tree())
 }
 
 #[test]
-fn test_concrete_syntax_tree() {
-    use nodes::{NonTerminalKind, TerminalKind};
+fn test_concrete_syntax_tree_valid_input() {
     use tree::CstBuilder;
 
     let mut actions = grammar::Grammar::new();
     let input = r#"
     @ a.b.c
-	d = 1 # comment
+    d = 1 # comment
     e = "aaa"
-	"#;
+    "#;
 
-    let mut tree_builder = CstBuilder::<TerminalKind, NonTerminalKind>::new();
+    let mut tree_builder = CstBuilder::new();
     parser::parse_into(input, &mut tree_builder, "test.swon", &mut actions).unwrap();
     let tree = tree_builder.build().unwrap();
 
+    let mut visitor = InspectVisitor { indent: 0, input };
+    visitor.visit_node_id(tree.root(), &tree).unwrap();
+
     let mut out = String::new();
     tree.write(input, &mut out).unwrap();
-    assert_eq!(out, input);
+
+    assert_eq!(input, out);
 }
 
 #[test]
 fn test_concrete_syntax_tree_with_syntax_error() {
-    use nodes::{NonTerminalKind, TerminalKind};
     use tree::CstBuilder;
 
     let mut actions = grammar::Grammar::new();
@@ -65,27 +70,24 @@ fn test_concrete_syntax_tree_with_syntax_error() {
     $variant
     "#;
 
-    let mut tree_builder = CstBuilder::<TerminalKind, NonTerminalKind>::new();
+    let mut tree_builder = CstBuilder::new();
     assert!(parser::parse_into(input, &mut tree_builder, "test.swon", &mut actions).is_err());
     let tree = tree_builder.build().unwrap();
+    println!("tree: {:?}", tree.root_nodes().collect::<Vec<_>>());
+
+    let mut visitor = InspectVisitor { indent: 0, input };
+    visitor.visit_node_id(tree.root(), &tree).unwrap();
 
     let mut out = String::new();
     tree.write(input, &mut out).unwrap();
-    assert_eq!(
-        out,
-        r#"
-    @ a
-    @ !!
-    $variant
-    "#
-    );
+    assert_eq!(input, out);
 }
 
 #[test]
 fn test_node_handlers() {
-    use nodes::{NonTerminalKind, TerminalKind};
     use tree::CstBuilder;
     use tree::NonTerminalHandle;
+    use tree::RecursiveView;
 
     let mut actions = grammar::Grammar::new();
     let input = r#"
@@ -97,7 +99,7 @@ fn test_node_handlers() {
     @ a.b.c.d
 	"#;
 
-    let mut tree_builder = CstBuilder::<TerminalKind, NonTerminalKind>::new();
+    let mut tree_builder = CstBuilder::new();
     parser::parse_into(input, &mut tree_builder, "test.swon", &mut actions).unwrap();
     let tree = tree_builder.build().unwrap();
 
@@ -127,4 +129,54 @@ fn test_visitor() {
     "#,
     )
     .unwrap();
+}
+
+#[test]
+fn test_inspect_visitor() {
+    let input = r#"
+    root = "a"
+    root2 = "b"
+    @ a.b.c
+    "#;
+    let cst = parse(input).unwrap();
+
+    let mut visitor = InspectVisitor { indent: 0, input };
+    visitor.visit_node_id(cst.root(), &cst).unwrap();
+}
+
+pub struct InspectVisitor<'a> {
+    indent: usize,
+    input: &'a str,
+}
+
+impl NodeVisitor for InspectVisitor<'_> {
+    type Error = Infallible;
+
+    fn visit_node(&mut self, id: CstNodeId, node: CstNode, tree: &Cst) -> Result<(), Self::Error> {
+        match node {
+            CstNodeData::Terminal { kind, data } => {
+                let text = match data {
+                    TerminalData::Input(span) => {
+                        &self.input[span.start as usize..span.end as usize]
+                    }
+                    TerminalData::Dynamic(id) => tree.dynamic_token(id).unwrap(),
+                };
+                println!(
+                    "{}{} {}",
+                    " ".repeat(self.indent),
+                    text.replace("\n", "\\n")
+                        .replace(" ", "_")
+                        .replace("\t", "\\t"),
+                    kind
+                );
+            }
+            CstNodeData::NonTerminal { kind, .. } => {
+                println!("{}{}", " ".repeat(self.indent), kind);
+                self.indent += 2;
+                self.visit_node_super(id, node, tree)?;
+                self.indent -= 2;
+            }
+        }
+        Ok(())
+    }
 }

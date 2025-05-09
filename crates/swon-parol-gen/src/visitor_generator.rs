@@ -37,12 +37,16 @@ impl VisitorGenerator {
         let cst_visitor_trait = self.generate_cst_visitor_trait(node_info);
         let cst_handle_super_trait = self.generate_cst_handle_super_trait(node_info);
         let cst_handle_super_impl = self.generate_cst_handle_super_impl(node_info);
+        let node_visitor = self.generate_node_visitor();
+        let builtin_terminal_visitor = self.generate_builtin_terminal_visitor();
 
         let generated_code = quote! {
             #imports
             #cst_visitor_trait
             #cst_handle_super_trait
             #cst_handle_super_impl
+            #node_visitor
+            #builtin_terminal_visitor
         };
 
         let syn_file = syn::parse_file(&generated_code.to_string())
@@ -54,7 +58,7 @@ impl VisitorGenerator {
     fn generate_imports(&self) -> TokenStream {
         quote! {
             use crate::{
-                Cst, CstConstructError, NodeKind, CstNode,
+                Cst, CstConstructError, NodeKind, CstNode, CstNodeData,
                 ast::*,
                 nodes::{TerminalKind, NonTerminalKind},
                 tree::{NonTerminalHandle as _, TerminalData, NonTerminalData, CstNodeId},
@@ -115,9 +119,10 @@ impl VisitorGenerator {
                 fn #fn_name_ident(
                     &mut self,
                     terminal: #terminal_ident,
+                    data: TerminalData,
                     tree: &Cst,
                 ) -> Result<(), Self::Error> {
-                    self.#fn_name_super_ident(terminal, tree)
+                    self.#fn_name_super_ident(terminal, data, tree)
                 }
             }
         });
@@ -133,8 +138,8 @@ impl VisitorGenerator {
                 fn visit_non_terminal_close(&mut self, id: CstNodeId, kind: NonTerminalKind, data: NonTerminalData, tree: &Cst) -> Result<(), Self::Error> {
                     self.visit_non_terminal_close_super(id, kind, data, tree)
                 }
-                fn visit_terminal(&mut self, id: CstNodeId, kind: TerminalKind, terminal: TerminalData, tree: &Cst) -> Result<(), Self::Error> {
-                    self.visit_terminal_super(id, kind, terminal, tree)
+                fn visit_terminal(&mut self, id: CstNodeId, kind: TerminalKind, data: TerminalData, tree: &Cst) -> Result<(), Self::Error> {
+                    self.visit_terminal_super(id, kind, data, tree)
                 }
                 /// This method is called when a construct view fails.
                 /// If you return Ok(()), the error is not propagated.
@@ -182,6 +187,7 @@ impl VisitorGenerator {
                 fn #fn_name_super_ident(
                     &mut self,
                     terminal: #terminal_ident,
+                    data: TerminalData,
                     tree: &Cst,
                 ) -> Result<(), E>;
             }
@@ -196,8 +202,8 @@ impl VisitorGenerator {
                 #(#terminal_methods)*
                 fn visit_non_terminal_super(&mut self, id: CstNodeId, kind: NonTerminalKind, data: NonTerminalData, tree: &Cst) -> Result<(), E>;
                 fn visit_non_terminal_close_super(&mut self, id: CstNodeId, kind: NonTerminalKind, data: NonTerminalData, tree: &Cst) -> Result<(), E>;
-                fn visit_terminal_super(&mut self, id: CstNodeId, kind: TerminalKind, terminal: TerminalData, tree: &Cst) -> Result<(), E>;
-                fn visit_any(&mut self, id: CstNodeId, tree: &Cst) -> Result<(), E>;
+                fn visit_terminal_super(&mut self, id: CstNodeId, kind: TerminalKind, data: TerminalData, tree: &Cst) -> Result<(), E>;
+                fn visit_any(&mut self, id: CstNodeId, node: CstNode, tree: &Cst) -> Result<(), E>;
                 /// Recover from a construct error. This eagerly visits the children of the node.
                 fn recover_error(&mut self, node_data: Option<CstNode>, id: CstNodeId, kind: NodeKind, tree: &Cst) -> Result<(), E>;
             }
@@ -233,7 +239,7 @@ impl VisitorGenerator {
                 fn visit_non_terminal_close_super(&mut self, _id: CstNodeId, _kind: NonTerminalKind, _data: NonTerminalData, _tree: &Cst) -> Result<(), V::Error> {
                     Ok(())
                 }
-                fn visit_terminal_super(&mut self, _id: CstNodeId, _kind: TerminalKind, _terminal: TerminalData, _tree: &Cst) -> Result<(), V::Error> {
+                fn visit_terminal_super(&mut self, _id: CstNodeId, _kind: TerminalKind, _data: TerminalData, _tree: &Cst) -> Result<(), V::Error> {
                     Ok(())
                 }
                 fn recover_error(&mut self, node_data: Option<CstNode>, id: CstNodeId, kind: NodeKind, tree: &Cst) -> Result<(), V::Error> {
@@ -242,10 +248,12 @@ impl VisitorGenerator {
                     };
                     if node_data.node_kind() == kind {
                         for child in tree.children(id) {
-                            self.visit_any(child, tree)?;
+                            if let Some(node_data) = tree.node_data(child) {
+                                self.visit_any(child, node_data, tree)?;
+                            }
                         }
                     } else {
-                        self.visit_any(id, tree)?;
+                        self.visit_any(id, node_data, tree)?;
                     }
                     Ok(())
                 }
@@ -263,13 +271,16 @@ impl VisitorGenerator {
         let on_view = match nt_info.kind {
             ChildrenType::Sequence | ChildrenType::OneOf => {
                 quote! {
-                    Ok(view) => self.#visitor_method_name(handle, view, tree)?,
+                    visit.#visitor_method_name(handle, view, tree)
                 }
             }
             ChildrenType::Option | ChildrenType::Recursion => {
                 quote! {
-                    Ok(Some(view)) => self.#visitor_method_name(handle, view, tree)?,
-                    Ok(None) => {}
+                    if let Some(view) = view {
+                        visit.#visitor_method_name(handle, view, tree)
+                    } else {
+                        Ok(())
+                    }
                 }
             }
         };
@@ -280,23 +291,23 @@ impl VisitorGenerator {
                 handle: #handle_type_ident,
                 tree: &Cst,
             ) -> Result<(), V::Error> {
-                let Some(node_data) = tree.node_data(handle.0) else {
-                    return self.then_construct_error(None, handle.0, NodeKind::NonTerminal(handle.kind()), CstConstructError::NodeIdNotFound { node: handle.0 }, tree);
+                let Some(node_data) = tree.node_data(handle.node_id()) else {
+                    return self.then_construct_error(None, handle.node_id(), NodeKind::NonTerminal(handle.kind()), CstConstructError::NodeIdNotFound { node: handle.node_id() }, tree);
                 };
 
-                let (kind, nt_data) = match node_data.expected_non_terminal_or_error(handle.0, handle.kind()) {
+                let (kind, nt_data) = match node_data.expected_non_terminal_or_error(handle.node_id(), handle.kind()) {
                     Ok((kind, nt_data)) => (kind, nt_data),
-                    Err(error) => return self.then_construct_error(Some(node_data), handle.0, NodeKind::NonTerminal(handle.kind()), error, tree),
+                    Err(error) => return self.then_construct_error(Some(node_data), handle.node_id(), NodeKind::NonTerminal(handle.kind()), error, tree),
                 };
-                self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-                let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-                match handle.get_view_with_visit(tree, visit_ignored).map_err(|e| e.extract_error()) {
-                    #on_view
-                    Err(Ok(err)) => return Err(err),
-                    Err(Err(err)) => self.then_construct_error(Some(node_data), handle.0, NodeKind::NonTerminal(kind), err, tree)?,
-                }
-                self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-                Ok(())
+                self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+                let result = match handle.get_view_with_visit(tree, |view, visit: &mut Self| (#on_view, visit), self).map_err(|e| e.extract_error()) {
+                    Ok(Ok(())) => Ok(()),
+                    Ok(Err(e)) => Err(e),
+                    Err(Ok(e)) => Err(e),
+                    Err(Err(e)) => self.then_construct_error(Some(node_data), handle.node_id(), NodeKind::NonTerminal(handle.kind()), e, tree),
+                };
+                self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+                result
             }
         }
     }
@@ -309,16 +320,10 @@ impl VisitorGenerator {
             fn #fn_name_super_ident(
                 &mut self,
                 terminal: #terminal_ident,
+                data: TerminalData,
                 tree: &Cst,
             ) -> Result<(), V::Error> {
-                let Some(node_data) = tree.node_data(terminal.0) else {
-                    return self.then_construct_error(None, terminal.0, NodeKind::Terminal(terminal.kind()), CstConstructError::NodeIdNotFound { node: terminal.0 }, tree);
-                };
-                let (kind, terminal_data) = match node_data.expected_terminal_or_error(terminal.0, terminal.kind()) {
-                    Ok((kind, terminal_data)) => (kind, terminal_data),
-                    Err(error) => return self.then_construct_error(Some(node_data), terminal.0, NodeKind::Terminal(terminal.kind()), error, tree),
-                };
-                self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+                self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
                 Ok(())
             }
         }
@@ -368,14 +373,23 @@ impl VisitorGenerator {
                     .iter()
                     .map(|field_info| {
                         let child_handle_field_name = &field_info.field_name_ident;
-                        let visit_child_handle_method =
-                            format_snake_case(&if field_info.is_non_terminal {
-                                format!("visit_{}_handle", field_info.original_name)
-                            } else {
-                                format!("visit_{}_terminal", field_info.original_name)
-                            });
-                        let visit_call = quote! {
-                            self.#visit_child_handle_method(#child_handle_field_name, tree)?;
+                        let visit_call = if field_info.is_non_terminal {
+                            let visit_child_handle_method = format_snake_case(&format!("visit_{}_handle", field_info.original_name));
+                            quote! {
+                                self.#visit_child_handle_method(#child_handle_field_name, tree)?;
+                            }
+                        } else {
+                            let visit_terminal_method = format_snake_case(&format!("visit_{}_terminal", field_info.original_name));
+                            quote! {
+                                let Some(node_data) = tree.node_data(#child_handle_field_name.0) else {
+                                    return self.then_construct_error(None, #child_handle_field_name.0, NodeKind::Terminal(#child_handle_field_name.kind()), CstConstructError::NodeIdNotFound { node: #child_handle_field_name.0 }, tree);
+                                };
+                                let (_kind, data) = match node_data.expected_terminal_or_error(#child_handle_field_name.0, #child_handle_field_name.kind()) {
+                                    Ok((_kind, data)) => (data, data),
+                                    Err(error) => return self.then_construct_error(Some(node_data), #child_handle_field_name.0, NodeKind::Terminal(#child_handle_field_name.kind()), error, tree),
+                                };
+                                self.#visit_terminal_method(#child_handle_field_name, data, tree)?;
+                            }
                         };
                         (child_handle_field_name, visit_call)
                     })
@@ -478,31 +492,142 @@ impl VisitorGenerator {
             quote! {
                 TerminalKind::#t_kind_variant => {
                     let terminal = #t_type(id);
-                    self.#visit_terminal_method(terminal, tree)?;
+                    self.#visit_terminal_method(terminal, data, tree)?;
                 }
             }
         });
 
         quote! {
-            fn visit_any(&mut self, id: CstNodeId, tree: &Cst) -> Result<(), V::Error> {
-                let Some(node_data) = tree.node_data(id) else {
-                    // If node doesn't exist, maybe log or just return. Mimic recover_error.
-                    return Ok(());
-                };
-
-                match node_data.node_kind() {
-                    NodeKind::NonTerminal(nt_kind) => {
-                        match nt_kind {
+            fn visit_any(&mut self, id: CstNodeId, node: CstNode, tree: &Cst) -> Result<(), V::Error> {
+                match node {
+                    CstNodeData::NonTerminal { kind, .. } => {
+                        match kind {
                             #(#non_terminal_arms)*
                         }
                     }
-                    NodeKind::Terminal(t_kind) => {
-                        match t_kind {
+                    CstNodeData::Terminal { kind, data } => {
+                        match kind {
                             #(#terminal_arms)*
                         }
                     }
                 }
                 Ok(())
+            }
+        }
+    }
+
+    fn generate_node_visitor(&self) -> TokenStream {
+        quote! {
+            mod private2 {
+                pub trait Sealed {}
+            }
+
+            pub trait NodeVisitor: NodeVisitorSuper<Self::Error> {
+                type Error;
+                fn visit_node(&mut self, id: CstNodeId, node: CstNode, tree: &Cst) -> Result<(), Self::Error>;
+            }
+
+            pub trait NodeVisitorSuper<E>: private2::Sealed {
+                fn visit_node_id(&mut self, id: CstNodeId, tree: &Cst) -> Result<(), E>;
+                fn visit_node_super(&mut self, id: CstNodeId, node: CstNode, tree: &Cst) -> Result<(), E>;
+            }
+
+            impl<V: NodeVisitor> private2::Sealed for V {}
+
+            impl<V: NodeVisitor> NodeVisitorSuper<V::Error> for V {
+                fn visit_node_id(
+                    &mut self,
+                    id: CstNodeId,
+                    tree: &Cst,
+                ) -> Result<(), V::Error> {
+                    if let Some(node) = tree.node_data(id) {
+                        self.visit_node(id, node, tree)
+                    } else {
+                        Ok(())
+                    }
+                }
+                fn visit_node_super(
+                    &mut self,
+                    id: CstNodeId,
+                    _node: CstNode,
+                    tree: &Cst,
+                ) -> Result<(), V::Error> {
+                    for child in tree.children(id) {
+                        if let Some(child_node) = tree.node_data(child) {
+                            self.visit_node(child, child_node, tree)?;
+                        }
+                    }
+                    Ok(())
+                }
+            }
+        }
+    }
+
+    fn generate_builtin_terminal_visitor(&self) -> TokenStream {
+        quote! {
+            pub trait BuiltinTerminalVisitor<E> {
+                fn visit_builtin_new_line_terminal(
+                    &mut self,
+                    terminal: NewLine,
+                    data: TerminalData,
+                    tree: &Cst,
+                ) -> Result<(), E>;
+                fn visit_builtin_whitespace_terminal(
+                    &mut self,
+                    terminal: Whitespace,
+                    data: TerminalData,
+                    tree: &Cst,
+                ) -> Result<(), E>;
+                fn visit_builtin_line_comment_terminal(
+                    &mut self,
+                    terminal: LineComment,
+                    data: TerminalData,
+                    tree: &Cst,
+                ) -> Result<(), E>;
+                fn visit_builtin_block_comment_terminal(
+                    &mut self,
+                    terminal: BlockComment,
+                    data: TerminalData,
+                    tree: &Cst,
+                ) -> Result<(), E>;
+            }
+
+            impl<V: CstVisitor> BuiltinTerminalVisitor<V::Error> for V {
+                fn visit_builtin_new_line_terminal(
+                    &mut self,
+                    terminal: NewLine,
+                    data: TerminalData,
+                    tree: &Cst,
+                ) -> Result<(), V::Error> {
+                    self.visit_new_line_terminal(terminal, data, tree)
+                }
+
+                fn visit_builtin_whitespace_terminal(
+                    &mut self,
+                    terminal: Whitespace,
+                    data: TerminalData,
+                    tree: &Cst,
+                ) -> Result<(), V::Error> {
+                    self.visit_whitespace_terminal(terminal, data, tree)
+                }
+
+                fn visit_builtin_line_comment_terminal(
+                    &mut self,
+                    terminal: LineComment,
+                    data: TerminalData,
+                    tree: &Cst,
+                ) -> Result<(), V::Error> {
+                    self.visit_line_comment_terminal(terminal, data, tree)
+                }
+
+                fn visit_builtin_block_comment_terminal(
+                    &mut self,
+                    terminal: BlockComment,
+                    data: TerminalData,
+                    tree: &Cst,
+                ) -> Result<(), V::Error> {
+                    self.visit_block_comment_terminal(terminal, data, tree)
+                }
             }
         }
     }

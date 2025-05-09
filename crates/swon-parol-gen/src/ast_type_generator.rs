@@ -49,7 +49,7 @@ impl AstTypeGenerator {
 
         quote! {
             #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-            pub struct #struct_name(pub CstNodeId);
+            pub struct #struct_name(pub super::tree::CstNodeId);
 
             impl #struct_name {
                 pub fn kind(&self) -> TerminalKind {
@@ -70,7 +70,8 @@ impl AstTypeGenerator {
     pub fn generate_imports(&self) -> proc_macro2::TokenStream {
         quote! {
             #![allow(unused_variables)]
-            use super::tree::{NonTerminalHandle, TerminalData, CstNodeId, ViewConstructionError, assert_node_kind};
+            use super::tree::{NonTerminalHandle, RecursiveView, CstNodeId, ViewConstructionError};
+            use super::visitor::BuiltinTerminalVisitor;
             use crate::{Cst, CstConstructError};
             use super::nodes::{TerminalKind, NonTerminalKind};
             use parol_runtime::parser::parse_tree_type::NodeKind;
@@ -135,18 +136,22 @@ impl AstTypeGenerator {
         );
         let kind_method = self.generate_handle_kind_method(quote!(NonTerminalKind::#variant_name));
         let item_impl = parse_quote! {
-            impl NonTerminalHandle<TerminalKind, NonTerminalKind> for #handle_name {
+            impl NonTerminalHandle for #handle_name {
                 type View = #view_name;
+                fn node_id(&self) -> CstNodeId {
+                    self.0
+                }
                 #new_method
                 #kind_method
-                fn get_view(&self, tree: &Cst) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-                    Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-                }
-                fn get_view_with_visit<E>(&self, tree: &Cst, visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>) -> Result<Self::View, CstConstructError<E>> {
-                    let [#(#field_names),*] = tree.collect_nodes(self.0, [#(#node_kinds),*], visit_ignored)?;
-                    Ok(#view_name {
+                fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
+                    &self,
+                    tree: &Cst,
+                    mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+                    visit_ignored: &'v mut V,
+                ) -> Result<O, CstConstructError<E>> {
+                    tree.collect_nodes(self.0, [#(#node_kinds),*], |[#(#field_names),*], visit_ignored| Ok(visit(#view_name {
                         #(#field_names: #field_types(#field_names),)*
-                    })
+                    }, visit_ignored)), visit_ignored)
                 }
             }
         };
@@ -286,14 +291,19 @@ impl AstTypeGenerator {
         let kind_method =
             self.generate_handle_kind_method(quote!(NonTerminalKind::#nt_variant_name));
         let item_impl: syn::ItemImpl = parse_quote! {
-            impl NonTerminalHandle<TerminalKind, NonTerminalKind> for #handle_name {
+            impl NonTerminalHandle for #handle_name {
                 type View = #view_name;
+                fn node_id(&self) -> CstNodeId {
+                    self.0
+                }
                 #new_method
                 #kind_method
-                fn get_view(&self, tree: &Cst) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-                    Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-                }
-                fn get_view_with_visit<E>(&self, tree: &Cst, visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>) -> Result<Self::View, CstConstructError<E>> {
+                fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
+                    &self,
+                    tree: &Cst,
+                    mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+                    visit_ignored: &'v mut V,
+                ) -> Result<O, CstConstructError<E>> {
                     let mut children = tree.children(self.0);
                     let Some(child) = children.next() else {
                         return Err(ViewConstructionError::UnexpectedEndOfChildren { parent: self.0 });
@@ -317,10 +327,11 @@ impl AstTypeGenerator {
                             });
                         }
                     };
+                    let (result, _visit) = visit(variant, visit_ignored);
                     if let Some(child) = children.next() {
                         return Err(ViewConstructionError::UnexpectedExtraNode { node: child });
                     }
-                    Ok(variant)
+                    Ok(result)
                 }
             }
         };
@@ -368,21 +379,25 @@ impl AstTypeGenerator {
         );
         let kind_method = self.generate_handle_kind_method(quote!(NonTerminalKind::#variant_name));
         let item_impl: syn::ItemImpl = parse_quote! {
-            impl NonTerminalHandle<TerminalKind, NonTerminalKind> for #handle_name {
+            impl NonTerminalHandle for #handle_name {
                 type View = Option<#view_name>;
+                fn node_id(&self) -> CstNodeId {
+                    self.0
+                }
                 #new_method
                 #kind_method
-                fn get_view(&self, tree: &Cst) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-                    Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-                }
-                fn get_view_with_visit<E>(&self, tree: &Cst, visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>) -> Result<Self::View, CstConstructError<E>> {
+                fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
+                    &self,
+                    tree: &Cst,
+                    mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+                    visit_ignored: &'v mut V,
+                ) -> Result<O, CstConstructError<E>> {
                     if tree.has_no_children(self.0) {
-                        return Ok(None);
+                        return Ok(visit(None, visit_ignored).0);
                     }
-                    let [#(#field_names),*] = tree.collect_nodes(self.0, [#(#node_kinds),*], visit_ignored)?;
-                    Ok(Some(#view_name {
+                    tree.collect_nodes(self.0, [#(#node_kinds),*], |[#(#field_names),*], visit_ignored| Ok(visit(Some(#view_name {
                         #(#field_names: #field_types(#field_names),)*
-                    }))
+                    }), visit_ignored)), visit_ignored)
                 }
             }
         };
@@ -411,17 +426,22 @@ impl AstTypeGenerator {
             None
         };
         let view_impl: syn::ItemImpl = parse_quote! {
-            impl #view_name {
-                pub fn get_all(&self, tree: &Cst) -> Result<Vec<#item_name>, CstConstructError> {
-                    self.get_all_with_visit(tree, |_, _, _| Ok(()))
-                }
-                pub fn get_all_with_visit<E>(&self, tree: &Cst, mut visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>) -> Result<Vec<#item_name>, CstConstructError<E>> {
+            impl RecursiveView<TerminalKind, NonTerminalKind> for #view_name {
+                type Item = #item_name;
+                fn get_all_with_visit<E>(&self, tree: &Cst, visit_ignored: &mut impl BuiltinTerminalVisitor<E>) -> Result<Vec<Self::Item>, CstConstructError<E>> {
                     let mut items = Vec::new();
                     let mut current_view = Some(*self);
                     while let Some(item) = current_view {
                         let Self { #(#field_names),*, .. } = item;
                         #push;
-                        current_view = item.#last_name.get_view_with_visit(tree, &mut visit_ignored)?;
+                        item.#last_name.get_view_with_visit(
+                            tree,
+                            |view, visit_ignored| {
+                                current_view = view;
+                                ((), visit_ignored)
+                            },
+                            visit_ignored,
+                        )?;
                     }
                     Ok(items)
                 }
@@ -472,7 +492,7 @@ impl AstTypeGenerator {
                 (
                     quote!(#handle_name),
                     quote!(NodeKind::NonTerminal(NonTerminalKind::#kind_variant)),
-                    quote!(#handle_name::new(child, NodeKind::NonTerminal(NonTerminalKind::#kind_variant)).map_err(|e| e.into_any_error::<E>())?),
+                    quote!(#handle_name::new_with_visit(child, tree, visit_ignored)?),
                 )
             }
         };
@@ -487,19 +507,23 @@ impl AstTypeGenerator {
         let kind_method = self.generate_handle_kind_method(quote!(NonTerminalKind::#variant_name));
 
         let item_impl: syn::ItemImpl = parse_quote! {
-            impl NonTerminalHandle<TerminalKind, NonTerminalKind> for #handle_name {
+            impl NonTerminalHandle for #handle_name {
                 type View = Option<#child_handle_name>;
+                fn node_id(&self) -> CstNodeId {
+                    self.0
+                }
                 #new_method
                 #kind_method
-                fn get_view(&self, tree: &Cst) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-                    Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-                }
-                fn get_view_with_visit<E>(&self, tree: &Cst, visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>) -> Result<Self::View, CstConstructError<E>> {
+                fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
+                    &self,
+                    tree: &Cst,
+                    mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+                    visit_ignored: &'v mut V,
+                ) -> Result<O, CstConstructError<E>> {
                     if tree.has_no_children(self.0) {
-                        return Ok(None);
+                        return Ok(visit(None, visit_ignored).0);
                     }
-                    let [child] = tree.collect_nodes(self.0, [#node_kind], visit_ignored)?;
-                    Ok(Some(#constructor))
+                    tree.collect_nodes(self.0, [#node_kind], |[child], visit_ignored| Ok(visit(Some(#constructor), visit_ignored)), visit_ignored)
                 }
             }
         };
@@ -512,9 +536,8 @@ impl AstTypeGenerator {
 
     fn generate_handle_new_method(&self, node_kind: TokenStream) -> proc_macro2::TokenStream {
         parse_quote! {
-            fn new(index: CstNodeId, kind: NodeKind<TerminalKind, NonTerminalKind>) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-                assert_node_kind(index, kind, #node_kind)?;
-                Ok(Self(index))
+            fn new_with_visit<E>(index: CstNodeId, tree: &Cst, visit_ignored: &mut impl BuiltinTerminalVisitor<E>) -> Result<Self, CstConstructError<E>> {
+                tree.collect_nodes(index, [#node_kind], |[index], visit| Ok((Self(index), visit)), visit_ignored)
             }
         }
     }

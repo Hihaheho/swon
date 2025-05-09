@@ -1,5 +1,5 @@
 use crate::{
-    Cst, CstConstructError, NodeKind, CstNode, ast::*,
+    Cst, CstConstructError, NodeKind, CstNode, CstNodeData, ast::*,
     nodes::{TerminalKind, NonTerminalKind},
     tree::{NonTerminalHandle as _, TerminalData, NonTerminalData, CstNodeId},
 };
@@ -593,226 +593,258 @@ pub trait CstVisitor: CstHandleSuper<Self::Error> {
     fn visit_new_line_terminal(
         &mut self,
         terminal: NewLine,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_new_line_terminal_super(terminal, tree)
+        self.visit_new_line_terminal_super(terminal, data, tree)
     }
     fn visit_whitespace_terminal(
         &mut self,
         terminal: Whitespace,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_whitespace_terminal_super(terminal, tree)
+        self.visit_whitespace_terminal_super(terminal, data, tree)
     }
     fn visit_line_comment_terminal(
         &mut self,
         terminal: LineComment,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_line_comment_terminal_super(terminal, tree)
+        self.visit_line_comment_terminal_super(terminal, data, tree)
     }
     fn visit_block_comment_terminal(
         &mut self,
         terminal: BlockComment,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_block_comment_terminal_super(terminal, tree)
+        self.visit_block_comment_terminal_super(terminal, data, tree)
     }
     fn visit_integer_terminal(
         &mut self,
         terminal: Integer,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_integer_terminal_super(terminal, tree)
+        self.visit_integer_terminal_super(terminal, data, tree)
     }
     fn visit_true_terminal(
         &mut self,
         terminal: True,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_true_terminal_super(terminal, tree)
+        self.visit_true_terminal_super(terminal, data, tree)
     }
     fn visit_false_terminal(
         &mut self,
         terminal: False,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_false_terminal_super(terminal, tree)
+        self.visit_false_terminal_super(terminal, data, tree)
     }
     fn visit_null_terminal(
         &mut self,
         terminal: Null,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_null_terminal_super(terminal, tree)
+        self.visit_null_terminal_super(terminal, data, tree)
     }
     fn visit_hole_terminal(
         &mut self,
         terminal: Hole,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_hole_terminal_super(terminal, tree)
+        self.visit_hole_terminal_super(terminal, data, tree)
     }
     fn visit_quote_terminal(
         &mut self,
         terminal: Quote,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_quote_terminal_super(terminal, tree)
+        self.visit_quote_terminal_super(terminal, data, tree)
     }
     fn visit_typed_quote_terminal(
         &mut self,
         terminal: TypedQuote,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_typed_quote_terminal_super(terminal, tree)
+        self.visit_typed_quote_terminal_super(terminal, data, tree)
     }
     fn visit_in_str_terminal(
         &mut self,
         terminal: InStr,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_in_str_terminal_super(terminal, tree)
+        self.visit_in_str_terminal_super(terminal, data, tree)
     }
     fn visit_text_terminal(
         &mut self,
         terminal: Text,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_text_terminal_super(terminal, tree)
+        self.visit_text_terminal_super(terminal, data, tree)
     }
     fn visit_named_code_terminal(
         &mut self,
         terminal: NamedCode,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_named_code_terminal_super(terminal, tree)
+        self.visit_named_code_terminal_super(terminal, data, tree)
     }
     fn visit_code_terminal(
         &mut self,
         terminal: Code,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_code_terminal_super(terminal, tree)
+        self.visit_code_terminal_super(terminal, data, tree)
     }
     fn visit_newline_terminal(
         &mut self,
         terminal: Newline,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_newline_terminal_super(terminal, tree)
+        self.visit_newline_terminal_super(terminal, data, tree)
     }
     fn visit_ws_terminal(
         &mut self,
         terminal: Ws,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_ws_terminal_super(terminal, tree)
+        self.visit_ws_terminal_super(terminal, data, tree)
     }
     fn visit_at_terminal(
         &mut self,
         terminal: At,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_at_terminal_super(terminal, tree)
+        self.visit_at_terminal_super(terminal, data, tree)
     }
     fn visit_dollar_terminal(
         &mut self,
         terminal: Dollar,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_dollar_terminal_super(terminal, tree)
+        self.visit_dollar_terminal_super(terminal, data, tree)
     }
     fn visit_dot_terminal(
         &mut self,
         terminal: Dot,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_dot_terminal_super(terminal, tree)
+        self.visit_dot_terminal_super(terminal, data, tree)
     }
     fn visit_l_brace_terminal(
         &mut self,
         terminal: LBrace,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_l_brace_terminal_super(terminal, tree)
+        self.visit_l_brace_terminal_super(terminal, data, tree)
     }
     fn visit_r_brace_terminal(
         &mut self,
         terminal: RBrace,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_r_brace_terminal_super(terminal, tree)
+        self.visit_r_brace_terminal_super(terminal, data, tree)
     }
     fn visit_l_bracket_terminal(
         &mut self,
         terminal: LBracket,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_l_bracket_terminal_super(terminal, tree)
+        self.visit_l_bracket_terminal_super(terminal, data, tree)
     }
     fn visit_r_bracket_terminal(
         &mut self,
         terminal: RBracket,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_r_bracket_terminal_super(terminal, tree)
+        self.visit_r_bracket_terminal_super(terminal, data, tree)
     }
     fn visit_bind_terminal(
         &mut self,
         terminal: Bind,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_bind_terminal_super(terminal, tree)
+        self.visit_bind_terminal_super(terminal, data, tree)
     }
     fn visit_comma_terminal(
         &mut self,
         terminal: Comma,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_comma_terminal_super(terminal, tree)
+        self.visit_comma_terminal_super(terminal, data, tree)
     }
     fn visit_esc_terminal(
         &mut self,
         terminal: Esc,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_esc_terminal_super(terminal, tree)
+        self.visit_esc_terminal_super(terminal, data, tree)
     }
     fn visit_text_start_terminal(
         &mut self,
         terminal: TextStart,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_text_start_terminal_super(terminal, tree)
+        self.visit_text_start_terminal_super(terminal, data, tree)
     }
     fn visit_ident_terminal(
         &mut self,
         terminal: Ident,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_ident_terminal_super(terminal, tree)
+        self.visit_ident_terminal_super(terminal, data, tree)
     }
     fn visit_named_code_block_begin_terminal(
         &mut self,
         terminal: NamedCodeBlockBegin,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_named_code_block_begin_terminal_super(terminal, tree)
+        self.visit_named_code_block_begin_terminal_super(terminal, data, tree)
     }
     fn visit_code_block_delimiter_terminal(
         &mut self,
         terminal: CodeBlockDelimiter,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_code_block_delimiter_terminal_super(terminal, tree)
+        self.visit_code_block_delimiter_terminal_super(terminal, data, tree)
     }
     fn visit_code_block_line_terminal(
         &mut self,
         terminal: CodeBlockLine,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_code_block_line_terminal_super(terminal, tree)
+        self.visit_code_block_line_terminal_super(terminal, data, tree)
     }
     fn visit_non_terminal(
         &mut self,
@@ -836,10 +868,10 @@ pub trait CstVisitor: CstHandleSuper<Self::Error> {
         &mut self,
         id: CstNodeId,
         kind: TerminalKind,
-        terminal: TerminalData,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_terminal_super(id, kind, terminal, tree)
+        self.visit_terminal_super(id, kind, data, tree)
     }
     /// This method is called when a construct view fails.
     /// If you return Ok(()), the error is not propagated.
@@ -1261,121 +1293,193 @@ pub trait CstHandleSuper<E>: private::Sealed {
     fn visit_new_line_terminal_super(
         &mut self,
         terminal: NewLine,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
     fn visit_whitespace_terminal_super(
         &mut self,
         terminal: Whitespace,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
     fn visit_line_comment_terminal_super(
         &mut self,
         terminal: LineComment,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
     fn visit_block_comment_terminal_super(
         &mut self,
         terminal: BlockComment,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
     fn visit_integer_terminal_super(
         &mut self,
         terminal: Integer,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
-    fn visit_true_terminal_super(&mut self, terminal: True, tree: &Cst) -> Result<(), E>;
+    fn visit_true_terminal_super(
+        &mut self,
+        terminal: True,
+        data: TerminalData,
+        tree: &Cst,
+    ) -> Result<(), E>;
     fn visit_false_terminal_super(
         &mut self,
         terminal: False,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
-    fn visit_null_terminal_super(&mut self, terminal: Null, tree: &Cst) -> Result<(), E>;
-    fn visit_hole_terminal_super(&mut self, terminal: Hole, tree: &Cst) -> Result<(), E>;
+    fn visit_null_terminal_super(
+        &mut self,
+        terminal: Null,
+        data: TerminalData,
+        tree: &Cst,
+    ) -> Result<(), E>;
+    fn visit_hole_terminal_super(
+        &mut self,
+        terminal: Hole,
+        data: TerminalData,
+        tree: &Cst,
+    ) -> Result<(), E>;
     fn visit_quote_terminal_super(
         &mut self,
         terminal: Quote,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
     fn visit_typed_quote_terminal_super(
         &mut self,
         terminal: TypedQuote,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
     fn visit_in_str_terminal_super(
         &mut self,
         terminal: InStr,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
-    fn visit_text_terminal_super(&mut self, terminal: Text, tree: &Cst) -> Result<(), E>;
+    fn visit_text_terminal_super(
+        &mut self,
+        terminal: Text,
+        data: TerminalData,
+        tree: &Cst,
+    ) -> Result<(), E>;
     fn visit_named_code_terminal_super(
         &mut self,
         terminal: NamedCode,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
-    fn visit_code_terminal_super(&mut self, terminal: Code, tree: &Cst) -> Result<(), E>;
+    fn visit_code_terminal_super(
+        &mut self,
+        terminal: Code,
+        data: TerminalData,
+        tree: &Cst,
+    ) -> Result<(), E>;
     fn visit_newline_terminal_super(
         &mut self,
         terminal: Newline,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
-    fn visit_ws_terminal_super(&mut self, terminal: Ws, tree: &Cst) -> Result<(), E>;
-    fn visit_at_terminal_super(&mut self, terminal: At, tree: &Cst) -> Result<(), E>;
+    fn visit_ws_terminal_super(
+        &mut self,
+        terminal: Ws,
+        data: TerminalData,
+        tree: &Cst,
+    ) -> Result<(), E>;
+    fn visit_at_terminal_super(
+        &mut self,
+        terminal: At,
+        data: TerminalData,
+        tree: &Cst,
+    ) -> Result<(), E>;
     fn visit_dollar_terminal_super(
         &mut self,
         terminal: Dollar,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
-    fn visit_dot_terminal_super(&mut self, terminal: Dot, tree: &Cst) -> Result<(), E>;
+    fn visit_dot_terminal_super(
+        &mut self,
+        terminal: Dot,
+        data: TerminalData,
+        tree: &Cst,
+    ) -> Result<(), E>;
     fn visit_l_brace_terminal_super(
         &mut self,
         terminal: LBrace,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
     fn visit_r_brace_terminal_super(
         &mut self,
         terminal: RBrace,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
     fn visit_l_bracket_terminal_super(
         &mut self,
         terminal: LBracket,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
     fn visit_r_bracket_terminal_super(
         &mut self,
         terminal: RBracket,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
-    fn visit_bind_terminal_super(&mut self, terminal: Bind, tree: &Cst) -> Result<(), E>;
+    fn visit_bind_terminal_super(
+        &mut self,
+        terminal: Bind,
+        data: TerminalData,
+        tree: &Cst,
+    ) -> Result<(), E>;
     fn visit_comma_terminal_super(
         &mut self,
         terminal: Comma,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
-    fn visit_esc_terminal_super(&mut self, terminal: Esc, tree: &Cst) -> Result<(), E>;
+    fn visit_esc_terminal_super(
+        &mut self,
+        terminal: Esc,
+        data: TerminalData,
+        tree: &Cst,
+    ) -> Result<(), E>;
     fn visit_text_start_terminal_super(
         &mut self,
         terminal: TextStart,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
     fn visit_ident_terminal_super(
         &mut self,
         terminal: Ident,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
     fn visit_named_code_block_begin_terminal_super(
         &mut self,
         terminal: NamedCodeBlockBegin,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
     fn visit_code_block_delimiter_terminal_super(
         &mut self,
         terminal: CodeBlockDelimiter,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
     fn visit_code_block_line_terminal_super(
         &mut self,
         terminal: CodeBlockLine,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
     fn visit_non_terminal_super(
@@ -1396,10 +1500,10 @@ pub trait CstHandleSuper<E>: private::Sealed {
         &mut self,
         id: CstNodeId,
         kind: TerminalKind,
-        terminal: TerminalData,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), E>;
-    fn visit_any(&mut self, id: CstNodeId, tree: &Cst) -> Result<(), E>;
+    fn visit_any(&mut self, id: CstNodeId, node: CstNode, tree: &Cst) -> Result<(), E>;
     /// Recover from a construct error. This eagerly visits the children of the node.
     fn recover_error(
         &mut self,
@@ -1416,3451 +1520,3873 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         handle: ArrayHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_array(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_array(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_array_begin_handle(
         &mut self,
         handle: ArrayBeginHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_array_begin(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_array_begin(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_array_end_handle(
         &mut self,
         handle: ArrayEndHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_array_end(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_array_end(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_array_list_handle(
         &mut self,
         handle: ArrayListHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    if let Some(view) = view {
+                        visit.visit_array_list(handle, view, tree)
+                    } else {
+                        Ok(())
+                    },
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(Some(view)) => self.visit_array_list(handle, view, tree)?,
-            Ok(None) => {}
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_array_marker_handle(
         &mut self,
         handle: ArrayMarkerHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_array_marker(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_array_marker(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_array_marker_opt_handle(
         &mut self,
         handle: ArrayMarkerOptHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    if let Some(view) = view {
+                        visit.visit_array_marker_opt(handle, view, tree)
+                    } else {
+                        Ok(())
+                    },
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(Some(view)) => self.visit_array_marker_opt(handle, view, tree)?,
-            Ok(None) => {}
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_array_opt_handle(
         &mut self,
         handle: ArrayOptHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    if let Some(view) = view {
+                        visit.visit_array_opt(handle, view, tree)
+                    } else {
+                        Ok(())
+                    },
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(Some(view)) => self.visit_array_opt(handle, view, tree)?,
-            Ok(None) => {}
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_at_handle(&mut self, handle: AtHandle, tree: &Cst) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_at(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_at(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_begin_handle(
         &mut self,
         handle: BeginHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_begin(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_begin(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_bind_handle(
         &mut self,
         handle: BindHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_bind(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_bind(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_binding_handle(
         &mut self,
         handle: BindingHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_binding(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_binding(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_binding_rhs_handle(
         &mut self,
         handle: BindingRhsHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_binding_rhs(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_binding_rhs(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_boolean_handle(
         &mut self,
         handle: BooleanHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_boolean(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_boolean(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_code_handle(
         &mut self,
         handle: CodeHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_code(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_code(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_code_block_handle(
         &mut self,
         handle: CodeBlockHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_code_block(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_code_block(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_code_block_delimiter_handle(
         &mut self,
         handle: CodeBlockDelimiterHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_code_block_delimiter(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_code_block_delimiter(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_code_block_line_handle(
         &mut self,
         handle: CodeBlockLineHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_code_block_line(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_code_block_line(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_code_block_tail_common_handle(
         &mut self,
         handle: CodeBlockTailCommonHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_code_block_tail_common(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_code_block_tail_common(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_code_block_tail_common_list_handle(
         &mut self,
         handle: CodeBlockTailCommonListHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    if let Some(view) = view {
+                        visit.visit_code_block_tail_common_list(handle, view, tree)
+                    } else {
+                        Ok(())
+                    },
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(Some(view)) => self.visit_code_block_tail_common_list(handle, view, tree)?,
-            Ok(None) => {}
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_code_block_tail_common_opt_handle(
         &mut self,
         handle: CodeBlockTailCommonOptHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    if let Some(view) = view {
+                        visit.visit_code_block_tail_common_opt(handle, view, tree)
+                    } else {
+                        Ok(())
+                    },
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(Some(view)) => self.visit_code_block_tail_common_opt(handle, view, tree)?,
-            Ok(None) => {}
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_comma_handle(
         &mut self,
         handle: CommaHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_comma(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_comma(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_continue_handle(
         &mut self,
         handle: ContinueHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_continue(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_continue(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_dot_handle(
         &mut self,
         handle: DotHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_dot(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_dot(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_end_handle(
         &mut self,
         handle: EndHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_end(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_end(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_ext_handle(
         &mut self,
         handle: ExtHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_ext(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_ext(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_extension_name_space_handle(
         &mut self,
         handle: ExtensionNameSpaceHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_extension_name_space(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_extension_name_space(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_false_handle(
         &mut self,
         handle: FalseHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_false(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_false(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_hole_handle(
         &mut self,
         handle: HoleHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_hole(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_hole(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_ident_handle(
         &mut self,
         handle: IdentHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_ident(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_ident(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_in_str_handle(
         &mut self,
         handle: InStrHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_in_str(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_in_str(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_integer_handle(
         &mut self,
         handle: IntegerHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_integer(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_integer(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_key_handle(
         &mut self,
         handle: KeyHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_key(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_key(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_key_base_handle(
         &mut self,
         handle: KeyBaseHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_key_base(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_key_base(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_key_opt_handle(
         &mut self,
         handle: KeyOptHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    if let Some(view) = view {
+                        visit.visit_key_opt(handle, view, tree)
+                    } else {
+                        Ok(())
+                    },
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(Some(view)) => self.visit_key_opt(handle, view, tree)?,
-            Ok(None) => {}
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_keys_handle(
         &mut self,
         handle: KeysHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_keys(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_keys(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_keys_list_handle(
         &mut self,
         handle: KeysListHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    if let Some(view) = view {
+                        visit.visit_keys_list(handle, view, tree)
+                    } else {
+                        Ok(())
+                    },
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(Some(view)) => self.visit_keys_list(handle, view, tree)?,
-            Ok(None) => {}
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_named_code_handle(
         &mut self,
         handle: NamedCodeHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_named_code(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_named_code(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_named_code_block_handle(
         &mut self,
         handle: NamedCodeBlockHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_named_code_block(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_named_code_block(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_named_code_block_begin_handle(
         &mut self,
         handle: NamedCodeBlockBeginHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_named_code_block_begin(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_named_code_block_begin(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_newline_handle(
         &mut self,
         handle: NewlineHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_newline(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_newline(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_null_handle(
         &mut self,
         handle: NullHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_null(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_null(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_object_handle(
         &mut self,
         handle: ObjectHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_object(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_object(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_object_list_handle(
         &mut self,
         handle: ObjectListHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    if let Some(view) = view {
+                        visit.visit_object_list(handle, view, tree)
+                    } else {
+                        Ok(())
+                    },
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(Some(view)) => self.visit_object_list(handle, view, tree)?,
-            Ok(None) => {}
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_object_opt_handle(
         &mut self,
         handle: ObjectOptHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    if let Some(view) = view {
+                        visit.visit_object_opt(handle, view, tree)
+                    } else {
+                        Ok(())
+                    },
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(Some(view)) => self.visit_object_opt(handle, view, tree)?,
-            Ok(None) => {}
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_quote_handle(
         &mut self,
         handle: QuoteHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_quote(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_quote(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_section_handle(
         &mut self,
         handle: SectionHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_section(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_section(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_section_binding_handle(
         &mut self,
         handle: SectionBindingHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_section_binding(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_section_binding(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_section_list_handle(
         &mut self,
         handle: SectionListHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    if let Some(view) = view {
+                        visit.visit_section_list(handle, view, tree)
+                    } else {
+                        Ok(())
+                    },
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(Some(view)) => self.visit_section_list(handle, view, tree)?,
-            Ok(None) => {}
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_str_handle(
         &mut self,
         handle: StrHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_str(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_str(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_str_continues_handle(
         &mut self,
         handle: StrContinuesHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_str_continues(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_str_continues(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_str_continues_list_handle(
         &mut self,
         handle: StrContinuesListHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    if let Some(view) = view {
+                        visit.visit_str_continues_list(handle, view, tree)
+                    } else {
+                        Ok(())
+                    },
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(Some(view)) => self.visit_str_continues_list(handle, view, tree)?,
-            Ok(None) => {}
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_swon_handle(
         &mut self,
         handle: SwonHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_swon(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_swon(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_swon_bindings_handle(
         &mut self,
         handle: SwonBindingsHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    if let Some(view) = view {
+                        visit.visit_swon_bindings(handle, view, tree)
+                    } else {
+                        Ok(())
+                    },
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(Some(view)) => self.visit_swon_bindings(handle, view, tree)?,
-            Ok(None) => {}
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_swon_sections_handle(
         &mut self,
         handle: SwonSectionsHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    if let Some(view) = view {
+                        visit.visit_swon_sections(handle, view, tree)
+                    } else {
+                        Ok(())
+                    },
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(Some(view)) => self.visit_swon_sections(handle, view, tree)?,
-            Ok(None) => {}
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_text_handle(
         &mut self,
         handle: TextHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_text(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_text(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_text_binding_handle(
         &mut self,
         handle: TextBindingHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_text_binding(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_text_binding(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_text_binding_opt_handle(
         &mut self,
         handle: TextBindingOptHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    if let Some(view) = view {
+                        visit.visit_text_binding_opt(handle, view, tree)
+                    } else {
+                        Ok(())
+                    },
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(Some(view)) => self.visit_text_binding_opt(handle, view, tree)?,
-            Ok(None) => {}
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_text_start_handle(
         &mut self,
         handle: TextStartHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_text_start(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_text_start(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_true_handle(
         &mut self,
         handle: TrueHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_true(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_true(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_typed_quote_handle(
         &mut self,
         handle: TypedQuoteHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_typed_quote(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_typed_quote(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_typed_str_handle(
         &mut self,
         handle: TypedStrHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_typed_str(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_typed_str(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_value_handle(
         &mut self,
         handle: ValueHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_value(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_value(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_value_binding_handle(
         &mut self,
         handle: ValueBindingHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_value_binding(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_value_binding(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_ws_handle(&mut self, handle: WsHandle, tree: &Cst) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_ws(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_ws(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_root_handle(
         &mut self,
         handle: RootHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(handle.0) else {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
             return self
                 .then_construct_error(
                     None,
-                    handle.0,
+                    handle.node_id(),
                     NodeKind::NonTerminal(handle.kind()),
                     CstConstructError::NodeIdNotFound {
-                        node: handle.0,
+                        node: handle.node_id(),
                     },
                     tree,
                 );
         };
         let (kind, nt_data) = match node_data
-            .expected_non_terminal_or_error(handle.0, handle.kind())
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
         {
             Ok((kind, nt_data)) => (kind, nt_data),
             Err(error) => {
                 return self
                     .then_construct_error(
                         Some(node_data),
-                        handle.0,
+                        handle.node_id(),
                         NodeKind::NonTerminal(handle.kind()),
                         error,
                         tree,
                     );
             }
         };
-        self.visit_non_terminal(handle.0, kind, nt_data, tree)?;
-        let visit_ignored = |id, kind, data| self.visit_terminal(id, kind, data, tree);
-        match handle
-            .get_view_with_visit(tree, visit_ignored)
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (visit.visit_root(handle, view, tree), visit),
+                self,
+            )
             .map_err(|e| e.extract_error())
         {
-            Ok(view) => self.visit_root(handle, view, tree)?,
-            Err(Ok(err)) => return Err(err),
-            Err(Err(err)) => {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
                 self.then_construct_error(
                     Some(node_data),
-                    handle.0,
-                    NodeKind::NonTerminal(kind),
-                    err,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
                     tree,
-                )?
+                )
             }
-        }
-        self.visit_non_terminal_close(handle.0, kind, nt_data, tree)?;
-        Ok(())
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
     }
     fn visit_array_super(
         &mut self,
@@ -4879,7 +5405,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let ArrayBeginView { l_bracket } = view_param;
-        self.visit_l_bracket_terminal(l_bracket, tree)?;
+        let Some(node_data) = tree.node_data(l_bracket.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    l_bracket.0,
+                    NodeKind::Terminal(l_bracket.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: l_bracket.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(l_bracket.0, l_bracket.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        l_bracket.0,
+                        NodeKind::Terminal(l_bracket.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_l_bracket_terminal(l_bracket, data, tree)?;
         Ok(())
     }
     fn visit_array_end_super(
@@ -4888,7 +5441,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let ArrayEndView { r_bracket } = view_param;
-        self.visit_r_bracket_terminal(r_bracket, tree)?;
+        let Some(node_data) = tree.node_data(r_bracket.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    r_bracket.0,
+                    NodeKind::Terminal(r_bracket.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: r_bracket.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(r_bracket.0, r_bracket.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        r_bracket.0,
+                        NodeKind::Terminal(r_bracket.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_r_bracket_terminal(r_bracket, data, tree)?;
         Ok(())
     }
     fn visit_array_list_super(
@@ -4935,7 +5515,32 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let AtView { at } = view_param;
-        self.visit_at_terminal(at, tree)?;
+        let Some(node_data) = tree.node_data(at.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    at.0,
+                    NodeKind::Terminal(at.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: at.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data.expected_terminal_or_error(at.0, at.kind()) {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        at.0,
+                        NodeKind::Terminal(at.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_at_terminal(at, data, tree)?;
         Ok(())
     }
     fn visit_begin_super(
@@ -4944,7 +5549,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let BeginView { l_brace } = view_param;
-        self.visit_l_brace_terminal(l_brace, tree)?;
+        let Some(node_data) = tree.node_data(l_brace.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    l_brace.0,
+                    NodeKind::Terminal(l_brace.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: l_brace.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(l_brace.0, l_brace.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        l_brace.0,
+                        NodeKind::Terminal(l_brace.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_l_brace_terminal(l_brace, data, tree)?;
         Ok(())
     }
     fn visit_bind_super(
@@ -4953,7 +5585,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let BindView { bind } = view_param;
-        self.visit_bind_terminal(bind, tree)?;
+        let Some(node_data) = tree.node_data(bind.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    bind.0,
+                    NodeKind::Terminal(bind.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: bind.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(bind.0, bind.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        bind.0,
+                        NodeKind::Terminal(bind.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_bind_terminal(bind, data, tree)?;
         Ok(())
     }
     fn visit_binding_super(
@@ -5005,7 +5664,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let CodeView { code } = view_param;
-        self.visit_code_terminal(code, tree)?;
+        let Some(node_data) = tree.node_data(code.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    code.0,
+                    NodeKind::Terminal(code.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: code.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(code.0, code.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        code.0,
+                        NodeKind::Terminal(code.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_code_terminal(code, data, tree)?;
         Ok(())
     }
     fn visit_code_block_super(
@@ -5024,7 +5710,37 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let CodeBlockDelimiterView { code_block_delimiter } = view_param;
-        self.visit_code_block_delimiter_terminal(code_block_delimiter, tree)?;
+        let Some(node_data) = tree.node_data(code_block_delimiter.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    code_block_delimiter.0,
+                    NodeKind::Terminal(code_block_delimiter.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: code_block_delimiter.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(
+                code_block_delimiter.0,
+                code_block_delimiter.kind(),
+            )
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        code_block_delimiter.0,
+                        NodeKind::Terminal(code_block_delimiter.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_code_block_delimiter_terminal(code_block_delimiter, data, tree)?;
         Ok(())
     }
     fn visit_code_block_line_super(
@@ -5033,7 +5749,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let CodeBlockLineView { code_block_line } = view_param;
-        self.visit_code_block_line_terminal(code_block_line, tree)?;
+        let Some(node_data) = tree.node_data(code_block_line.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    code_block_line.0,
+                    NodeKind::Terminal(code_block_line.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: code_block_line.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(code_block_line.0, code_block_line.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        code_block_line.0,
+                        NodeKind::Terminal(code_block_line.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_code_block_line_terminal(code_block_line, data, tree)?;
         Ok(())
     }
     fn visit_code_block_tail_common_super(
@@ -5088,7 +5831,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let CommaView { comma } = view_param;
-        self.visit_comma_terminal(comma, tree)?;
+        let Some(node_data) = tree.node_data(comma.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    comma.0,
+                    NodeKind::Terminal(comma.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: comma.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(comma.0, comma.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        comma.0,
+                        NodeKind::Terminal(comma.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_comma_terminal(comma, data, tree)?;
         Ok(())
     }
     fn visit_continue_super(
@@ -5097,7 +5867,33 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let ContinueView { esc } = view_param;
-        self.visit_esc_terminal(esc, tree)?;
+        let Some(node_data) = tree.node_data(esc.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    esc.0,
+                    NodeKind::Terminal(esc.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: esc.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data.expected_terminal_or_error(esc.0, esc.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        esc.0,
+                        NodeKind::Terminal(esc.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_esc_terminal(esc, data, tree)?;
         Ok(())
     }
     fn visit_dot_super(
@@ -5106,7 +5902,33 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let DotView { dot } = view_param;
-        self.visit_dot_terminal(dot, tree)?;
+        let Some(node_data) = tree.node_data(dot.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    dot.0,
+                    NodeKind::Terminal(dot.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: dot.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data.expected_terminal_or_error(dot.0, dot.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        dot.0,
+                        NodeKind::Terminal(dot.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_dot_terminal(dot, data, tree)?;
         Ok(())
     }
     fn visit_end_super(
@@ -5115,7 +5937,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let EndView { r_brace } = view_param;
-        self.visit_r_brace_terminal(r_brace, tree)?;
+        let Some(node_data) = tree.node_data(r_brace.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    r_brace.0,
+                    NodeKind::Terminal(r_brace.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: r_brace.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(r_brace.0, r_brace.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        r_brace.0,
+                        NodeKind::Terminal(r_brace.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_r_brace_terminal(r_brace, data, tree)?;
         Ok(())
     }
     fn visit_ext_super(
@@ -5124,7 +5973,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let ExtView { dollar } = view_param;
-        self.visit_dollar_terminal(dollar, tree)?;
+        let Some(node_data) = tree.node_data(dollar.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    dollar.0,
+                    NodeKind::Terminal(dollar.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: dollar.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(dollar.0, dollar.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        dollar.0,
+                        NodeKind::Terminal(dollar.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_dollar_terminal(dollar, data, tree)?;
         Ok(())
     }
     fn visit_extension_name_space_super(
@@ -5143,7 +6019,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let FalseView { r#false } = view_param;
-        self.visit_false_terminal(r#false, tree)?;
+        let Some(node_data) = tree.node_data(r#false.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    r#false.0,
+                    NodeKind::Terminal(r#false.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: r#false.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(r#false.0, r#false.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        r#false.0,
+                        NodeKind::Terminal(r#false.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_false_terminal(r#false, data, tree)?;
         Ok(())
     }
     fn visit_hole_super(
@@ -5152,7 +6055,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let HoleView { hole } = view_param;
-        self.visit_hole_terminal(hole, tree)?;
+        let Some(node_data) = tree.node_data(hole.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    hole.0,
+                    NodeKind::Terminal(hole.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: hole.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(hole.0, hole.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        hole.0,
+                        NodeKind::Terminal(hole.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_hole_terminal(hole, data, tree)?;
         Ok(())
     }
     fn visit_ident_super(
@@ -5161,7 +6091,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let IdentView { ident } = view_param;
-        self.visit_ident_terminal(ident, tree)?;
+        let Some(node_data) = tree.node_data(ident.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    ident.0,
+                    NodeKind::Terminal(ident.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: ident.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(ident.0, ident.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        ident.0,
+                        NodeKind::Terminal(ident.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_ident_terminal(ident, data, tree)?;
         Ok(())
     }
     fn visit_in_str_super(
@@ -5170,7 +6127,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let InStrView { in_str } = view_param;
-        self.visit_in_str_terminal(in_str, tree)?;
+        let Some(node_data) = tree.node_data(in_str.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    in_str.0,
+                    NodeKind::Terminal(in_str.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: in_str.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(in_str.0, in_str.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        in_str.0,
+                        NodeKind::Terminal(in_str.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_in_str_terminal(in_str, data, tree)?;
         Ok(())
     }
     fn visit_integer_super(
@@ -5179,7 +6163,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let IntegerView { integer } = view_param;
-        self.visit_integer_terminal(integer, tree)?;
+        let Some(node_data) = tree.node_data(integer.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    integer.0,
+                    NodeKind::Terminal(integer.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: integer.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(integer.0, integer.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        integer.0,
+                        NodeKind::Terminal(integer.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_integer_terminal(integer, data, tree)?;
         Ok(())
     }
     fn visit_key_super(
@@ -5248,7 +6259,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let NamedCodeView { named_code } = view_param;
-        self.visit_named_code_terminal(named_code, tree)?;
+        let Some(node_data) = tree.node_data(named_code.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    named_code.0,
+                    NodeKind::Terminal(named_code.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: named_code.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(named_code.0, named_code.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        named_code.0,
+                        NodeKind::Terminal(named_code.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_named_code_terminal(named_code, data, tree)?;
         Ok(())
     }
     fn visit_named_code_block_super(
@@ -5267,7 +6305,37 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let NamedCodeBlockBeginView { named_code_block_begin } = view_param;
-        self.visit_named_code_block_begin_terminal(named_code_block_begin, tree)?;
+        let Some(node_data) = tree.node_data(named_code_block_begin.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    named_code_block_begin.0,
+                    NodeKind::Terminal(named_code_block_begin.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: named_code_block_begin.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(
+                named_code_block_begin.0,
+                named_code_block_begin.kind(),
+            )
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        named_code_block_begin.0,
+                        NodeKind::Terminal(named_code_block_begin.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_named_code_block_begin_terminal(named_code_block_begin, data, tree)?;
         Ok(())
     }
     fn visit_newline_super(
@@ -5276,7 +6344,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let NewlineView { newline } = view_param;
-        self.visit_newline_terminal(newline, tree)?;
+        let Some(node_data) = tree.node_data(newline.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    newline.0,
+                    NodeKind::Terminal(newline.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: newline.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(newline.0, newline.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        newline.0,
+                        NodeKind::Terminal(newline.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_newline_terminal(newline, data, tree)?;
         Ok(())
     }
     fn visit_null_super(
@@ -5285,7 +6380,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let NullView { null } = view_param;
-        self.visit_null_terminal(null, tree)?;
+        let Some(node_data) = tree.node_data(null.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    null.0,
+                    NodeKind::Terminal(null.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: null.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(null.0, null.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        null.0,
+                        NodeKind::Terminal(null.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_null_terminal(null, data, tree)?;
         Ok(())
     }
     fn visit_object_super(
@@ -5326,7 +6448,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let QuoteView { quote } = view_param;
-        self.visit_quote_terminal(quote, tree)?;
+        let Some(node_data) = tree.node_data(quote.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    quote.0,
+                    NodeKind::Terminal(quote.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: quote.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(quote.0, quote.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        quote.0,
+                        NodeKind::Terminal(quote.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_quote_terminal(quote, data, tree)?;
         Ok(())
     }
     fn visit_section_super(
@@ -5429,7 +6578,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let TextView { text } = view_param;
-        self.visit_text_terminal(text, tree)?;
+        let Some(node_data) = tree.node_data(text.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    text.0,
+                    NodeKind::Terminal(text.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: text.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(text.0, text.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        text.0,
+                        NodeKind::Terminal(text.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_text_terminal(text, data, tree)?;
         Ok(())
     }
     fn visit_text_binding_super(
@@ -5458,7 +6634,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let TextStartView { text_start } = view_param;
-        self.visit_text_start_terminal(text_start, tree)?;
+        let Some(node_data) = tree.node_data(text_start.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    text_start.0,
+                    NodeKind::Terminal(text_start.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: text_start.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(text_start.0, text_start.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        text_start.0,
+                        NodeKind::Terminal(text_start.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_text_start_terminal(text_start, data, tree)?;
         Ok(())
     }
     fn visit_true_super(
@@ -5467,7 +6670,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let TrueView { r#true } = view_param;
-        self.visit_true_terminal(r#true, tree)?;
+        let Some(node_data) = tree.node_data(r#true.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    r#true.0,
+                    NodeKind::Terminal(r#true.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: r#true.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(r#true.0, r#true.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        r#true.0,
+                        NodeKind::Terminal(r#true.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_true_terminal(r#true, data, tree)?;
         Ok(())
     }
     fn visit_typed_quote_super(
@@ -5476,7 +6706,34 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let TypedQuoteView { typed_quote } = view_param;
-        self.visit_typed_quote_terminal(typed_quote, tree)?;
+        let Some(node_data) = tree.node_data(typed_quote.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    typed_quote.0,
+                    NodeKind::Terminal(typed_quote.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: typed_quote.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data
+            .expected_terminal_or_error(typed_quote.0, typed_quote.kind())
+        {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        typed_quote.0,
+                        NodeKind::Terminal(typed_quote.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_typed_quote_terminal(typed_quote, data, tree)?;
         Ok(())
     }
     fn visit_typed_str_super(
@@ -5551,7 +6808,32 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let WsView { ws } = view_param;
-        self.visit_ws_terminal(ws, tree)?;
+        let Some(node_data) = tree.node_data(ws.0) else {
+            return self
+                .then_construct_error(
+                    None,
+                    ws.0,
+                    NodeKind::Terminal(ws.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: ws.0,
+                    },
+                    tree,
+                );
+        };
+        let (_kind, data) = match node_data.expected_terminal_or_error(ws.0, ws.kind()) {
+            Ok((_kind, data)) => (data, data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        ws.0,
+                        NodeKind::Terminal(ws.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_ws_terminal(ws, data, tree)?;
         Ok(())
     }
     fn visit_root_super(
@@ -5566,1121 +6848,289 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
     fn visit_new_line_terminal_super(
         &mut self,
         terminal: NewLine,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_whitespace_terminal_super(
         &mut self,
         terminal: Whitespace,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_line_comment_terminal_super(
         &mut self,
         terminal: LineComment,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_block_comment_terminal_super(
         &mut self,
         terminal: BlockComment,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_integer_terminal_super(
         &mut self,
         terminal: Integer,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_true_terminal_super(
         &mut self,
         terminal: True,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_false_terminal_super(
         &mut self,
         terminal: False,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_null_terminal_super(
         &mut self,
         terminal: Null,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_hole_terminal_super(
         &mut self,
         terminal: Hole,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_quote_terminal_super(
         &mut self,
         terminal: Quote,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_typed_quote_terminal_super(
         &mut self,
         terminal: TypedQuote,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_in_str_terminal_super(
         &mut self,
         terminal: InStr,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_text_terminal_super(
         &mut self,
         terminal: Text,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_named_code_terminal_super(
         &mut self,
         terminal: NamedCode,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_code_terminal_super(
         &mut self,
         terminal: Code,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_newline_terminal_super(
         &mut self,
         terminal: Newline,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_ws_terminal_super(
         &mut self,
         terminal: Ws,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_at_terminal_super(
         &mut self,
         terminal: At,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_dollar_terminal_super(
         &mut self,
         terminal: Dollar,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_dot_terminal_super(
         &mut self,
         terminal: Dot,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_l_brace_terminal_super(
         &mut self,
         terminal: LBrace,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_r_brace_terminal_super(
         &mut self,
         terminal: RBrace,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_l_bracket_terminal_super(
         &mut self,
         terminal: LBracket,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_r_bracket_terminal_super(
         &mut self,
         terminal: RBracket,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_bind_terminal_super(
         &mut self,
         terminal: Bind,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_comma_terminal_super(
         &mut self,
         terminal: Comma,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_esc_terminal_super(
         &mut self,
         terminal: Esc,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_text_start_terminal_super(
         &mut self,
         terminal: TextStart,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_ident_terminal_super(
         &mut self,
         terminal: Ident,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_named_code_block_begin_terminal_super(
         &mut self,
         terminal: NamedCodeBlockBegin,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_code_block_delimiter_terminal_super(
         &mut self,
         terminal: CodeBlockDelimiter,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_code_block_line_terminal_super(
         &mut self,
         terminal: CodeBlockLine,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(terminal.0) else {
-            return self
-                .then_construct_error(
-                    None,
-                    terminal.0,
-                    NodeKind::Terminal(terminal.kind()),
-                    CstConstructError::NodeIdNotFound {
-                        node: terminal.0,
-                    },
-                    tree,
-                );
-        };
-        let (kind, terminal_data) = match node_data
-            .expected_terminal_or_error(terminal.0, terminal.kind())
-        {
-            Ok((kind, terminal_data)) => (kind, terminal_data),
-            Err(error) => {
-                return self
-                    .then_construct_error(
-                        Some(node_data),
-                        terminal.0,
-                        NodeKind::Terminal(terminal.kind()),
-                        error,
-                        tree,
-                    );
-            }
-        };
-        self.visit_terminal(terminal.0, kind, terminal_data, tree)?;
+        self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
     }
     fn visit_non_terminal_super(
@@ -6705,7 +7155,7 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         &mut self,
         _id: CstNodeId,
         _kind: TerminalKind,
-        _terminal: TerminalData,
+        _data: TerminalData,
         _tree: &Cst,
     ) -> Result<(), V::Error> {
         Ok(())
@@ -6722,20 +7172,24 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         };
         if node_data.node_kind() == kind {
             for child in tree.children(id) {
-                self.visit_any(child, tree)?;
+                if let Some(node_data) = tree.node_data(child) {
+                    self.visit_any(child, node_data, tree)?;
+                }
             }
         } else {
-            self.visit_any(id, tree)?;
+            self.visit_any(id, node_data, tree)?;
         }
         Ok(())
     }
-    fn visit_any(&mut self, id: CstNodeId, tree: &Cst) -> Result<(), V::Error> {
-        let Some(node_data) = tree.node_data(id) else {
-            return Ok(());
-        };
-        match node_data.node_kind() {
-            NodeKind::NonTerminal(nt_kind) => {
-                match nt_kind {
+    fn visit_any(
+        &mut self,
+        id: CstNodeId,
+        node: CstNode,
+        tree: &Cst,
+    ) -> Result<(), V::Error> {
+        match node {
+            CstNodeData::NonTerminal { kind, .. } => {
+                match kind {
                     NonTerminalKind::Array => {
                         let handle = ArrayHandle(id);
                         self.visit_array_handle(handle, tree)?;
@@ -6998,139 +7452,247 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
                     }
                 }
             }
-            NodeKind::Terminal(t_kind) => {
-                match t_kind {
+            CstNodeData::Terminal { kind, data } => {
+                match kind {
                     TerminalKind::NewLine => {
                         let terminal = NewLine(id);
-                        self.visit_new_line_terminal(terminal, tree)?;
+                        self.visit_new_line_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::Whitespace => {
                         let terminal = Whitespace(id);
-                        self.visit_whitespace_terminal(terminal, tree)?;
+                        self.visit_whitespace_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::LineComment => {
                         let terminal = LineComment(id);
-                        self.visit_line_comment_terminal(terminal, tree)?;
+                        self.visit_line_comment_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::BlockComment => {
                         let terminal = BlockComment(id);
-                        self.visit_block_comment_terminal(terminal, tree)?;
+                        self.visit_block_comment_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::Integer => {
                         let terminal = Integer(id);
-                        self.visit_integer_terminal(terminal, tree)?;
+                        self.visit_integer_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::True => {
                         let terminal = True(id);
-                        self.visit_true_terminal(terminal, tree)?;
+                        self.visit_true_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::False => {
                         let terminal = False(id);
-                        self.visit_false_terminal(terminal, tree)?;
+                        self.visit_false_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::Null => {
                         let terminal = Null(id);
-                        self.visit_null_terminal(terminal, tree)?;
+                        self.visit_null_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::Hole => {
                         let terminal = Hole(id);
-                        self.visit_hole_terminal(terminal, tree)?;
+                        self.visit_hole_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::Quote => {
                         let terminal = Quote(id);
-                        self.visit_quote_terminal(terminal, tree)?;
+                        self.visit_quote_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::TypedQuote => {
                         let terminal = TypedQuote(id);
-                        self.visit_typed_quote_terminal(terminal, tree)?;
+                        self.visit_typed_quote_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::InStr => {
                         let terminal = InStr(id);
-                        self.visit_in_str_terminal(terminal, tree)?;
+                        self.visit_in_str_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::Text => {
                         let terminal = Text(id);
-                        self.visit_text_terminal(terminal, tree)?;
+                        self.visit_text_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::NamedCode => {
                         let terminal = NamedCode(id);
-                        self.visit_named_code_terminal(terminal, tree)?;
+                        self.visit_named_code_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::Code => {
                         let terminal = Code(id);
-                        self.visit_code_terminal(terminal, tree)?;
+                        self.visit_code_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::Newline => {
                         let terminal = Newline(id);
-                        self.visit_newline_terminal(terminal, tree)?;
+                        self.visit_newline_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::Ws => {
                         let terminal = Ws(id);
-                        self.visit_ws_terminal(terminal, tree)?;
+                        self.visit_ws_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::At => {
                         let terminal = At(id);
-                        self.visit_at_terminal(terminal, tree)?;
+                        self.visit_at_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::Dollar => {
                         let terminal = Dollar(id);
-                        self.visit_dollar_terminal(terminal, tree)?;
+                        self.visit_dollar_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::Dot => {
                         let terminal = Dot(id);
-                        self.visit_dot_terminal(terminal, tree)?;
+                        self.visit_dot_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::LBrace => {
                         let terminal = LBrace(id);
-                        self.visit_l_brace_terminal(terminal, tree)?;
+                        self.visit_l_brace_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::RBrace => {
                         let terminal = RBrace(id);
-                        self.visit_r_brace_terminal(terminal, tree)?;
+                        self.visit_r_brace_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::LBracket => {
                         let terminal = LBracket(id);
-                        self.visit_l_bracket_terminal(terminal, tree)?;
+                        self.visit_l_bracket_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::RBracket => {
                         let terminal = RBracket(id);
-                        self.visit_r_bracket_terminal(terminal, tree)?;
+                        self.visit_r_bracket_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::Bind => {
                         let terminal = Bind(id);
-                        self.visit_bind_terminal(terminal, tree)?;
+                        self.visit_bind_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::Comma => {
                         let terminal = Comma(id);
-                        self.visit_comma_terminal(terminal, tree)?;
+                        self.visit_comma_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::Esc => {
                         let terminal = Esc(id);
-                        self.visit_esc_terminal(terminal, tree)?;
+                        self.visit_esc_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::TextStart => {
                         let terminal = TextStart(id);
-                        self.visit_text_start_terminal(terminal, tree)?;
+                        self.visit_text_start_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::Ident => {
                         let terminal = Ident(id);
-                        self.visit_ident_terminal(terminal, tree)?;
+                        self.visit_ident_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::NamedCodeBlockBegin => {
                         let terminal = NamedCodeBlockBegin(id);
-                        self.visit_named_code_block_begin_terminal(terminal, tree)?;
+                        self.visit_named_code_block_begin_terminal(
+                            terminal,
+                            data,
+                            tree,
+                        )?;
                     }
                     TerminalKind::CodeBlockDelimiter => {
                         let terminal = CodeBlockDelimiter(id);
-                        self.visit_code_block_delimiter_terminal(terminal, tree)?;
+                        self.visit_code_block_delimiter_terminal(terminal, data, tree)?;
                     }
                     TerminalKind::CodeBlockLine => {
                         let terminal = CodeBlockLine(id);
-                        self.visit_code_block_line_terminal(terminal, tree)?;
+                        self.visit_code_block_line_terminal(terminal, data, tree)?;
                     }
                 }
             }
         }
         Ok(())
+    }
+}
+mod private2 {
+    pub trait Sealed {}
+}
+pub trait NodeVisitor: NodeVisitorSuper<Self::Error> {
+    type Error;
+    fn visit_node(
+        &mut self,
+        id: CstNodeId,
+        node: CstNode,
+        tree: &Cst,
+    ) -> Result<(), Self::Error>;
+}
+pub trait NodeVisitorSuper<E>: private2::Sealed {
+    fn visit_node_id(&mut self, id: CstNodeId, tree: &Cst) -> Result<(), E>;
+    fn visit_node_super(
+        &mut self,
+        id: CstNodeId,
+        node: CstNode,
+        tree: &Cst,
+    ) -> Result<(), E>;
+}
+impl<V: NodeVisitor> private2::Sealed for V {}
+impl<V: NodeVisitor> NodeVisitorSuper<V::Error> for V {
+    fn visit_node_id(&mut self, id: CstNodeId, tree: &Cst) -> Result<(), V::Error> {
+        if let Some(node) = tree.node_data(id) {
+            self.visit_node(id, node, tree)
+        } else {
+            Ok(())
+        }
+    }
+    fn visit_node_super(
+        &mut self,
+        id: CstNodeId,
+        _node: CstNode,
+        tree: &Cst,
+    ) -> Result<(), V::Error> {
+        for child in tree.children(id) {
+            if let Some(child_node) = tree.node_data(child) {
+                self.visit_node(child, child_node, tree)?;
+            }
+        }
+        Ok(())
+    }
+}
+pub trait BuiltinTerminalVisitor<E> {
+    fn visit_builtin_new_line_terminal(
+        &mut self,
+        terminal: NewLine,
+        data: TerminalData,
+        tree: &Cst,
+    ) -> Result<(), E>;
+    fn visit_builtin_whitespace_terminal(
+        &mut self,
+        terminal: Whitespace,
+        data: TerminalData,
+        tree: &Cst,
+    ) -> Result<(), E>;
+    fn visit_builtin_line_comment_terminal(
+        &mut self,
+        terminal: LineComment,
+        data: TerminalData,
+        tree: &Cst,
+    ) -> Result<(), E>;
+    fn visit_builtin_block_comment_terminal(
+        &mut self,
+        terminal: BlockComment,
+        data: TerminalData,
+        tree: &Cst,
+    ) -> Result<(), E>;
+}
+impl<V: CstVisitor> BuiltinTerminalVisitor<V::Error> for V {
+    fn visit_builtin_new_line_terminal(
+        &mut self,
+        terminal: NewLine,
+        data: TerminalData,
+        tree: &Cst,
+    ) -> Result<(), V::Error> {
+        self.visit_new_line_terminal(terminal, data, tree)
+    }
+    fn visit_builtin_whitespace_terminal(
+        &mut self,
+        terminal: Whitespace,
+        data: TerminalData,
+        tree: &Cst,
+    ) -> Result<(), V::Error> {
+        self.visit_whitespace_terminal(terminal, data, tree)
+    }
+    fn visit_builtin_line_comment_terminal(
+        &mut self,
+        terminal: LineComment,
+        data: TerminalData,
+        tree: &Cst,
+    ) -> Result<(), V::Error> {
+        self.visit_line_comment_terminal(terminal, data, tree)
+    }
+    fn visit_builtin_block_comment_terminal(
+        &mut self,
+        terminal: BlockComment,
+        data: TerminalData,
+        tree: &Cst,
+    ) -> Result<(), V::Error> {
+        self.visit_block_comment_terminal(terminal, data, tree)
     }
 }

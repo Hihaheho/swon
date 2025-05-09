@@ -346,7 +346,7 @@ impl std::fmt::Display for NonTerminalKind {
             Self::Value => write!(f, stringify!(Value)),
             Self::ValueBinding => write!(f, stringify!(ValueBinding)),
             Self::Ws => write!(f, stringify!(Ws)),
-            Self::Root => write!(f, stringify!()),
+            Self::Root => write!(f, stringify!(Root)),
         }
     }
 }

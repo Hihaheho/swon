@@ -1,50 +1,56 @@
 #![allow(unused_variables)]
-use super::tree::{
-    NonTerminalHandle, TerminalData, CstNodeId, ViewConstructionError, assert_node_kind,
-};
+use super::tree::{NonTerminalHandle, RecursiveView, CstNodeId, ViewConstructionError};
+use super::visitor::BuiltinTerminalVisitor;
 use crate::{Cst, CstConstructError};
 use super::nodes::{TerminalKind, NonTerminalKind};
 use parol_runtime::parser::parse_tree_type::NodeKind;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ArrayHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for ArrayHandle {
+impl NonTerminalHandle for ArrayHandle {
     type View = ArrayView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Array))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Array)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Array
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [array_begin, array_list, array_end] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::ArrayBegin),
-                    NodeKind::NonTerminal(NonTerminalKind::ArrayList),
-                    NodeKind::NonTerminal(NonTerminalKind::ArrayEnd),
-                ],
-                visit_ignored,
-            )?;
-        Ok(ArrayView {
-            array_begin: ArrayBeginHandle(array_begin),
-            array_list: ArrayListHandle(array_list),
-            array_end: ArrayEndHandle(array_end),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::ArrayBegin),
+                NodeKind::NonTerminal(NonTerminalKind::ArrayList),
+                NodeKind::NonTerminal(NonTerminalKind::ArrayEnd),
+            ],
+            |[array_begin, array_list, array_end], visit_ignored| Ok(
+                visit(
+                    ArrayView {
+                        array_begin: ArrayBeginHandle(array_begin),
+                        array_list: ArrayListHandle(array_list),
+                        array_end: ArrayEndHandle(array_end),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -56,42 +62,45 @@ pub struct ArrayView {
 impl ArrayView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ArrayBeginHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for ArrayBeginHandle {
+impl NonTerminalHandle for ArrayBeginHandle {
     type View = ArrayBeginView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::ArrayBegin),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::ArrayBegin)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::ArrayBegin
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [l_bracket] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::LBracket)],
-                visit_ignored,
-            )?;
-        Ok(ArrayBeginView {
-            l_bracket: LBracket(l_bracket),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::LBracket)],
+            |[l_bracket], visit_ignored| Ok(
+                visit(
+                    ArrayBeginView {
+                        l_bracket: LBracket(l_bracket),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -101,38 +110,45 @@ pub struct ArrayBeginView {
 impl ArrayBeginView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ArrayEndHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for ArrayEndHandle {
+impl NonTerminalHandle for ArrayEndHandle {
     type View = ArrayEndView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::ArrayEnd))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::ArrayEnd)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::ArrayEnd
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [r_bracket] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::RBracket)],
-                visit_ignored,
-            )?;
-        Ok(ArrayEndView {
-            r_bracket: RBracket(r_bracket),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::RBracket)],
+            |[r_bracket], visit_ignored| Ok(
+                visit(
+                    ArrayEndView {
+                        r_bracket: RBracket(r_bracket),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -142,52 +158,53 @@ pub struct ArrayEndView {
 impl ArrayEndView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ArrayListHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for ArrayListHandle {
+impl NonTerminalHandle for ArrayListHandle {
     type View = Option<ArrayListView>;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::ArrayList),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::ArrayList)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::ArrayList
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
         if tree.has_no_children(self.0) {
-            return Ok(None);
+            return Ok(visit(None, visit_ignored).0);
         }
-        let [value, array_opt, array_list] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::Value),
-                    NodeKind::NonTerminal(NonTerminalKind::ArrayOpt),
-                    NodeKind::NonTerminal(NonTerminalKind::ArrayList),
-                ],
-                visit_ignored,
-            )?;
-        Ok(
-            Some(ArrayListView {
-                value: ValueHandle(value),
-                array_opt: ArrayOptHandle(array_opt),
-                array_list: ArrayListHandle(array_list),
-            }),
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::Value),
+                NodeKind::NonTerminal(NonTerminalKind::ArrayOpt),
+                NodeKind::NonTerminal(NonTerminalKind::ArrayList),
+            ],
+            |[value, array_opt, array_list], visit_ignored| Ok(
+                visit(
+                    Some(ArrayListView {
+                        value: ValueHandle(value),
+                        array_opt: ArrayOptHandle(array_opt),
+                        array_list: ArrayListHandle(array_list),
+                    }),
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
         )
     }
 }
@@ -197,27 +214,27 @@ pub struct ArrayListView {
     pub array_opt: ArrayOptHandle,
     pub array_list: ArrayListHandle,
 }
-impl ArrayListView {
-    pub fn get_all(&self, tree: &Cst) -> Result<Vec<ArrayListItem>, CstConstructError> {
-        self.get_all_with_visit(tree, |_, _, _| Ok(()))
-    }
-    pub fn get_all_with_visit<E>(
+impl RecursiveView<TerminalKind, NonTerminalKind> for ArrayListView {
+    type Item = ArrayListItem;
+    fn get_all_with_visit<E>(
         &self,
         tree: &Cst,
-        mut visit_ignored: impl FnMut(
-            CstNodeId,
-            TerminalKind,
-            TerminalData,
-        ) -> Result<(), E>,
-    ) -> Result<Vec<ArrayListItem>, CstConstructError<E>> {
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Vec<Self::Item>, CstConstructError<E>> {
         let mut items = Vec::new();
         let mut current_view = Some(*self);
         while let Some(item) = current_view {
             let Self { value, array_opt, .. } = item;
             items.push(ArrayListItem { value, array_opt });
-            current_view = item
-                .array_list
-                .get_view_with_visit(tree, &mut visit_ignored)?;
+            item.array_list
+                .get_view_with_visit(
+                    tree,
+                    |view, visit_ignored| {
+                        current_view = view;
+                        ((), visit_ignored)
+                    },
+                    visit_ignored,
+                )?;
         }
         Ok(items)
     }
@@ -229,48 +246,51 @@ pub struct ArrayListItem {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ArrayMarkerHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for ArrayMarkerHandle {
+impl NonTerminalHandle for ArrayMarkerHandle {
     type View = ArrayMarkerView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::ArrayMarker),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::ArrayMarker)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::ArrayMarker
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [array_begin, array_marker_opt, array_end] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::ArrayBegin),
-                    NodeKind::NonTerminal(NonTerminalKind::ArrayMarkerOpt),
-                    NodeKind::NonTerminal(NonTerminalKind::ArrayEnd),
-                ],
-                visit_ignored,
-            )?;
-        Ok(ArrayMarkerView {
-            array_begin: ArrayBeginHandle(array_begin),
-            array_marker_opt: ArrayMarkerOptHandle(array_marker_opt),
-            array_end: ArrayEndHandle(array_end),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::ArrayBegin),
+                NodeKind::NonTerminal(NonTerminalKind::ArrayMarkerOpt),
+                NodeKind::NonTerminal(NonTerminalKind::ArrayEnd),
+            ],
+            |[array_begin, array_marker_opt, array_end], visit_ignored| Ok(
+                visit(
+                    ArrayMarkerView {
+                        array_begin: ArrayBeginHandle(array_begin),
+                        array_marker_opt: ArrayMarkerOptHandle(array_marker_opt),
+                        array_end: ArrayEndHandle(array_end),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -282,127 +302,126 @@ pub struct ArrayMarkerView {
 impl ArrayMarkerView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ArrayMarkerOptHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for ArrayMarkerOptHandle {
+impl NonTerminalHandle for ArrayMarkerOptHandle {
     type View = Option<IntegerHandle>;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::ArrayMarkerOpt),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::ArrayMarkerOpt)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::ArrayMarkerOpt
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
         if tree.has_no_children(self.0) {
-            return Ok(None);
+            return Ok(visit(None, visit_ignored).0);
         }
-        let [child] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::NonTerminal(NonTerminalKind::Integer)],
-                visit_ignored,
-            )?;
-        Ok(
-            Some(
-                IntegerHandle::new(
-                        child,
-                        NodeKind::NonTerminal(NonTerminalKind::Integer),
-                    )
-                    .map_err(|e| e.into_any_error::<E>())?,
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::NonTerminal(NonTerminalKind::Integer)],
+            |[child], visit_ignored| Ok(
+                visit(
+                    Some(IntegerHandle::new_with_visit(child, tree, visit_ignored)?),
+                    visit_ignored,
+                ),
             ),
+            visit_ignored,
         )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ArrayOptHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for ArrayOptHandle {
+impl NonTerminalHandle for ArrayOptHandle {
     type View = Option<CommaHandle>;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::ArrayOpt))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::ArrayOpt)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::ArrayOpt
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
         if tree.has_no_children(self.0) {
-            return Ok(None);
+            return Ok(visit(None, visit_ignored).0);
         }
-        let [child] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::NonTerminal(NonTerminalKind::Comma)],
-                visit_ignored,
-            )?;
-        Ok(
-            Some(
-                CommaHandle::new(child, NodeKind::NonTerminal(NonTerminalKind::Comma))
-                    .map_err(|e| e.into_any_error::<E>())?,
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::NonTerminal(NonTerminalKind::Comma)],
+            |[child], visit_ignored| Ok(
+                visit(
+                    Some(CommaHandle::new_with_visit(child, tree, visit_ignored)?),
+                    visit_ignored,
+                ),
             ),
+            visit_ignored,
         )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AtHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for AtHandle {
+impl NonTerminalHandle for AtHandle {
     type View = AtView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::At))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::At)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::At
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [at] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::At)],
-                visit_ignored,
-            )?;
-        Ok(AtView { at: At(at) })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::At)],
+            |[at], visit_ignored| Ok(visit(AtView { at: At(at) }, visit_ignored)),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -412,38 +431,45 @@ pub struct AtView {
 impl AtView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct BeginHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for BeginHandle {
+impl NonTerminalHandle for BeginHandle {
     type View = BeginView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Begin))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Begin)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Begin
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [l_brace] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::LBrace)],
-                visit_ignored,
-            )?;
-        Ok(BeginView {
-            l_brace: LBrace(l_brace),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::LBrace)],
+            |[l_brace], visit_ignored| Ok(
+                visit(
+                    BeginView {
+                        l_brace: LBrace(l_brace),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -453,36 +479,40 @@ pub struct BeginView {
 impl BeginView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct BindHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for BindHandle {
+impl NonTerminalHandle for BindHandle {
     type View = BindView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Bind))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Bind)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Bind
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [bind] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::Bind)],
-                visit_ignored,
-            )?;
-        Ok(BindView { bind: Bind(bind) })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::Bind)],
+            |[bind], visit_ignored| Ok(
+                visit(BindView { bind: Bind(bind) }, visit_ignored),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -492,42 +522,49 @@ pub struct BindView {
 impl BindView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct BindingHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for BindingHandle {
+impl NonTerminalHandle for BindingHandle {
     type View = BindingView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Binding))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Binding)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Binding
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [keys, binding_rhs] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::Keys),
-                    NodeKind::NonTerminal(NonTerminalKind::BindingRhs),
-                ],
-                visit_ignored,
-            )?;
-        Ok(BindingView {
-            keys: KeysHandle(keys),
-            binding_rhs: BindingRhsHandle(binding_rhs),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::Keys),
+                NodeKind::NonTerminal(NonTerminalKind::BindingRhs),
+            ],
+            |[keys, binding_rhs], visit_ignored| Ok(
+                visit(
+                    BindingView {
+                        keys: KeysHandle(keys),
+                        binding_rhs: BindingRhsHandle(binding_rhs),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -538,33 +575,32 @@ pub struct BindingView {
 impl BindingView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct BindingRhsHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for BindingRhsHandle {
+impl NonTerminalHandle for BindingRhsHandle {
     type View = BindingRhsView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::BindingRhs),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::BindingRhs)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::BindingRhs
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
         let mut children = tree.children(self.0);
         let Some(child) = children.next() else {
             return Err(ViewConstructionError::UnexpectedEndOfChildren {
@@ -599,12 +635,13 @@ impl NonTerminalHandle<TerminalKind, NonTerminalKind> for BindingRhsHandle {
                 });
             }
         };
+        let (result, _visit) = visit(variant, visit_ignored);
         if let Some(child) = children.next() {
             return Err(ViewConstructionError::UnexpectedExtraNode {
                 node: child,
             });
         }
-        Ok(variant)
+        Ok(result)
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -616,29 +653,32 @@ pub enum BindingRhsView {
 impl BindingRhsView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct BooleanHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for BooleanHandle {
+impl NonTerminalHandle for BooleanHandle {
     type View = BooleanView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Boolean))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Boolean)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Boolean
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
         let mut children = tree.children(self.0);
         let Some(child) = children.next() else {
             return Err(ViewConstructionError::UnexpectedEndOfChildren {
@@ -670,12 +710,13 @@ impl NonTerminalHandle<TerminalKind, NonTerminalKind> for BooleanHandle {
                 });
             }
         };
+        let (result, _visit) = visit(variant, visit_ignored);
         if let Some(child) = children.next() {
             return Err(ViewConstructionError::UnexpectedExtraNode {
                 node: child,
             });
         }
-        Ok(variant)
+        Ok(result)
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -686,36 +727,40 @@ pub enum BooleanView {
 impl BooleanView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CodeHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for CodeHandle {
+impl NonTerminalHandle for CodeHandle {
     type View = CodeView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Code))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Code)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Code
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [code] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::Code)],
-                visit_ignored,
-            )?;
-        Ok(CodeView { code: Code(code) })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::Code)],
+            |[code], visit_ignored| Ok(
+                visit(CodeView { code: Code(code) }, visit_ignored),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -725,46 +770,53 @@ pub struct CodeView {
 impl CodeView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CodeBlockHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for CodeBlockHandle {
+impl NonTerminalHandle for CodeBlockHandle {
     type View = CodeBlockView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::CodeBlock),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::CodeBlock)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::CodeBlock
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [code_block_delimiter, code_block_tail_common] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::CodeBlockDelimiter),
-                    NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommon),
-                ],
-                visit_ignored,
-            )?;
-        Ok(CodeBlockView {
-            code_block_delimiter: CodeBlockDelimiterHandle(code_block_delimiter),
-            code_block_tail_common: CodeBlockTailCommonHandle(code_block_tail_common),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::CodeBlockDelimiter),
+                NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommon),
+            ],
+            |[code_block_delimiter, code_block_tail_common], visit_ignored| Ok(
+                visit(
+                    CodeBlockView {
+                        code_block_delimiter: CodeBlockDelimiterHandle(
+                            code_block_delimiter,
+                        ),
+                        code_block_tail_common: CodeBlockTailCommonHandle(
+                            code_block_tail_common,
+                        ),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -775,42 +827,45 @@ pub struct CodeBlockView {
 impl CodeBlockView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CodeBlockDelimiterHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for CodeBlockDelimiterHandle {
+impl NonTerminalHandle for CodeBlockDelimiterHandle {
     type View = CodeBlockDelimiterView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::CodeBlockDelimiter),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::CodeBlockDelimiter)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::CodeBlockDelimiter
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [code_block_delimiter] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::CodeBlockDelimiter)],
-                visit_ignored,
-            )?;
-        Ok(CodeBlockDelimiterView {
-            code_block_delimiter: CodeBlockDelimiter(code_block_delimiter),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::CodeBlockDelimiter)],
+            |[code_block_delimiter], visit_ignored| Ok(
+                visit(
+                    CodeBlockDelimiterView {
+                        code_block_delimiter: CodeBlockDelimiter(code_block_delimiter),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -820,42 +875,45 @@ pub struct CodeBlockDelimiterView {
 impl CodeBlockDelimiterView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CodeBlockLineHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for CodeBlockLineHandle {
+impl NonTerminalHandle for CodeBlockLineHandle {
     type View = CodeBlockLineView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::CodeBlockLine),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::CodeBlockLine)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::CodeBlockLine
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [code_block_line] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::CodeBlockLine)],
-                visit_ignored,
-            )?;
-        Ok(CodeBlockLineView {
-            code_block_line: CodeBlockLine(code_block_line),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::CodeBlockLine)],
+            |[code_block_line], visit_ignored| Ok(
+                visit(
+                    CodeBlockLineView {
+                        code_block_line: CodeBlockLine(code_block_line),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -865,55 +923,66 @@ pub struct CodeBlockLineView {
 impl CodeBlockLineView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CodeBlockTailCommonHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for CodeBlockTailCommonHandle {
+impl NonTerminalHandle for CodeBlockTailCommonHandle {
     type View = CodeBlockTailCommonView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommon),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommon)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::CodeBlockTailCommon
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [newline, code_block_tail_common_list, code_block_tail_common_opt,
-        code_block_delimiter] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::Newline),
-                    NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonList),
-                    NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonOpt),
-                    NodeKind::NonTerminal(NonTerminalKind::CodeBlockDelimiter),
-                ],
-                visit_ignored,
-            )?;
-        Ok(CodeBlockTailCommonView {
-            newline: NewlineHandle(newline),
-            code_block_tail_common_list: CodeBlockTailCommonListHandle(
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::Newline),
+                NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonList),
+                NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonOpt),
+                NodeKind::NonTerminal(NonTerminalKind::CodeBlockDelimiter),
+            ],
+            |
+                [newline,
                 code_block_tail_common_list,
-            ),
-            code_block_tail_common_opt: CodeBlockTailCommonOptHandle(
                 code_block_tail_common_opt,
+                code_block_delimiter,
+                ],
+                visit_ignored|
+            Ok(
+                visit(
+                    CodeBlockTailCommonView {
+                        newline: NewlineHandle(newline),
+                        code_block_tail_common_list: CodeBlockTailCommonListHandle(
+                            code_block_tail_common_list,
+                        ),
+                        code_block_tail_common_opt: CodeBlockTailCommonOptHandle(
+                            code_block_tail_common_opt,
+                        ),
+                        code_block_delimiter: CodeBlockDelimiterHandle(
+                            code_block_delimiter,
+                        ),
+                    },
+                    visit_ignored,
+                ),
             ),
-            code_block_delimiter: CodeBlockDelimiterHandle(code_block_delimiter),
-        })
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -926,54 +995,55 @@ pub struct CodeBlockTailCommonView {
 impl CodeBlockTailCommonView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CodeBlockTailCommonListHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for CodeBlockTailCommonListHandle {
+impl NonTerminalHandle for CodeBlockTailCommonListHandle {
     type View = Option<CodeBlockTailCommonListView>;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonList),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonList)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::CodeBlockTailCommonList
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
         if tree.has_no_children(self.0) {
-            return Ok(None);
+            return Ok(visit(None, visit_ignored).0);
         }
-        let [code_block_line, newline, code_block_tail_common_list] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::CodeBlockLine),
-                    NodeKind::NonTerminal(NonTerminalKind::Newline),
-                    NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonList),
-                ],
-                visit_ignored,
-            )?;
-        Ok(
-            Some(CodeBlockTailCommonListView {
-                code_block_line: CodeBlockLineHandle(code_block_line),
-                newline: NewlineHandle(newline),
-                code_block_tail_common_list: CodeBlockTailCommonListHandle(
-                    code_block_tail_common_list,
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::CodeBlockLine),
+                NodeKind::NonTerminal(NonTerminalKind::Newline),
+                NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonList),
+            ],
+            |[code_block_line, newline, code_block_tail_common_list], visit_ignored| Ok(
+                visit(
+                    Some(CodeBlockTailCommonListView {
+                        code_block_line: CodeBlockLineHandle(code_block_line),
+                        newline: NewlineHandle(newline),
+                        code_block_tail_common_list: CodeBlockTailCommonListHandle(
+                            code_block_tail_common_list,
+                        ),
+                    }),
+                    visit_ignored,
                 ),
-            }),
+            ),
+            visit_ignored,
         )
     }
 }
@@ -983,22 +1053,13 @@ pub struct CodeBlockTailCommonListView {
     pub newline: NewlineHandle,
     pub code_block_tail_common_list: CodeBlockTailCommonListHandle,
 }
-impl CodeBlockTailCommonListView {
-    pub fn get_all(
+impl RecursiveView<TerminalKind, NonTerminalKind> for CodeBlockTailCommonListView {
+    type Item = CodeBlockTailCommonListItem;
+    fn get_all_with_visit<E>(
         &self,
         tree: &Cst,
-    ) -> Result<Vec<CodeBlockTailCommonListItem>, CstConstructError> {
-        self.get_all_with_visit(tree, |_, _, _| Ok(()))
-    }
-    pub fn get_all_with_visit<E>(
-        &self,
-        tree: &Cst,
-        mut visit_ignored: impl FnMut(
-            CstNodeId,
-            TerminalKind,
-            TerminalData,
-        ) -> Result<(), E>,
-    ) -> Result<Vec<CodeBlockTailCommonListItem>, CstConstructError<E>> {
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Vec<Self::Item>, CstConstructError<E>> {
         let mut items = Vec::new();
         let mut current_view = Some(*self);
         while let Some(item) = current_view {
@@ -1008,9 +1069,15 @@ impl CodeBlockTailCommonListView {
                     code_block_line,
                     newline,
                 });
-            current_view = item
-                .code_block_tail_common_list
-                .get_view_with_visit(tree, &mut visit_ignored)?;
+            item.code_block_tail_common_list
+                .get_view_with_visit(
+                    tree,
+                    |view, visit_ignored| {
+                        current_view = view;
+                        ((), visit_ignored)
+                    },
+                    visit_ignored,
+                )?;
         }
         Ok(items)
     }
@@ -1022,82 +1089,84 @@ pub struct CodeBlockTailCommonListItem {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CodeBlockTailCommonOptHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for CodeBlockTailCommonOptHandle {
+impl NonTerminalHandle for CodeBlockTailCommonOptHandle {
     type View = Option<WsHandle>;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonOpt),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonOpt)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::CodeBlockTailCommonOpt
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
         if tree.has_no_children(self.0) {
-            return Ok(None);
+            return Ok(visit(None, visit_ignored).0);
         }
-        let [child] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::NonTerminal(NonTerminalKind::Ws)],
-                visit_ignored,
-            )?;
-        Ok(
-            Some(
-                WsHandle::new(child, NodeKind::NonTerminal(NonTerminalKind::Ws))
-                    .map_err(|e| e.into_any_error::<E>())?,
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::NonTerminal(NonTerminalKind::Ws)],
+            |[child], visit_ignored| Ok(
+                visit(
+                    Some(WsHandle::new_with_visit(child, tree, visit_ignored)?),
+                    visit_ignored,
+                ),
             ),
+            visit_ignored,
         )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CommaHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for CommaHandle {
+impl NonTerminalHandle for CommaHandle {
     type View = CommaView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Comma))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Comma)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Comma
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [comma] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::Comma)],
-                visit_ignored,
-            )?;
-        Ok(CommaView { comma: Comma(comma) })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::Comma)],
+            |[comma], visit_ignored| Ok(
+                visit(CommaView { comma: Comma(comma) }, visit_ignored),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1107,36 +1176,40 @@ pub struct CommaView {
 impl CommaView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ContinueHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for ContinueHandle {
+impl NonTerminalHandle for ContinueHandle {
     type View = ContinueView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Continue))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Continue)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Continue
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [esc] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::Esc)],
-                visit_ignored,
-            )?;
-        Ok(ContinueView { esc: Esc(esc) })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::Esc)],
+            |[esc], visit_ignored| Ok(
+                visit(ContinueView { esc: Esc(esc) }, visit_ignored),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1146,36 +1219,38 @@ pub struct ContinueView {
 impl ContinueView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DotHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for DotHandle {
+impl NonTerminalHandle for DotHandle {
     type View = DotView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Dot))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Dot)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Dot
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [dot] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::Dot)],
-                visit_ignored,
-            )?;
-        Ok(DotView { dot: Dot(dot) })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::Dot)],
+            |[dot], visit_ignored| Ok(visit(DotView { dot: Dot(dot) }, visit_ignored)),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1185,38 +1260,45 @@ pub struct DotView {
 impl DotView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct EndHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for EndHandle {
+impl NonTerminalHandle for EndHandle {
     type View = EndView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::End))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::End)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::End
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [r_brace] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::RBrace)],
-                visit_ignored,
-            )?;
-        Ok(EndView {
-            r_brace: RBrace(r_brace),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::RBrace)],
+            |[r_brace], visit_ignored| Ok(
+                visit(
+                    EndView {
+                        r_brace: RBrace(r_brace),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1226,36 +1308,40 @@ pub struct EndView {
 impl EndView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ExtHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for ExtHandle {
+impl NonTerminalHandle for ExtHandle {
     type View = ExtView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Ext))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Ext)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Ext
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [dollar] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::Dollar)],
-                visit_ignored,
-            )?;
-        Ok(ExtView { dollar: Dollar(dollar) })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::Dollar)],
+            |[dollar], visit_ignored| Ok(
+                visit(ExtView { dollar: Dollar(dollar) }, visit_ignored),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1265,46 +1351,49 @@ pub struct ExtView {
 impl ExtView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ExtensionNameSpaceHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for ExtensionNameSpaceHandle {
+impl NonTerminalHandle for ExtensionNameSpaceHandle {
     type View = ExtensionNameSpaceView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::ExtensionNameSpace),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::ExtensionNameSpace)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::ExtensionNameSpace
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [ext, ident] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::Ext),
-                    NodeKind::NonTerminal(NonTerminalKind::Ident),
-                ],
-                visit_ignored,
-            )?;
-        Ok(ExtensionNameSpaceView {
-            ext: ExtHandle(ext),
-            ident: IdentHandle(ident),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::Ext),
+                NodeKind::NonTerminal(NonTerminalKind::Ident),
+            ],
+            |[ext, ident], visit_ignored| Ok(
+                visit(
+                    ExtensionNameSpaceView {
+                        ext: ExtHandle(ext),
+                        ident: IdentHandle(ident),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1315,38 +1404,45 @@ pub struct ExtensionNameSpaceView {
 impl ExtensionNameSpaceView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FalseHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for FalseHandle {
+impl NonTerminalHandle for FalseHandle {
     type View = FalseView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::False))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::False)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::False
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [r#false] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::False)],
-                visit_ignored,
-            )?;
-        Ok(FalseView {
-            r#false: False(r#false),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::False)],
+            |[r#false], visit_ignored| Ok(
+                visit(
+                    FalseView {
+                        r#false: False(r#false),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1356,36 +1452,40 @@ pub struct FalseView {
 impl FalseView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct HoleHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for HoleHandle {
+impl NonTerminalHandle for HoleHandle {
     type View = HoleView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Hole))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Hole)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Hole
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [hole] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::Hole)],
-                visit_ignored,
-            )?;
-        Ok(HoleView { hole: Hole(hole) })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::Hole)],
+            |[hole], visit_ignored| Ok(
+                visit(HoleView { hole: Hole(hole) }, visit_ignored),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1395,36 +1495,40 @@ pub struct HoleView {
 impl HoleView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct IdentHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for IdentHandle {
+impl NonTerminalHandle for IdentHandle {
     type View = IdentView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Ident))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Ident)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Ident
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [ident] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::Ident)],
-                visit_ignored,
-            )?;
-        Ok(IdentView { ident: Ident(ident) })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::Ident)],
+            |[ident], visit_ignored| Ok(
+                visit(IdentView { ident: Ident(ident) }, visit_ignored),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1434,36 +1538,40 @@ pub struct IdentView {
 impl IdentView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct InStrHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for InStrHandle {
+impl NonTerminalHandle for InStrHandle {
     type View = InStrView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::InStr))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::InStr)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::InStr
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [in_str] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::InStr)],
-                visit_ignored,
-            )?;
-        Ok(InStrView { in_str: InStr(in_str) })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::InStr)],
+            |[in_str], visit_ignored| Ok(
+                visit(InStrView { in_str: InStr(in_str) }, visit_ignored),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1473,38 +1581,45 @@ pub struct InStrView {
 impl InStrView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct IntegerHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for IntegerHandle {
+impl NonTerminalHandle for IntegerHandle {
     type View = IntegerView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Integer))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Integer)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Integer
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [integer] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::Integer)],
-                visit_ignored,
-            )?;
-        Ok(IntegerView {
-            integer: Integer(integer),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::Integer)],
+            |[integer], visit_ignored| Ok(
+                visit(
+                    IntegerView {
+                        integer: Integer(integer),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1514,42 +1629,49 @@ pub struct IntegerView {
 impl IntegerView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct KeyHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for KeyHandle {
+impl NonTerminalHandle for KeyHandle {
     type View = KeyView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Key))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Key)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Key
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [key_base, key_opt] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::KeyBase),
-                    NodeKind::NonTerminal(NonTerminalKind::KeyOpt),
-                ],
-                visit_ignored,
-            )?;
-        Ok(KeyView {
-            key_base: KeyBaseHandle(key_base),
-            key_opt: KeyOptHandle(key_opt),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::KeyBase),
+                NodeKind::NonTerminal(NonTerminalKind::KeyOpt),
+            ],
+            |[key_base, key_opt], visit_ignored| Ok(
+                visit(
+                    KeyView {
+                        key_base: KeyBaseHandle(key_base),
+                        key_opt: KeyOptHandle(key_opt),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1560,29 +1682,32 @@ pub struct KeyView {
 impl KeyView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct KeyBaseHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for KeyBaseHandle {
+impl NonTerminalHandle for KeyBaseHandle {
     type View = KeyBaseView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::KeyBase))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::KeyBase)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::KeyBase
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
         let mut children = tree.children(self.0);
         let Some(child) = children.next() else {
             return Err(ViewConstructionError::UnexpectedEndOfChildren {
@@ -1620,12 +1745,13 @@ impl NonTerminalHandle<TerminalKind, NonTerminalKind> for KeyBaseHandle {
                 });
             }
         };
+        let (result, _visit) = visit(variant, visit_ignored);
         if let Some(child) = children.next() {
             return Err(ViewConstructionError::UnexpectedExtraNode {
                 node: child,
             });
         }
-        Ok(variant)
+        Ok(result)
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1638,87 +1764,93 @@ pub enum KeyBaseView {
 impl KeyBaseView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct KeyOptHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for KeyOptHandle {
+impl NonTerminalHandle for KeyOptHandle {
     type View = Option<ArrayMarkerHandle>;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::KeyOpt))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::KeyOpt)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::KeyOpt
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
         if tree.has_no_children(self.0) {
-            return Ok(None);
+            return Ok(visit(None, visit_ignored).0);
         }
-        let [child] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::NonTerminal(NonTerminalKind::ArrayMarker)],
-                visit_ignored,
-            )?;
-        Ok(
-            Some(
-                ArrayMarkerHandle::new(
-                        child,
-                        NodeKind::NonTerminal(NonTerminalKind::ArrayMarker),
-                    )
-                    .map_err(|e| e.into_any_error::<E>())?,
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::NonTerminal(NonTerminalKind::ArrayMarker)],
+            |[child], visit_ignored| Ok(
+                visit(
+                    Some(ArrayMarkerHandle::new_with_visit(child, tree, visit_ignored)?),
+                    visit_ignored,
+                ),
             ),
+            visit_ignored,
         )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct KeysHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for KeysHandle {
+impl NonTerminalHandle for KeysHandle {
     type View = KeysView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Keys))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Keys)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Keys
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [key, keys_list] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::Key),
-                    NodeKind::NonTerminal(NonTerminalKind::KeysList),
-                ],
-                visit_ignored,
-            )?;
-        Ok(KeysView {
-            key: KeyHandle(key),
-            keys_list: KeysListHandle(keys_list),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::Key),
+                NodeKind::NonTerminal(NonTerminalKind::KeysList),
+            ],
+            |[key, keys_list], visit_ignored| Ok(
+                visit(
+                    KeysView {
+                        key: KeyHandle(key),
+                        keys_list: KeysListHandle(keys_list),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1729,48 +1861,53 @@ pub struct KeysView {
 impl KeysView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct KeysListHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for KeysListHandle {
+impl NonTerminalHandle for KeysListHandle {
     type View = Option<KeysListView>;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::KeysList))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::KeysList)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::KeysList
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
         if tree.has_no_children(self.0) {
-            return Ok(None);
+            return Ok(visit(None, visit_ignored).0);
         }
-        let [dot, key, keys_list] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::Dot),
-                    NodeKind::NonTerminal(NonTerminalKind::Key),
-                    NodeKind::NonTerminal(NonTerminalKind::KeysList),
-                ],
-                visit_ignored,
-            )?;
-        Ok(
-            Some(KeysListView {
-                dot: DotHandle(dot),
-                key: KeyHandle(key),
-                keys_list: KeysListHandle(keys_list),
-            }),
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::Dot),
+                NodeKind::NonTerminal(NonTerminalKind::Key),
+                NodeKind::NonTerminal(NonTerminalKind::KeysList),
+            ],
+            |[dot, key, keys_list], visit_ignored| Ok(
+                visit(
+                    Some(KeysListView {
+                        dot: DotHandle(dot),
+                        key: KeyHandle(key),
+                        keys_list: KeysListHandle(keys_list),
+                    }),
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
         )
     }
 }
@@ -1780,25 +1917,27 @@ pub struct KeysListView {
     pub key: KeyHandle,
     pub keys_list: KeysListHandle,
 }
-impl KeysListView {
-    pub fn get_all(&self, tree: &Cst) -> Result<Vec<KeysListItem>, CstConstructError> {
-        self.get_all_with_visit(tree, |_, _, _| Ok(()))
-    }
-    pub fn get_all_with_visit<E>(
+impl RecursiveView<TerminalKind, NonTerminalKind> for KeysListView {
+    type Item = KeysListItem;
+    fn get_all_with_visit<E>(
         &self,
         tree: &Cst,
-        mut visit_ignored: impl FnMut(
-            CstNodeId,
-            TerminalKind,
-            TerminalData,
-        ) -> Result<(), E>,
-    ) -> Result<Vec<KeysListItem>, CstConstructError<E>> {
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Vec<Self::Item>, CstConstructError<E>> {
         let mut items = Vec::new();
         let mut current_view = Some(*self);
         while let Some(item) = current_view {
             let Self { dot, key, .. } = item;
             items.push(KeysListItem { dot, key });
-            current_view = item.keys_list.get_view_with_visit(tree, &mut visit_ignored)?;
+            item.keys_list
+                .get_view_with_visit(
+                    tree,
+                    |view, visit_ignored| {
+                        current_view = view;
+                        ((), visit_ignored)
+                    },
+                    visit_ignored,
+                )?;
         }
         Ok(items)
     }
@@ -1810,42 +1949,45 @@ pub struct KeysListItem {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct NamedCodeHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for NamedCodeHandle {
+impl NonTerminalHandle for NamedCodeHandle {
     type View = NamedCodeView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::NamedCode),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::NamedCode)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::NamedCode
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [named_code] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::NamedCode)],
-                visit_ignored,
-            )?;
-        Ok(NamedCodeView {
-            named_code: NamedCode(named_code),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::NamedCode)],
+            |[named_code], visit_ignored| Ok(
+                visit(
+                    NamedCodeView {
+                        named_code: NamedCode(named_code),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1855,46 +1997,53 @@ pub struct NamedCodeView {
 impl NamedCodeView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct NamedCodeBlockHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for NamedCodeBlockHandle {
+impl NonTerminalHandle for NamedCodeBlockHandle {
     type View = NamedCodeBlockView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::NamedCodeBlock),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::NamedCodeBlock)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::NamedCodeBlock
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [named_code_block_begin, code_block_tail_common] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::NamedCodeBlockBegin),
-                    NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommon),
-                ],
-                visit_ignored,
-            )?;
-        Ok(NamedCodeBlockView {
-            named_code_block_begin: NamedCodeBlockBeginHandle(named_code_block_begin),
-            code_block_tail_common: CodeBlockTailCommonHandle(code_block_tail_common),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::NamedCodeBlockBegin),
+                NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommon),
+            ],
+            |[named_code_block_begin, code_block_tail_common], visit_ignored| Ok(
+                visit(
+                    NamedCodeBlockView {
+                        named_code_block_begin: NamedCodeBlockBeginHandle(
+                            named_code_block_begin,
+                        ),
+                        code_block_tail_common: CodeBlockTailCommonHandle(
+                            code_block_tail_common,
+                        ),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1905,42 +2054,47 @@ pub struct NamedCodeBlockView {
 impl NamedCodeBlockView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct NamedCodeBlockBeginHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for NamedCodeBlockBeginHandle {
+impl NonTerminalHandle for NamedCodeBlockBeginHandle {
     type View = NamedCodeBlockBeginView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::NamedCodeBlockBegin),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::NamedCodeBlockBegin)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::NamedCodeBlockBegin
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [named_code_block_begin] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::NamedCodeBlockBegin)],
-                visit_ignored,
-            )?;
-        Ok(NamedCodeBlockBeginView {
-            named_code_block_begin: NamedCodeBlockBegin(named_code_block_begin),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::NamedCodeBlockBegin)],
+            |[named_code_block_begin], visit_ignored| Ok(
+                visit(
+                    NamedCodeBlockBeginView {
+                        named_code_block_begin: NamedCodeBlockBegin(
+                            named_code_block_begin,
+                        ),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1950,38 +2104,45 @@ pub struct NamedCodeBlockBeginView {
 impl NamedCodeBlockBeginView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct NewlineHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for NewlineHandle {
+impl NonTerminalHandle for NewlineHandle {
     type View = NewlineView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Newline))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Newline)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Newline
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [newline] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::Newline)],
-                visit_ignored,
-            )?;
-        Ok(NewlineView {
-            newline: Newline(newline),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::Newline)],
+            |[newline], visit_ignored| Ok(
+                visit(
+                    NewlineView {
+                        newline: Newline(newline),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1991,36 +2152,40 @@ pub struct NewlineView {
 impl NewlineView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct NullHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for NullHandle {
+impl NonTerminalHandle for NullHandle {
     type View = NullView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Null))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Null)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Null
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [null] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::Null)],
-                visit_ignored,
-            )?;
-        Ok(NullView { null: Null(null) })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::Null)],
+            |[null], visit_ignored| Ok(
+                visit(NullView { null: Null(null) }, visit_ignored),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2030,44 +2195,51 @@ pub struct NullView {
 impl NullView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ObjectHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for ObjectHandle {
+impl NonTerminalHandle for ObjectHandle {
     type View = ObjectView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Object))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Object)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Object
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [begin, object_list, end] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::Begin),
-                    NodeKind::NonTerminal(NonTerminalKind::ObjectList),
-                    NodeKind::NonTerminal(NonTerminalKind::End),
-                ],
-                visit_ignored,
-            )?;
-        Ok(ObjectView {
-            begin: BeginHandle(begin),
-            object_list: ObjectListHandle(object_list),
-            end: EndHandle(end),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::Begin),
+                NodeKind::NonTerminal(NonTerminalKind::ObjectList),
+                NodeKind::NonTerminal(NonTerminalKind::End),
+            ],
+            |[begin, object_list, end], visit_ignored| Ok(
+                visit(
+                    ObjectView {
+                        begin: BeginHandle(begin),
+                        object_list: ObjectListHandle(object_list),
+                        end: EndHandle(end),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2079,56 +2251,57 @@ pub struct ObjectView {
 impl ObjectView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ObjectListHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for ObjectListHandle {
+impl NonTerminalHandle for ObjectListHandle {
     type View = Option<ObjectListView>;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::ObjectList),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::ObjectList)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::ObjectList
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
         if tree.has_no_children(self.0) {
-            return Ok(None);
+            return Ok(visit(None, visit_ignored).0);
         }
-        let [key, bind, value, object_opt, object_list] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::Key),
-                    NodeKind::NonTerminal(NonTerminalKind::Bind),
-                    NodeKind::NonTerminal(NonTerminalKind::Value),
-                    NodeKind::NonTerminal(NonTerminalKind::ObjectOpt),
-                    NodeKind::NonTerminal(NonTerminalKind::ObjectList),
-                ],
-                visit_ignored,
-            )?;
-        Ok(
-            Some(ObjectListView {
-                key: KeyHandle(key),
-                bind: BindHandle(bind),
-                value: ValueHandle(value),
-                object_opt: ObjectOptHandle(object_opt),
-                object_list: ObjectListHandle(object_list),
-            }),
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::Key),
+                NodeKind::NonTerminal(NonTerminalKind::Bind),
+                NodeKind::NonTerminal(NonTerminalKind::Value),
+                NodeKind::NonTerminal(NonTerminalKind::ObjectOpt),
+                NodeKind::NonTerminal(NonTerminalKind::ObjectList),
+            ],
+            |[key, bind, value, object_opt, object_list], visit_ignored| Ok(
+                visit(
+                    Some(ObjectListView {
+                        key: KeyHandle(key),
+                        bind: BindHandle(bind),
+                        value: ValueHandle(value),
+                        object_opt: ObjectOptHandle(object_opt),
+                        object_list: ObjectListHandle(object_list),
+                    }),
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
         )
     }
 }
@@ -2140,19 +2313,13 @@ pub struct ObjectListView {
     pub object_opt: ObjectOptHandle,
     pub object_list: ObjectListHandle,
 }
-impl ObjectListView {
-    pub fn get_all(&self, tree: &Cst) -> Result<Vec<ObjectListItem>, CstConstructError> {
-        self.get_all_with_visit(tree, |_, _, _| Ok(()))
-    }
-    pub fn get_all_with_visit<E>(
+impl RecursiveView<TerminalKind, NonTerminalKind> for ObjectListView {
+    type Item = ObjectListItem;
+    fn get_all_with_visit<E>(
         &self,
         tree: &Cst,
-        mut visit_ignored: impl FnMut(
-            CstNodeId,
-            TerminalKind,
-            TerminalData,
-        ) -> Result<(), E>,
-    ) -> Result<Vec<ObjectListItem>, CstConstructError<E>> {
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Vec<Self::Item>, CstConstructError<E>> {
         let mut items = Vec::new();
         let mut current_view = Some(*self);
         while let Some(item) = current_view {
@@ -2164,9 +2331,15 @@ impl ObjectListView {
                     value,
                     object_opt,
                 });
-            current_view = item
-                .object_list
-                .get_view_with_visit(tree, &mut visit_ignored)?;
+            item.object_list
+                .get_view_with_visit(
+                    tree,
+                    |view, visit_ignored| {
+                        current_view = view;
+                        ((), visit_ignored)
+                    },
+                    visit_ignored,
+                )?;
         }
         Ok(items)
     }
@@ -2180,82 +2353,84 @@ pub struct ObjectListItem {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ObjectOptHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for ObjectOptHandle {
+impl NonTerminalHandle for ObjectOptHandle {
     type View = Option<CommaHandle>;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::ObjectOpt),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::ObjectOpt)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::ObjectOpt
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
         if tree.has_no_children(self.0) {
-            return Ok(None);
+            return Ok(visit(None, visit_ignored).0);
         }
-        let [child] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::NonTerminal(NonTerminalKind::Comma)],
-                visit_ignored,
-            )?;
-        Ok(
-            Some(
-                CommaHandle::new(child, NodeKind::NonTerminal(NonTerminalKind::Comma))
-                    .map_err(|e| e.into_any_error::<E>())?,
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::NonTerminal(NonTerminalKind::Comma)],
+            |[child], visit_ignored| Ok(
+                visit(
+                    Some(CommaHandle::new_with_visit(child, tree, visit_ignored)?),
+                    visit_ignored,
+                ),
             ),
+            visit_ignored,
         )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct QuoteHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for QuoteHandle {
+impl NonTerminalHandle for QuoteHandle {
     type View = QuoteView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Quote))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Quote)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Quote
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [quote] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::Quote)],
-                visit_ignored,
-            )?;
-        Ok(QuoteView { quote: Quote(quote) })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::Quote)],
+            |[quote], visit_ignored| Ok(
+                visit(QuoteView { quote: Quote(quote) }, visit_ignored),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2265,44 +2440,51 @@ pub struct QuoteView {
 impl QuoteView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SectionHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for SectionHandle {
+impl NonTerminalHandle for SectionHandle {
     type View = SectionView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Section))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Section)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Section
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [at, keys, section_list] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::At),
-                    NodeKind::NonTerminal(NonTerminalKind::Keys),
-                    NodeKind::NonTerminal(NonTerminalKind::SectionList),
-                ],
-                visit_ignored,
-            )?;
-        Ok(SectionView {
-            at: AtHandle(at),
-            keys: KeysHandle(keys),
-            section_list: SectionListHandle(section_list),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::At),
+                NodeKind::NonTerminal(NonTerminalKind::Keys),
+                NodeKind::NonTerminal(NonTerminalKind::SectionList),
+            ],
+            |[at, keys, section_list], visit_ignored| Ok(
+                visit(
+                    SectionView {
+                        at: AtHandle(at),
+                        keys: KeysHandle(keys),
+                        section_list: SectionListHandle(section_list),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2314,48 +2496,51 @@ pub struct SectionView {
 impl SectionView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SectionBindingHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for SectionBindingHandle {
+impl NonTerminalHandle for SectionBindingHandle {
     type View = SectionBindingView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::SectionBinding),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::SectionBinding)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::SectionBinding
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [begin, swon, end] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::Begin),
-                    NodeKind::NonTerminal(NonTerminalKind::Swon),
-                    NodeKind::NonTerminal(NonTerminalKind::End),
-                ],
-                visit_ignored,
-            )?;
-        Ok(SectionBindingView {
-            begin: BeginHandle(begin),
-            swon: SwonHandle(swon),
-            end: EndHandle(end),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::Begin),
+                NodeKind::NonTerminal(NonTerminalKind::Swon),
+                NodeKind::NonTerminal(NonTerminalKind::End),
+            ],
+            |[begin, swon, end], visit_ignored| Ok(
+                visit(
+                    SectionBindingView {
+                        begin: BeginHandle(begin),
+                        swon: SwonHandle(swon),
+                        end: EndHandle(end),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2367,50 +2552,51 @@ pub struct SectionBindingView {
 impl SectionBindingView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SectionListHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for SectionListHandle {
+impl NonTerminalHandle for SectionListHandle {
     type View = Option<SectionListView>;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::SectionList),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::SectionList)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::SectionList
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
         if tree.has_no_children(self.0) {
-            return Ok(None);
+            return Ok(visit(None, visit_ignored).0);
         }
-        let [binding, section_list] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::Binding),
-                    NodeKind::NonTerminal(NonTerminalKind::SectionList),
-                ],
-                visit_ignored,
-            )?;
-        Ok(
-            Some(SectionListView {
-                binding: BindingHandle(binding),
-                section_list: SectionListHandle(section_list),
-            }),
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::Binding),
+                NodeKind::NonTerminal(NonTerminalKind::SectionList),
+            ],
+            |[binding, section_list], visit_ignored| Ok(
+                visit(
+                    Some(SectionListView {
+                        binding: BindingHandle(binding),
+                        section_list: SectionListHandle(section_list),
+                    }),
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
         )
     }
 }
@@ -2419,71 +2605,78 @@ pub struct SectionListView {
     pub binding: BindingHandle,
     pub section_list: SectionListHandle,
 }
-impl SectionListView {
-    pub fn get_all(&self, tree: &Cst) -> Result<Vec<BindingHandle>, CstConstructError> {
-        self.get_all_with_visit(tree, |_, _, _| Ok(()))
-    }
-    pub fn get_all_with_visit<E>(
+impl RecursiveView<TerminalKind, NonTerminalKind> for SectionListView {
+    type Item = BindingHandle;
+    fn get_all_with_visit<E>(
         &self,
         tree: &Cst,
-        mut visit_ignored: impl FnMut(
-            CstNodeId,
-            TerminalKind,
-            TerminalData,
-        ) -> Result<(), E>,
-    ) -> Result<Vec<BindingHandle>, CstConstructError<E>> {
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Vec<Self::Item>, CstConstructError<E>> {
         let mut items = Vec::new();
         let mut current_view = Some(*self);
         while let Some(item) = current_view {
             let Self { binding, .. } = item;
             items.push(binding);
-            current_view = item
-                .section_list
-                .get_view_with_visit(tree, &mut visit_ignored)?;
+            item.section_list
+                .get_view_with_visit(
+                    tree,
+                    |view, visit_ignored| {
+                        current_view = view;
+                        ((), visit_ignored)
+                    },
+                    visit_ignored,
+                )?;
         }
         Ok(items)
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct StrHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for StrHandle {
+impl NonTerminalHandle for StrHandle {
     type View = StrView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Str))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Str)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Str
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [quote, in_str, quote2] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::Quote),
-                    NodeKind::NonTerminal(NonTerminalKind::InStr),
-                    NodeKind::NonTerminal(NonTerminalKind::Quote),
-                ],
-                visit_ignored,
-            )?;
-        Ok(StrView {
-            quote: QuoteHandle(quote),
-            in_str: InStrHandle(in_str),
-            quote2: QuoteHandle(quote2),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::Quote),
+                NodeKind::NonTerminal(NonTerminalKind::InStr),
+                NodeKind::NonTerminal(NonTerminalKind::Quote),
+            ],
+            |[quote, in_str, quote2], visit_ignored| Ok(
+                visit(
+                    StrView {
+                        quote: QuoteHandle(quote),
+                        in_str: InStrHandle(in_str),
+                        quote2: QuoteHandle(quote2),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2495,46 +2688,49 @@ pub struct StrView {
 impl StrView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct StrContinuesHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for StrContinuesHandle {
+impl NonTerminalHandle for StrContinuesHandle {
     type View = StrContinuesView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::StrContinues),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::StrContinues)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::StrContinues
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [str, str_continues_list] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::Str),
-                    NodeKind::NonTerminal(NonTerminalKind::StrContinuesList),
-                ],
-                visit_ignored,
-            )?;
-        Ok(StrContinuesView {
-            str: StrHandle(str),
-            str_continues_list: StrContinuesListHandle(str_continues_list),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::Str),
+                NodeKind::NonTerminal(NonTerminalKind::StrContinuesList),
+            ],
+            |[str, str_continues_list], visit_ignored| Ok(
+                visit(
+                    StrContinuesView {
+                        str: StrHandle(str),
+                        str_continues_list: StrContinuesListHandle(str_continues_list),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2545,52 +2741,53 @@ pub struct StrContinuesView {
 impl StrContinuesView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct StrContinuesListHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for StrContinuesListHandle {
+impl NonTerminalHandle for StrContinuesListHandle {
     type View = Option<StrContinuesListView>;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::StrContinuesList),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::StrContinuesList)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::StrContinuesList
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
         if tree.has_no_children(self.0) {
-            return Ok(None);
+            return Ok(visit(None, visit_ignored).0);
         }
-        let [r#continue, str, str_continues_list] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::Continue),
-                    NodeKind::NonTerminal(NonTerminalKind::Str),
-                    NodeKind::NonTerminal(NonTerminalKind::StrContinuesList),
-                ],
-                visit_ignored,
-            )?;
-        Ok(
-            Some(StrContinuesListView {
-                r#continue: ContinueHandle(r#continue),
-                str: StrHandle(str),
-                str_continues_list: StrContinuesListHandle(str_continues_list),
-            }),
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::Continue),
+                NodeKind::NonTerminal(NonTerminalKind::Str),
+                NodeKind::NonTerminal(NonTerminalKind::StrContinuesList),
+            ],
+            |[r#continue, str, str_continues_list], visit_ignored| Ok(
+                visit(
+                    Some(StrContinuesListView {
+                        r#continue: ContinueHandle(r#continue),
+                        str: StrHandle(str),
+                        str_continues_list: StrContinuesListHandle(str_continues_list),
+                    }),
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
         )
     }
 }
@@ -2600,22 +2797,13 @@ pub struct StrContinuesListView {
     pub str: StrHandle,
     pub str_continues_list: StrContinuesListHandle,
 }
-impl StrContinuesListView {
-    pub fn get_all(
+impl RecursiveView<TerminalKind, NonTerminalKind> for StrContinuesListView {
+    type Item = StrContinuesListItem;
+    fn get_all_with_visit<E>(
         &self,
         tree: &Cst,
-    ) -> Result<Vec<StrContinuesListItem>, CstConstructError> {
-        self.get_all_with_visit(tree, |_, _, _| Ok(()))
-    }
-    pub fn get_all_with_visit<E>(
-        &self,
-        tree: &Cst,
-        mut visit_ignored: impl FnMut(
-            CstNodeId,
-            TerminalKind,
-            TerminalData,
-        ) -> Result<(), E>,
-    ) -> Result<Vec<StrContinuesListItem>, CstConstructError<E>> {
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Vec<Self::Item>, CstConstructError<E>> {
         let mut items = Vec::new();
         let mut current_view = Some(*self);
         while let Some(item) = current_view {
@@ -2625,9 +2813,15 @@ impl StrContinuesListView {
                     r#continue,
                     str,
                 });
-            current_view = item
-                .str_continues_list
-                .get_view_with_visit(tree, &mut visit_ignored)?;
+            item.str_continues_list
+                .get_view_with_visit(
+                    tree,
+                    |view, visit_ignored| {
+                        current_view = view;
+                        ((), visit_ignored)
+                    },
+                    visit_ignored,
+                )?;
         }
         Ok(items)
     }
@@ -2639,42 +2833,49 @@ pub struct StrContinuesListItem {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SwonHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for SwonHandle {
+impl NonTerminalHandle for SwonHandle {
     type View = SwonView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Swon))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Swon)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Swon
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [swon_bindings, swon_sections] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::SwonList),
-                    NodeKind::NonTerminal(NonTerminalKind::SwonList0),
-                ],
-                visit_ignored,
-            )?;
-        Ok(SwonView {
-            swon_bindings: SwonBindingsHandle(swon_bindings),
-            swon_sections: SwonSectionsHandle(swon_sections),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::SwonList),
+                NodeKind::NonTerminal(NonTerminalKind::SwonList0),
+            ],
+            |[swon_bindings, swon_sections], visit_ignored| Ok(
+                visit(
+                    SwonView {
+                        swon_bindings: SwonBindingsHandle(swon_bindings),
+                        swon_sections: SwonSectionsHandle(swon_sections),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2685,46 +2886,51 @@ pub struct SwonView {
 impl SwonView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SwonBindingsHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for SwonBindingsHandle {
+impl NonTerminalHandle for SwonBindingsHandle {
     type View = Option<SwonBindingsView>;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::SwonList))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::SwonList)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::SwonList
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
         if tree.has_no_children(self.0) {
-            return Ok(None);
+            return Ok(visit(None, visit_ignored).0);
         }
-        let [binding, swon_bindings] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::Binding),
-                    NodeKind::NonTerminal(NonTerminalKind::SwonList),
-                ],
-                visit_ignored,
-            )?;
-        Ok(
-            Some(SwonBindingsView {
-                binding: BindingHandle(binding),
-                swon_bindings: SwonBindingsHandle(swon_bindings),
-            }),
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::Binding),
+                NodeKind::NonTerminal(NonTerminalKind::SwonList),
+            ],
+            |[binding, swon_bindings], visit_ignored| Ok(
+                visit(
+                    Some(SwonBindingsView {
+                        binding: BindingHandle(binding),
+                        swon_bindings: SwonBindingsHandle(swon_bindings),
+                    }),
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
         )
     }
 }
@@ -2733,77 +2939,78 @@ pub struct SwonBindingsView {
     pub binding: BindingHandle,
     pub swon_bindings: SwonBindingsHandle,
 }
-impl SwonBindingsView {
-    pub fn get_all(&self, tree: &Cst) -> Result<Vec<BindingHandle>, CstConstructError> {
-        self.get_all_with_visit(tree, |_, _, _| Ok(()))
-    }
-    pub fn get_all_with_visit<E>(
+impl RecursiveView<TerminalKind, NonTerminalKind> for SwonBindingsView {
+    type Item = BindingHandle;
+    fn get_all_with_visit<E>(
         &self,
         tree: &Cst,
-        mut visit_ignored: impl FnMut(
-            CstNodeId,
-            TerminalKind,
-            TerminalData,
-        ) -> Result<(), E>,
-    ) -> Result<Vec<BindingHandle>, CstConstructError<E>> {
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Vec<Self::Item>, CstConstructError<E>> {
         let mut items = Vec::new();
         let mut current_view = Some(*self);
         while let Some(item) = current_view {
             let Self { binding, .. } = item;
             items.push(binding);
-            current_view = item
-                .swon_bindings
-                .get_view_with_visit(tree, &mut visit_ignored)?;
+            item.swon_bindings
+                .get_view_with_visit(
+                    tree,
+                    |view, visit_ignored| {
+                        current_view = view;
+                        ((), visit_ignored)
+                    },
+                    visit_ignored,
+                )?;
         }
         Ok(items)
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct SwonSectionsHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for SwonSectionsHandle {
+impl NonTerminalHandle for SwonSectionsHandle {
     type View = Option<SwonSectionsView>;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::SwonList0),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::SwonList0)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::SwonList0
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
         if tree.has_no_children(self.0) {
-            return Ok(None);
+            return Ok(visit(None, visit_ignored).0);
         }
-        let [section, swon_sections] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::Section),
-                    NodeKind::NonTerminal(NonTerminalKind::SwonList0),
-                ],
-                visit_ignored,
-            )?;
-        Ok(
-            Some(SwonSectionsView {
-                section: SectionHandle(section),
-                swon_sections: SwonSectionsHandle(swon_sections),
-            }),
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::Section),
+                NodeKind::NonTerminal(NonTerminalKind::SwonList0),
+            ],
+            |[section, swon_sections], visit_ignored| Ok(
+                visit(
+                    Some(SwonSectionsView {
+                        section: SectionHandle(section),
+                        swon_sections: SwonSectionsHandle(swon_sections),
+                    }),
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
         )
     }
 }
@@ -2812,63 +3019,67 @@ pub struct SwonSectionsView {
     pub section: SectionHandle,
     pub swon_sections: SwonSectionsHandle,
 }
-impl SwonSectionsView {
-    pub fn get_all(&self, tree: &Cst) -> Result<Vec<SectionHandle>, CstConstructError> {
-        self.get_all_with_visit(tree, |_, _, _| Ok(()))
-    }
-    pub fn get_all_with_visit<E>(
+impl RecursiveView<TerminalKind, NonTerminalKind> for SwonSectionsView {
+    type Item = SectionHandle;
+    fn get_all_with_visit<E>(
         &self,
         tree: &Cst,
-        mut visit_ignored: impl FnMut(
-            CstNodeId,
-            TerminalKind,
-            TerminalData,
-        ) -> Result<(), E>,
-    ) -> Result<Vec<SectionHandle>, CstConstructError<E>> {
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Vec<Self::Item>, CstConstructError<E>> {
         let mut items = Vec::new();
         let mut current_view = Some(*self);
         while let Some(item) = current_view {
             let Self { section, .. } = item;
             items.push(section);
-            current_view = item
-                .swon_sections
-                .get_view_with_visit(tree, &mut visit_ignored)?;
+            item.swon_sections
+                .get_view_with_visit(
+                    tree,
+                    |view, visit_ignored| {
+                        current_view = view;
+                        ((), visit_ignored)
+                    },
+                    visit_ignored,
+                )?;
         }
         Ok(items)
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct TextHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for TextHandle {
+impl NonTerminalHandle for TextHandle {
     type View = TextView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Text))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Text)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Text
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [text] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::Text)],
-                visit_ignored,
-            )?;
-        Ok(TextView { text: Text(text) })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::Text)],
+            |[text], visit_ignored| Ok(
+                visit(TextView { text: Text(text) }, visit_ignored),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2878,50 +3089,53 @@ pub struct TextView {
 impl TextView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct TextBindingHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for TextBindingHandle {
+impl NonTerminalHandle for TextBindingHandle {
     type View = TextBindingView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::TextBinding),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::TextBinding)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::TextBinding
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [text_start, text_binding_opt, text, newline] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::TextStart),
-                    NodeKind::NonTerminal(NonTerminalKind::TextBindingOpt),
-                    NodeKind::NonTerminal(NonTerminalKind::Text),
-                    NodeKind::NonTerminal(NonTerminalKind::Newline),
-                ],
-                visit_ignored,
-            )?;
-        Ok(TextBindingView {
-            text_start: TextStartHandle(text_start),
-            text_binding_opt: TextBindingOptHandle(text_binding_opt),
-            text: TextHandle(text),
-            newline: NewlineHandle(newline),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::TextStart),
+                NodeKind::NonTerminal(NonTerminalKind::TextBindingOpt),
+                NodeKind::NonTerminal(NonTerminalKind::Text),
+                NodeKind::NonTerminal(NonTerminalKind::Newline),
+            ],
+            |[text_start, text_binding_opt, text, newline], visit_ignored| Ok(
+                visit(
+                    TextBindingView {
+                        text_start: TextStartHandle(text_start),
+                        text_binding_opt: TextBindingOptHandle(text_binding_opt),
+                        text: TextHandle(text),
+                        newline: NewlineHandle(newline),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2934,88 +3148,89 @@ pub struct TextBindingView {
 impl TextBindingView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct TextBindingOptHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for TextBindingOptHandle {
+impl NonTerminalHandle for TextBindingOptHandle {
     type View = Option<WsHandle>;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::TextBindingOpt),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::TextBindingOpt)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::TextBindingOpt
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
         if tree.has_no_children(self.0) {
-            return Ok(None);
+            return Ok(visit(None, visit_ignored).0);
         }
-        let [child] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::NonTerminal(NonTerminalKind::Ws)],
-                visit_ignored,
-            )?;
-        Ok(
-            Some(
-                WsHandle::new(child, NodeKind::NonTerminal(NonTerminalKind::Ws))
-                    .map_err(|e| e.into_any_error::<E>())?,
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::NonTerminal(NonTerminalKind::Ws)],
+            |[child], visit_ignored| Ok(
+                visit(
+                    Some(WsHandle::new_with_visit(child, tree, visit_ignored)?),
+                    visit_ignored,
+                ),
             ),
+            visit_ignored,
         )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct TextStartHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for TextStartHandle {
+impl NonTerminalHandle for TextStartHandle {
     type View = TextStartView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::TextStart),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::TextStart)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::TextStart
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [text_start] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::TextStart)],
-                visit_ignored,
-            )?;
-        Ok(TextStartView {
-            text_start: TextStart(text_start),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::TextStart)],
+            |[text_start], visit_ignored| Ok(
+                visit(
+                    TextStartView {
+                        text_start: TextStart(text_start),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -3025,36 +3240,40 @@ pub struct TextStartView {
 impl TextStartView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct TrueHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for TrueHandle {
+impl NonTerminalHandle for TrueHandle {
     type View = TrueView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::True))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::True)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::True
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [r#true] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::True)],
-                visit_ignored,
-            )?;
-        Ok(TrueView { r#true: True(r#true) })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::True)],
+            |[r#true], visit_ignored| Ok(
+                visit(TrueView { r#true: True(r#true) }, visit_ignored),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -3064,42 +3283,45 @@ pub struct TrueView {
 impl TrueView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct TypedQuoteHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for TypedQuoteHandle {
+impl NonTerminalHandle for TypedQuoteHandle {
     type View = TypedQuoteView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::TypedQuote),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::TypedQuote)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::TypedQuote
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [typed_quote] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::TypedQuote)],
-                visit_ignored,
-            )?;
-        Ok(TypedQuoteView {
-            typed_quote: TypedQuote(typed_quote),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::TypedQuote)],
+            |[typed_quote], visit_ignored| Ok(
+                visit(
+                    TypedQuoteView {
+                        typed_quote: TypedQuote(typed_quote),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -3109,44 +3331,51 @@ pub struct TypedQuoteView {
 impl TypedQuoteView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct TypedStrHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for TypedStrHandle {
+impl NonTerminalHandle for TypedStrHandle {
     type View = TypedStrView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::TypedStr))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::TypedStr)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::TypedStr
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [typed_quote, in_str, quote] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::TypedQuote),
-                    NodeKind::NonTerminal(NonTerminalKind::InStr),
-                    NodeKind::NonTerminal(NonTerminalKind::Quote),
-                ],
-                visit_ignored,
-            )?;
-        Ok(TypedStrView {
-            typed_quote: TypedQuoteHandle(typed_quote),
-            in_str: InStrHandle(in_str),
-            quote: QuoteHandle(quote),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::TypedQuote),
+                NodeKind::NonTerminal(NonTerminalKind::InStr),
+                NodeKind::NonTerminal(NonTerminalKind::Quote),
+            ],
+            |[typed_quote, in_str, quote], visit_ignored| Ok(
+                visit(
+                    TypedStrView {
+                        typed_quote: TypedQuoteHandle(typed_quote),
+                        in_str: InStrHandle(in_str),
+                        quote: QuoteHandle(quote),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -3158,29 +3387,32 @@ pub struct TypedStrView {
 impl TypedStrView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ValueHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for ValueHandle {
+impl NonTerminalHandle for ValueHandle {
     type View = ValueView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Value))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Value)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Value
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
         let mut children = tree.children(self.0);
         let Some(child) = children.next() else {
             return Err(ViewConstructionError::UnexpectedEndOfChildren {
@@ -3242,12 +3474,13 @@ impl NonTerminalHandle<TerminalKind, NonTerminalKind> for ValueHandle {
                 });
             }
         };
+        let (result, _visit) = visit(variant, visit_ignored);
         if let Some(child) = children.next() {
             return Err(ViewConstructionError::UnexpectedExtraNode {
                 node: child,
             });
         }
-        Ok(variant)
+        Ok(result)
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -3268,46 +3501,49 @@ pub enum ValueView {
 impl ValueView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ValueBindingHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for ValueBindingHandle {
+impl NonTerminalHandle for ValueBindingHandle {
     type View = ValueBindingView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
             index,
-            kind,
-            NodeKind::NonTerminal(NonTerminalKind::ValueBinding),
-        )?;
-        Ok(Self(index))
+            [NodeKind::NonTerminal(NonTerminalKind::ValueBinding)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::ValueBinding
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [bind, value] = tree
-            .collect_nodes(
-                self.0,
-                [
-                    NodeKind::NonTerminal(NonTerminalKind::Bind),
-                    NodeKind::NonTerminal(NonTerminalKind::Value),
-                ],
-                visit_ignored,
-            )?;
-        Ok(ValueBindingView {
-            bind: BindHandle(bind),
-            value: ValueHandle(value),
-        })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [
+                NodeKind::NonTerminal(NonTerminalKind::Bind),
+                NodeKind::NonTerminal(NonTerminalKind::Value),
+            ],
+            |[bind, value], visit_ignored| Ok(
+                visit(
+                    ValueBindingView {
+                        bind: BindHandle(bind),
+                        value: ValueHandle(value),
+                    },
+                    visit_ignored,
+                ),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -3318,36 +3554,38 @@ pub struct ValueBindingView {
 impl ValueBindingView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct WsHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for WsHandle {
+impl NonTerminalHandle for WsHandle {
     type View = WsView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Ws))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Ws)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Ws
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [ws] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::Terminal(TerminalKind::Ws)],
-                visit_ignored,
-            )?;
-        Ok(WsView { ws: Ws(ws) })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::Terminal(TerminalKind::Ws)],
+            |[ws], visit_ignored| Ok(visit(WsView { ws: Ws(ws) }, visit_ignored)),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -3357,36 +3595,40 @@ pub struct WsView {
 impl WsView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RootHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle<TerminalKind, NonTerminalKind> for RootHandle {
+impl NonTerminalHandle for RootHandle {
     type View = RootView;
-    fn new(
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
         index: CstNodeId,
-        kind: NodeKind<TerminalKind, NonTerminalKind>,
-    ) -> Result<Self, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        assert_node_kind(index, kind, NodeKind::NonTerminal(NonTerminalKind::Root))?;
-        Ok(Self(index))
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::Root)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
     }
     fn kind(&self) -> NonTerminalKind {
         NonTerminalKind::Root
     }
-    fn get_view(
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         tree: &Cst,
-    ) -> Result<Self::View, ViewConstructionError<TerminalKind, NonTerminalKind>> {
-        Ok(self.get_view_with_visit(tree, |_, _, _| Ok(()))?)
-    }
-    fn get_view_with_visit<E>(
-        &self,
-        tree: &Cst,
-        visit_ignored: impl FnMut(CstNodeId, TerminalKind, TerminalData) -> Result<(), E>,
-    ) -> Result<Self::View, CstConstructError<E>> {
-        let [swon] = tree
-            .collect_nodes(
-                self.0,
-                [NodeKind::NonTerminal(NonTerminalKind::Swon)],
-                visit_ignored,
-            )?;
-        Ok(RootView { swon: SwonHandle(swon) })
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        tree.collect_nodes(
+            self.0,
+            [NodeKind::NonTerminal(NonTerminalKind::Swon)],
+            |[swon], visit_ignored| Ok(
+                visit(RootView { swon: SwonHandle(swon) }, visit_ignored),
+            ),
+            visit_ignored,
+        )
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -3395,224 +3637,224 @@ pub struct RootView {
 }
 impl RootView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct NewLine(pub CstNodeId);
+pub struct NewLine(pub super::tree::CstNodeId);
 impl NewLine {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::NewLine
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Whitespace(pub CstNodeId);
+pub struct Whitespace(pub super::tree::CstNodeId);
 impl Whitespace {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::Whitespace
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct LineComment(pub CstNodeId);
+pub struct LineComment(pub super::tree::CstNodeId);
 impl LineComment {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::LineComment
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct BlockComment(pub CstNodeId);
+pub struct BlockComment(pub super::tree::CstNodeId);
 impl BlockComment {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::BlockComment
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Integer(pub CstNodeId);
+pub struct Integer(pub super::tree::CstNodeId);
 impl Integer {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::Integer
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct True(pub CstNodeId);
+pub struct True(pub super::tree::CstNodeId);
 impl True {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::True
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct False(pub CstNodeId);
+pub struct False(pub super::tree::CstNodeId);
 impl False {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::False
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Null(pub CstNodeId);
+pub struct Null(pub super::tree::CstNodeId);
 impl Null {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::Null
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Hole(pub CstNodeId);
+pub struct Hole(pub super::tree::CstNodeId);
 impl Hole {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::Hole
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Quote(pub CstNodeId);
+pub struct Quote(pub super::tree::CstNodeId);
 impl Quote {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::Quote
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct TypedQuote(pub CstNodeId);
+pub struct TypedQuote(pub super::tree::CstNodeId);
 impl TypedQuote {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::TypedQuote
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct InStr(pub CstNodeId);
+pub struct InStr(pub super::tree::CstNodeId);
 impl InStr {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::InStr
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Text(pub CstNodeId);
+pub struct Text(pub super::tree::CstNodeId);
 impl Text {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::Text
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct NamedCode(pub CstNodeId);
+pub struct NamedCode(pub super::tree::CstNodeId);
 impl NamedCode {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::NamedCode
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Code(pub CstNodeId);
+pub struct Code(pub super::tree::CstNodeId);
 impl Code {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::Code
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Newline(pub CstNodeId);
+pub struct Newline(pub super::tree::CstNodeId);
 impl Newline {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::Newline
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Ws(pub CstNodeId);
+pub struct Ws(pub super::tree::CstNodeId);
 impl Ws {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::Ws
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct At(pub CstNodeId);
+pub struct At(pub super::tree::CstNodeId);
 impl At {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::At
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Dollar(pub CstNodeId);
+pub struct Dollar(pub super::tree::CstNodeId);
 impl Dollar {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::Dollar
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Dot(pub CstNodeId);
+pub struct Dot(pub super::tree::CstNodeId);
 impl Dot {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::Dot
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct LBrace(pub CstNodeId);
+pub struct LBrace(pub super::tree::CstNodeId);
 impl LBrace {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::LBrace
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct RBrace(pub CstNodeId);
+pub struct RBrace(pub super::tree::CstNodeId);
 impl RBrace {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::RBrace
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct LBracket(pub CstNodeId);
+pub struct LBracket(pub super::tree::CstNodeId);
 impl LBracket {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::LBracket
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct RBracket(pub CstNodeId);
+pub struct RBracket(pub super::tree::CstNodeId);
 impl RBracket {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::RBracket
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Bind(pub CstNodeId);
+pub struct Bind(pub super::tree::CstNodeId);
 impl Bind {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::Bind
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Comma(pub CstNodeId);
+pub struct Comma(pub super::tree::CstNodeId);
 impl Comma {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::Comma
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Esc(pub CstNodeId);
+pub struct Esc(pub super::tree::CstNodeId);
 impl Esc {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::Esc
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct TextStart(pub CstNodeId);
+pub struct TextStart(pub super::tree::CstNodeId);
 impl TextStart {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::TextStart
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Ident(pub CstNodeId);
+pub struct Ident(pub super::tree::CstNodeId);
 impl Ident {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::Ident
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct NamedCodeBlockBegin(pub CstNodeId);
+pub struct NamedCodeBlockBegin(pub super::tree::CstNodeId);
 impl NamedCodeBlockBegin {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::NamedCodeBlockBegin
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct CodeBlockDelimiter(pub CstNodeId);
+pub struct CodeBlockDelimiter(pub super::tree::CstNodeId);
 impl CodeBlockDelimiter {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::CodeBlockDelimiter
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct CodeBlockLine(pub CstNodeId);
+pub struct CodeBlockLine(pub super::tree::CstNodeId);
 impl CodeBlockLine {
     pub fn kind(&self) -> TerminalKind {
         TerminalKind::CodeBlockLine
