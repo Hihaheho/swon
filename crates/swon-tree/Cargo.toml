@@ -1,0 +1,11 @@
+[package]
+name = "swon-tree"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+swon-value = { workspace = true }
+
+petgraph = "0.8.1"
+thiserror = { workspace = true }
+thisisplural = { workspace = true }

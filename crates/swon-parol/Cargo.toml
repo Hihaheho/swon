@@ -9,12 +9,13 @@ repository = "https://github.com/Hihaheho/swon"
 readme = "README.md"
 
 [dependencies]
+swon-tree = { workspace = true }
+
 parol_runtime.workspace = true
 petgraph = "0.8.1"
 thiserror = { workspace = true }
 thisisplural = { workspace = true }
 ahash = { workspace = true }
-swon-value = { workspace = true }
 
 [dev-dependencies]
 syntree_layout = "0.4"
