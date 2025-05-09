@@ -7,14 +7,24 @@ pub struct SwonDocument {
 }
 
 pub struct SwonSection {
-    /// Whether the section has `{` and `}`
-    nested: bool,
-    keys: Vec<SwonKey>,
+    keys: SwonKeys,
+    body: SectionBody,
+}
+
+pub enum SectionBody {
+    Nested(SwonDocument),
+    Bindings(Vec<SwonBinding>),
 }
 
 pub struct SwonBinding {
     keys: Vec<SwonKey>,
-    value: SwonValue,
+    rhs: BindingRhs,
+}
+
+pub enum BindingRhs {
+    Value(SwonValue),
+    Text(String),
+    Swon(SwonDocument),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Plural)]

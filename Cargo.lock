@@ -4635,6 +4635,9 @@ dependencies = [
 [[package]]
 name = "swon-json"
 version = "0.1.0"
+dependencies = [
+ "swon-parol",
+]
 
 [[package]]
 name = "swon-json-schema"
@@ -4661,9 +4664,11 @@ dependencies = [
 name = "swon-parol"
 version = "0.1.0"
 dependencies = [
+ "ahash",
  "parol_runtime",
  "petgraph 0.8.1",
  "pretty_assertions",
+ "swon-value",
  "syntree_layout",
  "thiserror 2.0.9",
  "thisisplural",

@@ -20,6 +20,16 @@ pub enum Value {
     Unit,
 }
 
+#[derive(Debug, Clone, PartialEq, Plural)]
+pub struct Path(pub Vec<PathSegment>);
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum PathSegment {
+    Extension(Identifier),
+    Value(Value),
+    Array { key: Value, index: Option<Value> },
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct TypedString {
     pub type_name: String,
@@ -47,4 +57,7 @@ pub struct Variant {
     pub content: Box<Value>,
 }
 
-pub struct Unit;
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Identifier {
+    pub name: String,
+}

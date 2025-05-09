@@ -116,7 +116,7 @@ impl std::fmt::Display for CstNodeId {
 /// A generic concrete syntax tree that doesn't know about SWON-specific ordering issues
 #[derive(Debug, Clone)]
 pub struct ConcreteSyntaxTree<T, Nt> {
-    graph: DiGraph<CstNodeData<T, Nt>, ()>,
+    graph: DiGraph<Option<CstNodeData<T, Nt>>, ()>,
     dynamic_tokens: BTreeMap<DynamicTokenId, String>,
     root: CstNodeId,
 }
@@ -126,17 +126,31 @@ impl<T, Nt> ConcreteSyntaxTree<T, Nt> {
         self.root
     }
 
-    pub fn root_nodes(&self) -> impl Iterator<Item = CstNodeId> {
-        let nodes = self.graph.node_indices().collect::<Vec<_>>();
-        nodes
-            .into_iter()
-            .filter(move |node| self.parent(CstNodeId(*node)).is_none())
-            .map(CstNodeId)
+    pub fn change_parent(&mut self, id: CstNodeId, parent: CstNodeId) {
+        if let Some(edge) = self
+            .graph
+            .edges_directed(id.0, Direction::Incoming)
+            .next()
+            .map(|edge| edge.id())
+        {
+            self.graph.remove_edge(edge);
+        }
+        self.graph.add_edge(parent.0, id.0, ());
     }
 
     pub fn add_node(&mut self, data: CstNodeData<T, Nt>) -> CstNodeId {
-        let node = self.graph.add_node(data);
+        let node = self.graph.add_node(Some(data));
         CstNodeId(node)
+    }
+
+    pub fn add_node_with_parent(
+        &mut self,
+        data: CstNodeData<T, Nt>,
+        parent: CstNodeId,
+    ) -> CstNodeId {
+        let node = self.add_node(data);
+        self.graph.add_edge(parent.0, node.0, ());
+        node
     }
 
     pub fn add_edge(&mut self, from: CstNodeId, to: CstNodeId) {
@@ -166,6 +180,18 @@ impl<T, Nt> ConcreteSyntaxTree<T, Nt> {
     pub fn dynamic_token(&self, id: DynamicTokenId) -> Option<&str> {
         self.dynamic_tokens.get(&id).map(|s| s.as_str())
     }
+
+    pub fn update_node(
+        &mut self,
+        id: CstNodeId,
+        data: CstNodeData<T, Nt>,
+    ) -> Option<CstNodeData<T, Nt>> {
+        if let Some(Some(node_data)) = self.graph.node_weight_mut(id.0) {
+            Some(std::mem::replace(node_data, data))
+        } else {
+            None
+        }
+    }
 }
 
 impl<T, Nt> ConcreteSyntaxTree<T, Nt>
@@ -174,7 +200,20 @@ where
     Nt: Copy,
 {
     pub fn node_data(&self, node: CstNodeId) -> Option<CstNodeData<T, Nt>> {
-        self.graph.node_weight(node.0).copied()
+        self.graph.node_weight(node.0).copied().flatten()
+    }
+
+    /// Delete a node but keep its children
+    pub fn delete_node(&mut self, id: CstNodeId) {
+        // This does not remove the node from the graph, because it causes CstNodeId inconsistent.
+        let edges = self
+            .graph
+            .edges_directed(id.0, Direction::Incoming)
+            .map(|edge| edge.id())
+            .collect::<Vec<_>>();
+        for edge in edges {
+            self.graph.remove_edge(edge);
+        }
     }
 }
 
@@ -358,7 +397,7 @@ impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
 /// particularly the reversed ordering of list elements
 #[derive(Debug, Clone)]
 pub struct CstBuilder {
-    tree: DiGraph<CstNodeData<TerminalKind, NonTerminalKind>, ()>,
+    tree: DiGraph<Option<CstNodeData<TerminalKind, NonTerminalKind>>, ()>,
     node_stack: Vec<NodeStackItem>,
     root_node: Option<CstNodeId>,
 }
@@ -387,10 +426,10 @@ impl CstBuilder {
 
     // Adds a terminal node to the current non-terminal in the stack
     fn add_terminal_node(&mut self, kind: TerminalKind, span: InputSpan) -> NodeIndex {
-        let node = self.tree.add_node(CstNodeData::Terminal {
+        let node = self.tree.add_node(Some(CstNodeData::Terminal {
             kind,
             data: TerminalData::Input(span),
-        });
+        }));
 
         let parent = self.node_stack.last_mut().expect("node stack is empty");
         parent.children.push(CstNodeId(node));
@@ -402,10 +441,10 @@ impl CstBuilder {
     // Opens a new non-terminal and adds it to the stack
     fn open_non_terminal_node(&mut self, kind: NonTerminalKind) -> NodeIndex {
         // span will be filled later
-        let node = self.tree.add_node(CstNodeData::NonTerminal {
+        let node = self.tree.add_node(Some(CstNodeData::NonTerminal {
             kind,
             data: NonTerminalData::Input(InputSpan::EMPTY),
-        });
+        }));
 
         if let Some(parent) = self.node_stack.last_mut() {
             parent.children.push(CstNodeId(node));
@@ -434,7 +473,7 @@ impl CstBuilder {
                 .tree
                 .node_weight_mut(parent.0)
                 .expect("this node must be created on open_non_terminal_node");
-            let CstNodeData::NonTerminal { data, .. } = node_data else {
+            let Some(CstNodeData::NonTerminal { data, .. }) = node_data else {
                 panic!("this node must be created as NonTerminal");
             };
             let NonTerminalData::Input(span) = data else {

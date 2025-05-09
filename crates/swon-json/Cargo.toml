@@ -9,3 +9,4 @@ repository = "https://github.com/Hihaheho/swon"
 readme = "README.md"
 
 [dependencies]
+swon-parol = { workspace = true }
