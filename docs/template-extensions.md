@@ -1,7 +1,45 @@
 # Template Extensions
 
+## Example
+
+### input.swon
+
+```swon
+@ values.for.documentA
+$template-input.of = ./documentA.swon
+key1 = "value1"
+key2 = "value2"
+
+@ values.for.documentB
+$template-input.of = ./documentB.swon
+key1 = "value3"
+key2 = "value4"
+```
+
+### documentA.swon
+
+```swon
+key1.$template.include.path = .key1
+key2.$template.include.path = .key2
+```
+
+### documentB.swon
+
+```swon
+key1.$template.include.path = .key1
+key2.$template.include.path = .key2
+```
+
+## $template-value.for
+
+Mark the object as a value set for a template.
+
 ## $template.if
 
-## $template.for
+Deactivate the object if the condition is false.
+
+## $template.for_each
+
+Make array of objects for each value
 
 ## $template.include = { path, type }
