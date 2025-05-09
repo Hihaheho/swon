@@ -52,7 +52,8 @@ pub enum NonTerminalKind {
     Quote,
     Section,
     SectionBinding,
-    SectionList,
+    SectionBody,
+    SectionBodyList,
     Str,
     StrContinues,
     StrContinuesList,
@@ -218,7 +219,8 @@ impl NonTerminalEnum for NonTerminalKind {
             "Quote" => Self::Quote,
             "Section" => Self::Section,
             "SectionBinding" => Self::SectionBinding,
-            "SectionList" => Self::SectionList,
+            "SectionBody" => Self::SectionBody,
+            "SectionBodyList" => Self::SectionBodyList,
             "Str" => Self::Str,
             "StrContinues" => Self::StrContinues,
             "StrContinuesList" => Self::StrContinuesList,
@@ -329,7 +331,8 @@ impl std::fmt::Display for NonTerminalKind {
             Self::Quote => write!(f, stringify!(Quote)),
             Self::Section => write!(f, stringify!(Section)),
             Self::SectionBinding => write!(f, stringify!(SectionBinding)),
-            Self::SectionList => write!(f, stringify!(SectionList)),
+            Self::SectionBody => write!(f, stringify!(SectionBody)),
+            Self::SectionBodyList => write!(f, stringify!(SectionBodyList)),
             Self::Str => write!(f, stringify!(Str)),
             Self::StrContinues => write!(f, stringify!(StrContinues)),
             Self::StrContinuesList => write!(f, stringify!(StrContinuesList)),
@@ -701,8 +704,8 @@ impl ExpectedChildren<TerminalKind, NonTerminalKind> for NonTerminalKind {
                     attribute: ChildAttribute::Normal,
                 },
                 ChildKind {
-                    kind: NodeKind::NonTerminal(NonTerminalKind::SectionList),
-                    attribute: ChildAttribute::Vec,
+                    kind: NodeKind::NonTerminal(NonTerminalKind::SectionBody),
+                    attribute: ChildAttribute::Normal,
                 },
             ]),
             Self::SectionBinding => ExpectedChildrenKinds::Sequence(&[
@@ -719,13 +722,23 @@ impl ExpectedChildren<TerminalKind, NonTerminalKind> for NonTerminalKind {
                     attribute: ChildAttribute::Normal,
                 },
             ]),
-            Self::SectionList => ExpectedChildrenKinds::Recursion(&[
+            Self::SectionBody => ExpectedChildrenKinds::OneOf(&[
+                ChildKind {
+                    kind: NodeKind::NonTerminal(NonTerminalKind::SectionBodyList),
+                    attribute: ChildAttribute::Vec,
+                },
+                ChildKind {
+                    kind: NodeKind::NonTerminal(NonTerminalKind::SectionBinding),
+                    attribute: ChildAttribute::Normal,
+                },
+            ]),
+            Self::SectionBodyList => ExpectedChildrenKinds::Recursion(&[
                 ChildKind {
                     kind: NodeKind::NonTerminal(NonTerminalKind::Binding),
                     attribute: ChildAttribute::Normal,
                 },
                 ChildKind {
-                    kind: NodeKind::NonTerminal(NonTerminalKind::SectionList),
+                    kind: NodeKind::NonTerminal(NonTerminalKind::SectionBodyList),
                     attribute: ChildAttribute::Normal,
                 },
             ]),
@@ -2238,9 +2251,9 @@ where
             .find_child(cursor, NodeKind::NonTerminal(NonTerminalKind::Keys))
             .map(|option| option.map(|(i, node)| (i, Section::new(node))))
     }
-    pub fn find_section_list(&self, cursor: usize) -> Result<Option<(usize, Section<N>)>, N> {
+    pub fn find_section_body(&self, cursor: usize) -> Result<Option<(usize, Section<N>)>, N> {
         self.0
-            .find_child(cursor, NodeKind::NonTerminal(NonTerminalKind::SectionList))
+            .find_child(cursor, NodeKind::NonTerminal(NonTerminalKind::SectionBody))
             .map(|option| option.map(|(i, node)| (i, Section::new(node))))
     }
 }
@@ -2279,14 +2292,52 @@ where
 }
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct SectionList<T>(T);
+pub enum SectionBody<T> {
+    SectionBodyList(SectionBodyList<T>),
+    SectionBinding(SectionBinding<T>),
+    Invalid(T),
+}
 #[allow(dead_code)]
-impl<'a, N> SectionList<N>
+impl<'a, N> SectionBody<N>
 where
     N: Node<'a, TerminalKind, NonTerminalKind>,
 {
     pub fn new(node: N) -> Self {
-        SectionList(node)
+        match node.kind() {
+            NodeKind::NonTerminal(NonTerminalKind::SectionBodyList) => {
+                Self::SectionBodyList(SectionBodyList::new(node))
+            }
+            NodeKind::NonTerminal(NonTerminalKind::SectionBinding) => {
+                Self::SectionBinding(SectionBinding::new(node))
+            }
+            _ => SectionBody::Invalid(node),
+        }
+    }
+    pub fn node(&self) -> &N {
+        match self {
+            Self::SectionBodyList(node) => node.node(),
+            Self::SectionBinding(node) => node.node(),
+            Self::Invalid(node) => node,
+        }
+    }
+    pub fn node_mut(&mut self) -> &mut N {
+        match self {
+            Self::SectionBodyList(node) => node.node_mut(),
+            Self::SectionBinding(node) => node.node_mut(),
+            Self::Invalid(node) => node,
+        }
+    }
+}
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SectionBodyList<T>(T);
+#[allow(dead_code)]
+impl<'a, N> SectionBodyList<N>
+where
+    N: Node<'a, TerminalKind, NonTerminalKind>,
+{
+    pub fn new(node: N) -> Self {
+        SectionBodyList(node)
     }
     pub fn node(&self) -> &N {
         &self.0
@@ -2294,15 +2345,21 @@ where
     pub fn node_mut(&mut self) -> &mut N {
         &mut self.0
     }
-    pub fn find_binding(&self, cursor: usize) -> Result<Option<(usize, SectionList<N>)>, N> {
+    pub fn find_binding(&self, cursor: usize) -> Result<Option<(usize, SectionBodyList<N>)>, N> {
         self.0
             .find_child(cursor, NodeKind::NonTerminal(NonTerminalKind::Binding))
-            .map(|option| option.map(|(i, node)| (i, SectionList::new(node))))
+            .map(|option| option.map(|(i, node)| (i, SectionBodyList::new(node))))
     }
-    pub fn find_section_list(&self, cursor: usize) -> Result<Option<(usize, SectionList<N>)>, N> {
+    pub fn find_section_body_list(
+        &self,
+        cursor: usize,
+    ) -> Result<Option<(usize, SectionBodyList<N>)>, N> {
         self.0
-            .find_child(cursor, NodeKind::NonTerminal(NonTerminalKind::SectionList))
-            .map(|option| option.map(|(i, node)| (i, SectionList::new(node))))
+            .find_child(
+                cursor,
+                NodeKind::NonTerminal(NonTerminalKind::SectionBodyList),
+            )
+            .map(|option| option.map(|(i, node)| (i, SectionBodyList::new(node))))
     }
 }
 #[allow(dead_code)]

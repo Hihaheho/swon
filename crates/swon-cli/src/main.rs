@@ -1,10 +1,9 @@
 use clap::{Args, Parser, Subcommand};
 use std::fs;
+use swon_parol::TreeConstruct;
 use swon_parol::grammar::Grammar;
-use swon_parol::nodes::{NonTerminalKind, TerminalKind};
 use swon_parol::parser::parse_into;
 use swon_parol::tree::CstBuilder;
-use swon_parol::TreeConstruct;
 
 #[derive(Parser)]
 #[command(name = "swon", about = "SWON file utilities")]
@@ -39,7 +38,7 @@ fn main() {
             };
 
             let mut grammar = Grammar::new();
-            let mut tree_builder = CstBuilder::<TerminalKind, NonTerminalKind>::new();
+            let mut tree_builder = CstBuilder::new();
             if let Err(e) = parse_into(&contents, &mut tree_builder, &file, &mut grammar) {
                 eprintln!("Error parsing file: {}", e);
             }

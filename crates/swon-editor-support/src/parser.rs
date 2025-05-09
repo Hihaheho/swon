@@ -1,4 +1,3 @@
-use swon_parol::nodes::{NonTerminalKind, TerminalKind};
 use swon_parol::parol_runtime::ParolError;
 use swon_parol::tree::CstBuilder;
 use swon_parol::{Cst, TreeConstruct, parser};
@@ -11,7 +10,7 @@ pub enum ParseResult {
 /// Parse a document and return a CST
 pub fn parse_document(text: &str) -> ParseResult {
     let mut actions = swon_parol::grammar::Grammar::new();
-    let mut tree_builder = CstBuilder::<TerminalKind, NonTerminalKind>::new();
+    let mut tree_builder = CstBuilder::new();
 
     // Parse the document and capture any error
     let parse_result = parser::parse_into(text, &mut tree_builder, "document.swon", &mut actions);

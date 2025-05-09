@@ -2471,14 +2471,14 @@ impl NonTerminalHandle for SectionHandle {
             [
                 NodeKind::NonTerminal(NonTerminalKind::At),
                 NodeKind::NonTerminal(NonTerminalKind::Keys),
-                NodeKind::NonTerminal(NonTerminalKind::SectionList),
+                NodeKind::NonTerminal(NonTerminalKind::SectionBody),
             ],
-            |[at, keys, section_list], visit_ignored| Ok(
+            |[at, keys, section_body], visit_ignored| Ok(
                 visit(
                     SectionView {
                         at: AtHandle(at),
                         keys: KeysHandle(keys),
-                        section_list: SectionListHandle(section_list),
+                        section_body: SectionBodyHandle(section_body),
                     },
                     visit_ignored,
                 ),
@@ -2491,7 +2491,7 @@ impl NonTerminalHandle for SectionHandle {
 pub struct SectionView {
     pub at: AtHandle,
     pub keys: KeysHandle,
-    pub section_list: SectionListHandle,
+    pub section_body: SectionBodyHandle,
 }
 impl SectionView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -2551,9 +2551,9 @@ pub struct SectionBindingView {
 }
 impl SectionBindingView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct SectionListHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle for SectionListHandle {
-    type View = Option<SectionListView>;
+pub struct SectionBodyHandle(pub(crate) super::tree::CstNodeId);
+impl NonTerminalHandle for SectionBodyHandle {
+    type View = SectionBodyView;
     fn node_id(&self) -> CstNodeId {
         self.0
     }
@@ -2564,13 +2564,87 @@ impl NonTerminalHandle for SectionListHandle {
     ) -> Result<Self, CstConstructError<E>> {
         tree.collect_nodes(
             index,
-            [NodeKind::NonTerminal(NonTerminalKind::SectionList)],
+            [NodeKind::NonTerminal(NonTerminalKind::SectionBody)],
             |[index], visit| Ok((Self(index), visit)),
             visit_ignored,
         )
     }
     fn kind(&self) -> NonTerminalKind {
-        NonTerminalKind::SectionList
+        NonTerminalKind::SectionBody
+    }
+    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
+        &self,
+        tree: &Cst,
+        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        let mut children = tree.children(self.0);
+        let Some(child) = children.next() else {
+            return Err(ViewConstructionError::UnexpectedEndOfChildren {
+                parent: self.0,
+            });
+        };
+        let Some(child_data) = tree.node_data(child) else {
+            return Err(ViewConstructionError::NodeIdNotFound {
+                node: child,
+            });
+        };
+        let variant = match child_data.node_kind() {
+            NodeKind::NonTerminal(NonTerminalKind::SectionBodyList) => {
+                SectionBodyView::SectionBodyList(SectionBodyListHandle(child))
+            }
+            NodeKind::NonTerminal(NonTerminalKind::SectionBinding) => {
+                SectionBodyView::SectionBinding(SectionBindingHandle(child))
+            }
+            NodeKind::Terminal(kind) => {
+                return Err(ViewConstructionError::UnexpectedTerminal {
+                    node: child,
+                    terminal: kind,
+                });
+            }
+            NodeKind::NonTerminal(kind) => {
+                return Err(ViewConstructionError::UnexpectedNonTerminal {
+                    node: child,
+                    non_terminal: kind,
+                });
+            }
+        };
+        let (result, _visit) = visit(variant, visit_ignored);
+        if let Some(child) = children.next() {
+            return Err(ViewConstructionError::UnexpectedExtraNode {
+                node: child,
+            });
+        }
+        Ok(result)
+    }
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SectionBodyView {
+    SectionBodyList(SectionBodyListHandle),
+    SectionBinding(SectionBindingHandle),
+}
+impl SectionBodyView {}
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct SectionBodyListHandle(pub(crate) super::tree::CstNodeId);
+impl NonTerminalHandle for SectionBodyListHandle {
+    type View = Option<SectionBodyListView>;
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn new_with_visit<E>(
+        index: CstNodeId,
+        tree: &Cst,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
+    ) -> Result<Self, CstConstructError<E>> {
+        tree.collect_nodes(
+            index,
+            [NodeKind::NonTerminal(NonTerminalKind::SectionBodyList)],
+            |[index], visit| Ok((Self(index), visit)),
+            visit_ignored,
+        )
+    }
+    fn kind(&self) -> NonTerminalKind {
+        NonTerminalKind::SectionBodyList
     }
     fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
@@ -2585,13 +2659,13 @@ impl NonTerminalHandle for SectionListHandle {
             self.0,
             [
                 NodeKind::NonTerminal(NonTerminalKind::Binding),
-                NodeKind::NonTerminal(NonTerminalKind::SectionList),
+                NodeKind::NonTerminal(NonTerminalKind::SectionBodyList),
             ],
-            |[binding, section_list], visit_ignored| Ok(
+            |[binding, section_body_list], visit_ignored| Ok(
                 visit(
-                    Some(SectionListView {
+                    Some(SectionBodyListView {
                         binding: BindingHandle(binding),
-                        section_list: SectionListHandle(section_list),
+                        section_body_list: SectionBodyListHandle(section_body_list),
                     }),
                     visit_ignored,
                 ),
@@ -2601,11 +2675,11 @@ impl NonTerminalHandle for SectionListHandle {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct SectionListView {
+pub struct SectionBodyListView {
     pub binding: BindingHandle,
-    pub section_list: SectionListHandle,
+    pub section_body_list: SectionBodyListHandle,
 }
-impl RecursiveView<TerminalKind, NonTerminalKind> for SectionListView {
+impl RecursiveView<TerminalKind, NonTerminalKind> for SectionBodyListView {
     type Item = BindingHandle;
     fn get_all_with_visit<E>(
         &self,
@@ -2617,7 +2691,7 @@ impl RecursiveView<TerminalKind, NonTerminalKind> for SectionListView {
         while let Some(item) = current_view {
             let Self { binding, .. } = item;
             items.push(binding);
-            item.section_list
+            item.section_body_list
                 .get_view_with_visit(
                     tree,
                     |view, visit_ignored| {

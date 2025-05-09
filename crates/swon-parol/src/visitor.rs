@@ -428,14 +428,23 @@ pub trait CstVisitor: CstHandleSuper<Self::Error> {
         let _handle = handle;
         self.visit_section_binding_super(view, tree)
     }
-    fn visit_section_list(
+    fn visit_section_body(
         &mut self,
-        handle: SectionListHandle,
-        view: SectionListView,
+        handle: SectionBodyHandle,
+        view: SectionBodyView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
-        self.visit_section_list_super(view, tree)
+        self.visit_section_body_super(view, tree)
+    }
+    fn visit_section_body_list(
+        &mut self,
+        handle: SectionBodyListHandle,
+        view: SectionBodyListView,
+        tree: &Cst,
+    ) -> Result<(), Self::Error> {
+        let _handle = handle;
+        self.visit_section_body_list_super(view, tree)
     }
     fn visit_str(
         &mut self,
@@ -882,7 +891,10 @@ pub trait CstVisitor: CstHandleSuper<Self::Error> {
         kind: NodeKind,
         error: CstConstructError,
         tree: &Cst,
-    ) -> Result<(), Self::Error>;
+    ) -> Result<(), Self::Error> {
+        let _error = error;
+        self.recover_error(node_data, parent, kind, tree)
+    }
 }
 mod private {
     pub trait Sealed {}
@@ -1170,14 +1182,24 @@ pub trait CstHandleSuper<E>: private::Sealed {
         view: SectionBindingView,
         tree: &Cst,
     ) -> Result<(), E>;
-    fn visit_section_list_handle(
+    fn visit_section_body_handle(
         &mut self,
-        handle: SectionListHandle,
+        handle: SectionBodyHandle,
         tree: &Cst,
     ) -> Result<(), E>;
-    fn visit_section_list_super(
+    fn visit_section_body_super(
         &mut self,
-        view: SectionListView,
+        view: SectionBodyView,
+        tree: &Cst,
+    ) -> Result<(), E>;
+    fn visit_section_body_list_handle(
+        &mut self,
+        handle: SectionBodyListHandle,
+        tree: &Cst,
+    ) -> Result<(), E>;
+    fn visit_section_body_list_super(
+        &mut self,
+        view: SectionBodyListView,
         tree: &Cst,
     ) -> Result<(), E>;
     fn visit_str_handle(&mut self, handle: StrHandle, tree: &Cst) -> Result<(), E>;
@@ -4313,9 +4335,69 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
         result
     }
-    fn visit_section_list_handle(
+    fn visit_section_body_handle(
         &mut self,
-        handle: SectionListHandle,
+        handle: SectionBodyHandle,
+        tree: &Cst,
+    ) -> Result<(), V::Error> {
+        let Some(node_data) = tree.node_data(handle.node_id()) else {
+            return self
+                .then_construct_error(
+                    None,
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    CstConstructError::NodeIdNotFound {
+                        node: handle.node_id(),
+                    },
+                    tree,
+                );
+        };
+        let (kind, nt_data) = match node_data
+            .expected_non_terminal_or_error(handle.node_id(), handle.kind())
+        {
+            Ok((kind, nt_data)) => (kind, nt_data),
+            Err(error) => {
+                return self
+                    .then_construct_error(
+                        Some(node_data),
+                        handle.node_id(),
+                        NodeKind::NonTerminal(handle.kind()),
+                        error,
+                        tree,
+                    );
+            }
+        };
+        self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+        let result = match handle
+            .get_view_with_visit(
+                tree,
+                |view, visit: &mut Self| (
+                    visit.visit_section_body(handle, view, tree),
+                    visit,
+                ),
+                self,
+            )
+            .map_err(|e| e.extract_error())
+        {
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(e)) => Err(e),
+            Err(Ok(e)) => Err(e),
+            Err(Err(e)) => {
+                self.then_construct_error(
+                    Some(node_data),
+                    handle.node_id(),
+                    NodeKind::NonTerminal(handle.kind()),
+                    e,
+                    tree,
+                )
+            }
+        };
+        self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+        result
+    }
+    fn visit_section_body_list_handle(
+        &mut self,
+        handle: SectionBodyListHandle,
         tree: &Cst,
     ) -> Result<(), V::Error> {
         let Some(node_data) = tree.node_data(handle.node_id()) else {
@@ -4351,7 +4433,7 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
                 tree,
                 |view, visit: &mut Self| (
                     if let Some(view) = view {
-                        visit.visit_section_list(handle, view, tree)
+                        visit.visit_section_body_list(handle, view, tree)
                     } else {
                         Ok(())
                     },
@@ -6483,10 +6565,10 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         view_param: SectionView,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let SectionView { at, keys, section_list } = view_param;
+        let SectionView { at, keys, section_body } = view_param;
         self.visit_at_handle(at, tree)?;
         self.visit_keys_handle(keys, tree)?;
-        self.visit_section_list_handle(section_list, tree)?;
+        self.visit_section_body_handle(section_body, tree)?;
         Ok(())
     }
     fn visit_section_binding_super(
@@ -6500,14 +6582,29 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         self.visit_end_handle(end, tree)?;
         Ok(())
     }
-    fn visit_section_list_super(
+    fn visit_section_body_super(
         &mut self,
-        view_param: SectionListView,
+        view_param: SectionBodyView,
         tree: &Cst,
     ) -> Result<(), V::Error> {
-        let SectionListView { binding, section_list } = view_param;
+        match view_param {
+            SectionBodyView::SectionBodyList(item) => {
+                self.visit_section_body_list_handle(item, tree)?;
+            }
+            SectionBodyView::SectionBinding(item) => {
+                self.visit_section_binding_handle(item, tree)?;
+            }
+        }
+        Ok(())
+    }
+    fn visit_section_body_list_super(
+        &mut self,
+        view_param: SectionBodyListView,
+        tree: &Cst,
+    ) -> Result<(), V::Error> {
+        let SectionBodyListView { binding, section_body_list } = view_param;
         self.visit_binding_handle(binding, tree)?;
-        self.visit_section_list_handle(section_list, tree)?;
+        self.visit_section_body_list_handle(section_body_list, tree)?;
         Ok(())
     }
     fn visit_str_super(
@@ -7378,9 +7475,13 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
                         let handle = SectionBindingHandle(id);
                         self.visit_section_binding_handle(handle, tree)?;
                     }
-                    NonTerminalKind::SectionList => {
-                        let handle = SectionListHandle(id);
-                        self.visit_section_list_handle(handle, tree)?;
+                    NonTerminalKind::SectionBody => {
+                        let handle = SectionBodyHandle(id);
+                        self.visit_section_body_handle(handle, tree)?;
+                    }
+                    NonTerminalKind::SectionBodyList => {
+                        let handle = SectionBodyListHandle(id);
+                        self.visit_section_body_list_handle(handle, tree)?;
                     }
                     NonTerminalKind::Str => {
                         let handle = StrHandle(id);

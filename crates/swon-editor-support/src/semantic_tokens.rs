@@ -1,7 +1,7 @@
 use lsp_types::{SemanticTokenModifier, SemanticTokenType, SemanticTokens, SemanticTokensLegend};
 use swon_parol::Cst;
 use swon_parol::nodes::TerminalKind;
-use swon_parol::tree::{CstNodeData, CstNodeId, InputSpan, LineNumbers};
+use swon_parol::tree::{CstNodeData, CstNodeId, InputSpan, LineNumbers, TerminalData};
 
 /// Define the token types we'll use for Swon syntax highlighting
 const TOKEN_TYPES: &[SemanticTokenType] = &[
@@ -93,20 +93,13 @@ fn collect_tokens(
     legend: &SemanticTokensLegend,
 ) {
     // Get node data
-    if let Some(node_data) = cst.node_data(node_id) {
-        match node_data {
-            CstNodeData::Terminal(terminal_kind, span) => {
-                // Process terminal nodes
-                process_terminal(*terminal_kind, span, text, line_numbers, tokens, legend);
-            }
-            CstNodeData::NonTerminal(_non_terminal_kind) => {
-                // For non-terminals, we only need to process their children
-                // Special handling can be added here if needed
-            }
-            CstNodeData::DynamicToken(_, _) => {
-                // Dynamic tokens handling would go here
-            }
-        }
+    if let Some(CstNodeData::Terminal {
+        kind,
+        data: TerminalData::Input(span),
+    }) = cst.node_data(node_id)
+    {
+        // Process terminal nodes
+        process_terminal(kind, span, text, line_numbers, tokens, legend);
     }
 
     // Process all children
@@ -118,7 +111,7 @@ fn collect_tokens(
 /// Process a terminal node to extract token information
 fn process_terminal(
     kind: TerminalKind,
-    span: &InputSpan,
+    span: InputSpan,
     text: &str,
     line_numbers: &LineNumbers,
     tokens: &mut Vec<TokenData>,
@@ -233,7 +226,7 @@ fn push_multiple_tokens_oneline(
 
 /// Convert a span to line and character position
 fn span_to_line_char(
-    span: &InputSpan,
+    span: InputSpan,
     line_numbers: &LineNumbers,
     text: &str,
 ) -> Option<(u32, u32, u32)> {

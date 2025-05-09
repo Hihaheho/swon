@@ -35,7 +35,8 @@ Binding: Keys BindingRhs ;
   SectionBinding: Begin Swon End ;
   TextBinding: TextStart [Ws^] Text Newline ;
 
-Section: At Keys { Binding } ;
+Section: At Keys SectionBody ;
+  SectionBody: { Binding } | SectionBinding ;
   Keys: Key { Dot Key } ;
   Key: KeyBase [ ArrayMarker ] ;
   ArrayMarker: ArrayBegin [ Integer ] ArrayEnd ;
