@@ -104,6 +104,7 @@ pub enum TerminalKind {
     CodeBlockDelimiter,
     CodeBlockLine,
 }
+#[allow(dead_code)]
 impl TerminalKind {
     pub fn from_terminal_index(index: u16) -> Self {
         match index {
@@ -165,6 +166,7 @@ impl TerminalKind {
     }
 }
 
+#[allow(dead_code)]
 impl NonTerminalKind {
     pub fn from_non_terminal_name(name: &str) -> Self {
         match name {
