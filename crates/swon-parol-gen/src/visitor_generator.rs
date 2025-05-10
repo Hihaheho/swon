@@ -128,7 +128,7 @@ impl VisitorGenerator {
         });
 
         quote! {
-            pub trait CstVisitor: CstHandleSuper<Self::Error> {
+            pub trait CstVisitor: CstVisitorSuper<Self::Error> {
                 type Error;
                 #(#nt_visit_methods)*
                 #(#terminal_visit_methods)*
@@ -200,7 +200,7 @@ impl VisitorGenerator {
             mod private {
                 pub trait Sealed {}
             }
-            pub trait CstHandleSuper<E>: private::Sealed {
+            pub trait CstVisitorSuper<E>: private::Sealed {
                 #(#methods)*
                 #(#terminal_methods)*
                 fn visit_non_terminal_super(&mut self, id: CstNodeId, kind: NonTerminalKind, data: NonTerminalData, tree: &Cst) -> Result<(), E>;
@@ -232,7 +232,7 @@ impl VisitorGenerator {
 
         quote! {
             impl<V: CstVisitor> private::Sealed for V {}
-            impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
+            impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
                 #(#visit_handle_impls)*
                 #(#visit_super_impls)*
                 #(#terminal_visit_super_impls)*

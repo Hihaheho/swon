@@ -16,3 +16,10 @@ pub type CstNode = tree::CstNodeData<TerminalKind, NonTerminalKind>;
 pub type CstConstructError<E = Infallible> =
     ViewConstructionError<TerminalKind, NonTerminalKind, E>;
 pub type NodeKind = node_kind::NodeKind<TerminalKind, NonTerminalKind>;
+
+pub mod prelude {
+    pub use super::*;
+    pub use crate::nodes::*;
+    pub use crate::tree::{CstNodeId, DynamicTokenId, NonTerminalData, TerminalData};
+    pub use crate::visitor::{CstVisitor, CstVisitorSuper as _};
+}
