@@ -1,7 +1,7 @@
 use lsp_types::{SemanticTokenModifier, SemanticTokenType, SemanticTokens, SemanticTokensLegend};
 use swon_tree::{
     Cst,
-    nodes::TerminalKind,
+    node_kind::TerminalKind,
     tree::{CstNodeData, CstNodeId, InputSpan, LineNumbers, TerminalData},
 };
 

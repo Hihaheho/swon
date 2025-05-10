@@ -4,7 +4,7 @@ use thiserror::Error;
 
 use crate::{
     CstConstructError,
-    ast::{KeyHandle, KeysHandle},
+    nodes::{KeyHandle, KeysHandle},
     tree::NonTerminalHandle as _,
     visitor::{CstHandleSuper as _, CstVisitor},
 };
@@ -27,7 +27,7 @@ impl CstVisitor for ValueVisitor {
     fn visit_keys(
         &mut self,
         handle: KeysHandle,
-        view: crate::ast::KeysView,
+        view: crate::nodes::KeysView,
         tree: &crate::Cst,
     ) -> Result<(), Self::Error> {
         assert_eq!(self.current_keys.len(), 0);
@@ -40,7 +40,7 @@ impl CstVisitor for ValueVisitor {
     fn visit_key(
         &mut self,
         handle: KeyHandle,
-        view: crate::ast::KeyView,
+        view: crate::nodes::KeyView,
         tree: &crate::Cst,
     ) -> Result<(), Self::Error> {
         let key_base = view.key_base.get_view(tree)?;

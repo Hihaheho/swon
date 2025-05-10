@@ -16,7 +16,7 @@ fn main() {
         .parser_output_file("src/parser.rs")
         .actions_output_file("src/grammar_trait.rs")
         .node_kind_enums()
-        .node_kind_enums_output_file("../swon-tree/src/nodes.rs")
+        .node_kind_enums_output_file("../swon-tree/src/node_kind.rs")
         .expanded_grammar_output_file("swon-expanded.par")
         .user_type_name("Grammar")
         .user_trait_module_name("grammar")
@@ -31,12 +31,12 @@ fn main() {
     format_node_info(&node_info);
     rename_non_terminal_names(&mut node_info);
     let mut ast_type_generator =
-        AstTypeGenerator::new(Path::new("crates/swon-tree/src/ast.rs").into());
+        AstTypeGenerator::new(Path::new("crates/swon-tree/src/nodes.rs").into());
     ast_type_generator.generate(&node_info);
     let visitor_generator =
         VisitorGenerator::new(Path::new("crates/swon-tree/src/visitor.rs").into());
     visitor_generator.generate(&node_info);
-    generate_node_kind("crates/swon-tree/src/nodes.rs");
+    generate_node_kind("crates/swon-tree/src/node_kind.rs");
 
     Command::new("cargo")
         .args(["fmt", "-p", "crates/swon-tree"])

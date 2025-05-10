@@ -59,8 +59,8 @@ impl VisitorGenerator {
         quote! {
             use crate::{
                 Cst, CstConstructError, NodeKind, CstNode,
-                ast::*,
-                nodes::{TerminalKind, NonTerminalKind},
+                nodes::*,
+                node_kind::{TerminalKind, NonTerminalKind},
                 tree::{NonTerminalHandle as _, TerminalData, NonTerminalData, CstNodeId},
             };
         }

@@ -2,7 +2,7 @@ use thiserror::Error;
 
 use crate::{
     Cst, CstConstructError, CstNode, NodeKind,
-    nodes::TerminalKind,
+    node_kind::TerminalKind,
     tree::{CstNodeId, DynamicTokenId, TerminalData},
     visitor::{CstHandleSuper as _, CstVisitor},
 };
@@ -101,7 +101,7 @@ impl CstVisitor for InspectVisitor<'_, '_> {
     fn visit_terminal(
         &mut self,
         _id: CstNodeId,
-        kind: crate::nodes::TerminalKind,
+        kind: crate::node_kind::TerminalKind,
         data: crate::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
@@ -130,7 +130,7 @@ impl CstVisitor for InspectVisitor<'_, '_> {
     fn visit_non_terminal(
         &mut self,
         _id: CstNodeId,
-        kind: crate::nodes::NonTerminalKind,
+        kind: crate::node_kind::NonTerminalKind,
         _data: crate::tree::NonTerminalData,
         _tree: &Cst,
     ) -> Result<(), Self::Error> {
@@ -141,7 +141,7 @@ impl CstVisitor for InspectVisitor<'_, '_> {
     fn visit_non_terminal_close(
         &mut self,
         _id: CstNodeId,
-        _kind: crate::nodes::NonTerminalKind,
+        _kind: crate::node_kind::NonTerminalKind,
         _data: crate::tree::NonTerminalData,
         _tree: &Cst,
     ) -> Result<(), Self::Error> {

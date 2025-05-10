@@ -1,6 +1,6 @@
 use crate::{
-    Cst, CstConstructError, NodeKind, CstNode, ast::*,
-    nodes::{TerminalKind, NonTerminalKind},
+    Cst, CstConstructError, NodeKind, CstNode, nodes::*,
+    node_kind::{TerminalKind, NonTerminalKind},
     tree::{NonTerminalHandle as _, TerminalData, NonTerminalData, CstNodeId},
 };
 pub trait CstVisitor: CstHandleSuper<Self::Error> {

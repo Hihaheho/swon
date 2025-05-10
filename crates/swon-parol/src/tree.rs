@@ -2,7 +2,7 @@ use parol_runtime::{ParolError, Token, parser::parse_tree_type::TreeConstruct};
 use petgraph::graph::{DiGraph, NodeIndex};
 use swon_tree::{
     Cst,
-    nodes::{NonTerminalKind, TerminalKind},
+    node_kind::{NonTerminalKind, TerminalKind},
     tree::{ConcreteSyntaxTree, CstNodeData, CstNodeId, InputSpan, NonTerminalData, TerminalData},
 };
 

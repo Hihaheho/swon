@@ -12,9 +12,9 @@ pub use span::*;
 
 use crate::{
     Cst, CstConstructError,
-    ast::{BlockComment, LineComment, NewLine, RootHandle, Whitespace},
     common_visitors::{FormatVisitor, FormatVisitorError, InspectVisitor},
-    nodes::{NodeKind, NonTerminalKind, TerminalKind},
+    node_kind::{NodeKind, NonTerminalKind, TerminalKind},
+    nodes::{BlockComment, LineComment, NewLine, RootHandle, Whitespace},
     visitor::{BuiltinTerminalVisitor, CstHandleSuper as _},
 };
 
@@ -525,7 +525,7 @@ struct DummyTerminalVisitor;
 impl<E> BuiltinTerminalVisitor<E> for DummyTerminalVisitor {
     fn visit_builtin_new_line_terminal(
         &mut self,
-        _terminal: crate::ast::NewLine,
+        _terminal: crate::nodes::NewLine,
         _data: TerminalData,
         _tree: &crate::Cst,
     ) -> Result<(), E> {
@@ -534,7 +534,7 @@ impl<E> BuiltinTerminalVisitor<E> for DummyTerminalVisitor {
 
     fn visit_builtin_whitespace_terminal(
         &mut self,
-        _terminal: crate::ast::Whitespace,
+        _terminal: crate::nodes::Whitespace,
         _data: TerminalData,
         _tree: &crate::Cst,
     ) -> Result<(), E> {
@@ -543,7 +543,7 @@ impl<E> BuiltinTerminalVisitor<E> for DummyTerminalVisitor {
 
     fn visit_builtin_line_comment_terminal(
         &mut self,
-        _terminal: crate::ast::LineComment,
+        _terminal: crate::nodes::LineComment,
         _data: TerminalData,
         _tree: &crate::Cst,
     ) -> Result<(), E> {
@@ -552,7 +552,7 @@ impl<E> BuiltinTerminalVisitor<E> for DummyTerminalVisitor {
 
     fn visit_builtin_block_comment_terminal(
         &mut self,
-        _terminal: crate::ast::BlockComment,
+        _terminal: crate::nodes::BlockComment,
         _data: TerminalData,
         _tree: &crate::Cst,
     ) -> Result<(), E> {

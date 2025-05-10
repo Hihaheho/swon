@@ -73,7 +73,7 @@ impl AstTypeGenerator {
             use super::tree::{NonTerminalHandle, RecursiveView, CstNodeId, ViewConstructionError};
             use super::visitor::BuiltinTerminalVisitor;
             use crate::{Cst, CstConstructError};
-            use super::nodes::{TerminalKind, NonTerminalKind, NodeKind};
+            use super::node_kind::{TerminalKind, NonTerminalKind, NodeKind};
         }
     }
 
