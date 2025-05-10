@@ -49,11 +49,17 @@ impl AstTypeGenerator {
 
         quote! {
             #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-            pub struct #struct_name(pub super::tree::CstNodeId);
+            pub struct #struct_name(pub(crate) super::tree::CstNodeId);
 
-            impl #struct_name {
-                pub fn kind(&self) -> TerminalKind {
+            impl TerminalHandle for #struct_name {
+                fn node_id(&self) -> CstNodeId {
+                    self.0
+                }
+                fn kind(&self) -> TerminalKind {
                     TerminalKind::#variant_name
+                }
+                fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+                    tree.get_terminal(self.0, TerminalKind::#variant_name)
                 }
             }
         }
@@ -70,7 +76,7 @@ impl AstTypeGenerator {
     pub fn generate_imports(&self) -> proc_macro2::TokenStream {
         quote! {
             #![allow(unused_variables)]
-            use super::tree::{NonTerminalHandle, RecursiveView, CstNodeId, ViewConstructionError};
+            use super::tree::{TerminalHandle, NonTerminalHandle, RecursiveView, CstNodeId, ViewConstructionError, TerminalData};
             use super::visitor::BuiltinTerminalVisitor;
             use crate::{Cst, CstConstructError};
             use super::node_kind::{TerminalKind, NonTerminalKind, NodeKind};
@@ -313,16 +319,11 @@ impl AstTypeGenerator {
 
                     let variant = match child_data.node_kind() {
                         #(#get_view_match_arms)*
-                        NodeKind::Terminal(kind) => {
-                            return Err(ViewConstructionError::UnexpectedTerminal {
+                        _ => {
+                            return Err(ViewConstructionError::UnexpectedNode {
                                 node: child,
-                                terminal: kind,
-                            });
-                        }
-                        NodeKind::NonTerminal(kind) => {
-                            return Err(ViewConstructionError::UnexpectedNonTerminal {
-                                node: child,
-                                non_terminal: kind,
+                                data: child_data,
+                                expected_kind: child_data.node_kind(),
                             });
                         }
                     };

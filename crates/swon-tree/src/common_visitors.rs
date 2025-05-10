@@ -1,11 +1,6 @@
 use thiserror::Error;
 
-use crate::{
-    Cst, CstConstructError, CstNode, NodeKind,
-    node_kind::TerminalKind,
-    tree::{CstNodeId, DynamicTokenId, TerminalData},
-    visitor::{CstHandleSuper as _, CstVisitor},
-};
+use crate::prelude::*;
 
 pub struct FormatVisitor<'f, 't> {
     input: &'t str,
@@ -101,8 +96,8 @@ impl CstVisitor for InspectVisitor<'_, '_> {
     fn visit_terminal(
         &mut self,
         _id: CstNodeId,
-        kind: crate::node_kind::TerminalKind,
-        data: crate::tree::TerminalData,
+        kind: TerminalKind,
+        data: TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         match data {
@@ -130,8 +125,8 @@ impl CstVisitor for InspectVisitor<'_, '_> {
     fn visit_non_terminal(
         &mut self,
         _id: CstNodeId,
-        kind: crate::node_kind::NonTerminalKind,
-        _data: crate::tree::NonTerminalData,
+        kind: NonTerminalKind,
+        _data: NonTerminalData,
         _tree: &Cst,
     ) -> Result<(), Self::Error> {
         writeln!(self.f, "{}{:?}", " ".repeat(self.indent), kind)?;
@@ -141,8 +136,8 @@ impl CstVisitor for InspectVisitor<'_, '_> {
     fn visit_non_terminal_close(
         &mut self,
         _id: CstNodeId,
-        _kind: crate::node_kind::NonTerminalKind,
-        _data: crate::tree::NonTerminalData,
+        _kind: NonTerminalKind,
+        _data: NonTerminalData,
         _tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.indent -= 2;

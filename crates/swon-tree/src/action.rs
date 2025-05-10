@@ -1,5 +1,3 @@
-use thisisplural::Plural;
-
 use crate::{Cst, CstNode, tree::CstNodeId};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -86,8 +84,6 @@ impl CstCommands {
         }
     }
 }
-#[derive(Debug, Clone, Plural)]
-pub struct CstActions(pub Vec<Command>);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Command {

@@ -61,7 +61,7 @@ impl VisitorGenerator {
                 Cst, CstConstructError, NodeKind, CstNode,
                 nodes::*,
                 node_kind::{TerminalKind, NonTerminalKind},
-                tree::{NonTerminalHandle as _, TerminalData, NonTerminalData, CstNodeId},
+                tree::{TerminalHandle as _, NonTerminalHandle as _, TerminalData, NonTerminalData, CstNodeId},
             };
         }
     }
@@ -105,8 +105,7 @@ impl VisitorGenerator {
                     view: #view_param_type,
                     tree: &Cst,
                 ) -> Result<(), Self::Error> {
-                    let _handle = handle;
-                    self.#fn_name_super_ident(view, tree)
+                    self.#fn_name_super_ident(handle, view, tree)
                 }
             }
         });
@@ -174,6 +173,7 @@ impl VisitorGenerator {
                 let visit_super_method = quote! {
                     fn #visit_super_fn_name(
                         &mut self,
+                        handle: #handle_type_ident,
                         view: #view_param_type,
                         tree: &Cst,
                     ) -> Result<(), E>;
@@ -294,22 +294,26 @@ impl VisitorGenerator {
                 handle: #handle_type_ident,
                 tree: &Cst,
             ) -> Result<(), V::Error> {
-                let Some(node_data) = tree.node_data(handle.node_id()) else {
-                    return self.then_construct_error(None, handle.node_id(), NodeKind::NonTerminal(handle.kind()), CstConstructError::NodeIdNotFound { node: handle.node_id() }, tree);
+                let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
+                    Ok(nt_data) => nt_data,
+                    Err(error) => {
+                        return self.then_construct_error(
+                            None,
+                            handle.node_id(),
+                            NodeKind::NonTerminal(handle.kind()),
+                            error,
+                            tree,
+                        );
+                    }
                 };
-
-                let (kind, nt_data) = match node_data.expected_non_terminal_or_error(handle.node_id(), handle.kind()) {
-                    Ok((kind, nt_data)) => (kind, nt_data),
-                    Err(error) => return self.then_construct_error(Some(node_data), handle.node_id(), NodeKind::NonTerminal(handle.kind()), error, tree),
-                };
-                self.visit_non_terminal(handle.node_id(), kind, nt_data, tree)?;
+                self.visit_non_terminal(handle.node_id(), handle.kind(), nt_data, tree)?;
                 let result = match handle.get_view_with_visit(tree, |view, visit: &mut Self| (#on_view, visit), self).map_err(|e| e.extract_error()) {
                     Ok(Ok(())) => Ok(()),
                     Ok(Err(e)) => Err(e),
                     Err(Ok(e)) => Err(e),
-                    Err(Err(e)) => self.then_construct_error(Some(node_data), handle.node_id(), NodeKind::NonTerminal(handle.kind()), e, tree),
+                    Err(Err(e)) => self.then_construct_error(Some(CstNode::new_non_terminal(handle.kind(), nt_data)), handle.node_id(), NodeKind::NonTerminal(handle.kind()), e, tree),
                 };
-                self.visit_non_terminal_close(handle.node_id(), kind, nt_data, tree)?;
+                self.visit_non_terminal_close(handle.node_id(), handle.kind(), nt_data, tree)?;
                 result
             }
         }
@@ -368,6 +372,7 @@ impl VisitorGenerator {
         let view_ident = format_ident!("view_param");
 
         let actual_view_type_name = format_ident!("{}View", nt_info.name);
+        let handle_type_ident = format_ident!("{}Handle", nt_info.name);
 
         let body = match nt_info.kind {
             ChildrenType::Sequence | ChildrenType::Recursion => {
@@ -377,19 +382,22 @@ impl VisitorGenerator {
                     .map(|field_info| {
                         let child_handle_field_name = &field_info.field_name_ident;
                         let visit_call = if field_info.is_non_terminal {
-                            let visit_child_handle_method = format_snake_case(&format!("visit_{}_handle", field_info.original_name));
+                            let visit_child_handle_method = format_snake_case(&format!(
+                                "visit_{}_handle",
+                                field_info.original_name
+                            ));
                             quote! {
                                 self.#visit_child_handle_method(#child_handle_field_name, tree)?;
                             }
                         } else {
-                            let visit_terminal_method = format_snake_case(&format!("visit_{}_terminal", field_info.original_name));
+                            let visit_terminal_method = format_snake_case(&format!(
+                                "visit_{}_terminal",
+                                field_info.original_name
+                            ));
                             quote! {
-                                let Some(node_data) = tree.node_data(#child_handle_field_name.0) else {
-                                    return self.then_construct_error(None, #child_handle_field_name.0, NodeKind::Terminal(#child_handle_field_name.kind()), CstConstructError::NodeIdNotFound { node: #child_handle_field_name.0 }, tree);
-                                };
-                                let (_kind, data) = match node_data.expected_terminal_or_error(#child_handle_field_name.0, #child_handle_field_name.kind()) {
-                                    Ok((_kind, data)) => (data, data),
-                                    Err(error) => return self.then_construct_error(Some(node_data), #child_handle_field_name.0, NodeKind::Terminal(#child_handle_field_name.kind()), error, tree),
+                                let data = match #child_handle_field_name.get_data(tree) {
+                                    Ok(data) => data,
+                                    Err(error) => return self.then_construct_error(None, #child_handle_field_name.0, NodeKind::Terminal(#child_handle_field_name.kind()), error, tree),
                                 };
                                 self.#visit_terminal_method(#child_handle_field_name, data, tree)?;
                             }
@@ -465,9 +473,11 @@ impl VisitorGenerator {
         quote! {
             fn #fn_name_super_ident(
                 &mut self,
+                handle: #handle_type_ident,
                 #view_ident: #view_param_type,
                 tree: &Cst,
             ) -> Result<(), V::Error> {
+                let _handle = handle;
                 #body
             }
         }

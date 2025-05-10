@@ -15,7 +15,7 @@ use crate::{
     common_visitors::{FormatVisitor, FormatVisitorError, InspectVisitor},
     node_kind::{NodeKind, NonTerminalKind, TerminalKind},
     nodes::{BlockComment, LineComment, NewLine, RootHandle, Whitespace},
-    visitor::{BuiltinTerminalVisitor, CstHandleSuper as _},
+    visitor::{BuiltinTerminalVisitor, CstVisitorSuper as _},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -28,6 +28,24 @@ pub enum CstNodeData<T, Nt> {
     Terminal { kind: T, data: TerminalData },
     /// A non-terminal node with its kind
     NonTerminal { kind: Nt, data: NonTerminalData },
+}
+
+impl<T, Nt> CstNodeData<T, Nt> {
+    pub fn new_terminal(kind: T, data: TerminalData) -> Self {
+        Self::Terminal { kind, data }
+    }
+
+    pub fn new_non_terminal(kind: Nt, data: NonTerminalData) -> Self {
+        Self::NonTerminal { kind, data }
+    }
+
+    pub fn is_terminal(&self) -> bool {
+        matches!(self, CstNodeData::Terminal { .. })
+    }
+
+    pub fn is_non_terminal(&self) -> bool {
+        matches!(self, CstNodeData::NonTerminal { .. })
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -67,16 +85,11 @@ where
     ) -> Result<(T, TerminalData), ViewConstructionError<T, Nt>> {
         match self {
             CstNodeData::Terminal { kind, data } if *kind == expected => Ok((*kind, *data)),
-            CstNodeData::Terminal { kind, .. } => Err(ViewConstructionError::UnexpectedTerminal {
+            _ => Err(ViewConstructionError::UnexpectedNode {
                 node,
-                terminal: *kind,
+                data: *self,
+                expected_kind: NodeKind::Terminal(expected),
             }),
-            CstNodeData::NonTerminal { kind, .. } => {
-                Err(ViewConstructionError::UnexpectedNonTerminal {
-                    node,
-                    non_terminal: *kind,
-                })
-            }
         }
     }
 
@@ -87,15 +100,10 @@ where
     ) -> Result<(Nt, NonTerminalData), ViewConstructionError<T, Nt>> {
         match self {
             CstNodeData::NonTerminal { kind, data } if *kind == expected => Ok((*kind, *data)),
-            CstNodeData::NonTerminal { kind, .. } => {
-                Err(ViewConstructionError::UnexpectedNonTerminal {
-                    node,
-                    non_terminal: *kind,
-                })
-            }
-            CstNodeData::Terminal { kind, .. } => Err(ViewConstructionError::UnexpectedTerminal {
+            _ => Err(ViewConstructionError::UnexpectedNode {
                 node,
-                terminal: *kind,
+                data: *self,
+                expected_kind: NodeKind::NonTerminal(expected),
             }),
         }
     }
@@ -240,6 +248,29 @@ impl TerminalKind {
 }
 
 impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
+    pub fn get_non_terminal(
+        &self,
+        id: CstNodeId,
+        kind: NonTerminalKind,
+    ) -> Result<NonTerminalData, CstConstructError> {
+        let node_data = self
+            .node_data(id)
+            .ok_or(ViewConstructionError::NodeIdNotFound { node: id })?;
+        let (_, data) = node_data.expected_non_terminal_or_error(id, kind)?;
+        Ok(data)
+    }
+    pub fn get_terminal(
+        &self,
+        id: CstNodeId,
+        kind: TerminalKind,
+    ) -> Result<TerminalData, CstConstructError> {
+        let node_data = self
+            .node_data(id)
+            .ok_or(ViewConstructionError::NodeIdNotFound { node: id })?;
+        let (_, data) = node_data.expected_terminal_or_error(id, kind)?;
+        Ok(data)
+    }
+
     pub fn collect_nodes<'v, const N: usize, V: BuiltinTerminalVisitor<E>, O, E>(
         &self,
         parent: CstNodeId,
@@ -266,9 +297,10 @@ impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
                             continue 'outer;
                         } else if kind.is_builtin_whitespace() || kind.is_builtin_new_line() {
                             if kind.auto_ws_is_off(idx) {
-                                return Err(ViewConstructionError::UnexpectedTerminal {
+                                return Err(ViewConstructionError::UnexpectedNode {
                                     node: child,
-                                    terminal: kind,
+                                    data: child_data,
+                                    expected_kind,
                                 });
                             }
                             ignored.push((child, kind, data));
@@ -278,9 +310,10 @@ impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
                             ignored.push((child, kind, data));
                             continue 'inner;
                         } else {
-                            return Err(ViewConstructionError::UnexpectedTerminal {
+                            return Err(ViewConstructionError::UnexpectedNode {
                                 node: child,
-                                terminal: kind,
+                                data: child_data,
+                                expected_kind,
                             });
                         }
                     }
@@ -289,9 +322,10 @@ impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
                             result.push(child);
                             continue 'outer;
                         } else {
-                            return Err(ViewConstructionError::UnexpectedNonTerminal {
+                            return Err(ViewConstructionError::UnexpectedNode {
                                 node: child,
-                                non_terminal: kind,
+                                data: child_data,
+                                expected_kind,
                             });
                         }
                     }
@@ -355,16 +389,18 @@ impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
                             _ => unreachable!(),
                         }
                     } else {
-                        return Err(ViewConstructionError::UnexpectedTerminal {
+                        return Err(ViewConstructionError::UnexpectedNode {
                             node: child,
-                            terminal: kind,
+                            data: child_data,
+                            expected_kind: NodeKind::Terminal(kind),
                         });
                     }
                 }
                 CstNodeData::NonTerminal { kind, .. } => {
-                    return Err(ViewConstructionError::UnexpectedNonTerminal {
+                    return Err(ViewConstructionError::UnexpectedNode {
                         node: child,
-                        non_terminal: kind,
+                        data: child_data,
+                        expected_kind: NodeKind::NonTerminal(kind),
                     });
                 }
             }
@@ -401,20 +437,14 @@ impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
 /// Error that occurs when constructing a view from a [NonTerminalHandle].
 pub enum ViewConstructionError<T, Nt, E = Infallible> {
     /// Expected a specific kind of terminal node, but got an invalid node
-    #[error("Unexpected node for expected terminal: {terminal}")]
-    UnexpectedTerminal {
+    #[error("Unexpected node for expected kind: {expected_kind:?} but got {data:?}")]
+    UnexpectedNode {
         /// The index of the node.
         node: CstNodeId,
-        /// The expected terminal.
-        terminal: T,
-    },
-    /// Expected a specific kind of non-terminal node, but got an invalid node
-    #[error("Unexpected node for expected non-terminal: {non_terminal}")]
-    UnexpectedNonTerminal {
-        /// The index of the node.
-        node: CstNodeId,
-        /// The expected non-terminal.
-        non_terminal: Nt,
+        /// The data of the node.
+        data: CstNodeData<T, Nt>,
+        /// The expected kind.
+        expected_kind: NodeKind<T, Nt>,
     },
     /// Expected an extra node, but got an invalid node
     #[error("Unexpected extra node")]
@@ -449,12 +479,15 @@ impl<T, Nt, E> ViewConstructionError<T, Nt, E> {
     pub fn extract_error(self) -> Result<E, ViewConstructionError<T, Nt, Infallible>> {
         match self {
             ViewConstructionError::Error(e) => Ok(e),
-            ViewConstructionError::UnexpectedTerminal { node, terminal } => {
-                Err(ViewConstructionError::UnexpectedTerminal { node, terminal })
-            }
-            ViewConstructionError::UnexpectedNonTerminal { node, non_terminal } => {
-                Err(ViewConstructionError::UnexpectedNonTerminal { node, non_terminal })
-            }
+            ViewConstructionError::UnexpectedNode {
+                node,
+                data,
+                expected_kind,
+            } => Err(ViewConstructionError::UnexpectedNode {
+                node,
+                data,
+                expected_kind,
+            }),
             ViewConstructionError::UnexpectedExtraNode { node } => {
                 Err(ViewConstructionError::UnexpectedExtraNode { node })
             }
@@ -474,12 +507,15 @@ impl<T, Nt, E> ViewConstructionError<T, Nt, E> {
 impl<T, Nt> ViewConstructionError<T, Nt, Infallible> {
     pub fn into_any_error<E>(self) -> ViewConstructionError<T, Nt, E> {
         match self {
-            ViewConstructionError::UnexpectedTerminal { node, terminal } => {
-                ViewConstructionError::UnexpectedTerminal { node, terminal }
-            }
-            ViewConstructionError::UnexpectedNonTerminal { node, non_terminal } => {
-                ViewConstructionError::UnexpectedNonTerminal { node, non_terminal }
-            }
+            ViewConstructionError::UnexpectedNode {
+                node,
+                data,
+                expected_kind,
+            } => ViewConstructionError::UnexpectedNode {
+                node,
+                data,
+                expected_kind,
+            },
             ViewConstructionError::UnexpectedExtraNode { node } => {
                 ViewConstructionError::UnexpectedExtraNode { node }
             }
@@ -495,29 +531,31 @@ impl<T, Nt> ViewConstructionError<T, Nt, Infallible> {
         }
     }
 }
-
-pub fn assert_node_kind<T, Nt>(
-    node: CstNodeId,
-    kind: NodeKind<T, Nt>,
-    expected_kind: NodeKind<T, Nt>,
-) -> Result<(), ViewConstructionError<T, Nt>>
+impl<T, Nt> ViewConstructionError<T, Nt, Infallible>
 where
-    T: PartialEq,
-    Nt: PartialEq,
+    T: Copy,
+    Nt: Copy,
 {
-    if kind == expected_kind {
-        Ok(())
-    } else {
-        match kind {
-            NodeKind::Terminal(k) => {
-                Err(ViewConstructionError::UnexpectedTerminal { node, terminal: k })
-            }
-            NodeKind::NonTerminal(k) => Err(ViewConstructionError::UnexpectedNonTerminal {
+    pub fn unexpected_node(&self) -> Option<UnexpectedNode<T, Nt>> {
+        match self {
+            ViewConstructionError::UnexpectedNode {
                 node,
-                non_terminal: k,
+                data,
+                expected_kind,
+            } => Some(UnexpectedNode {
+                node: *node,
+                data: *data,
+                expected_kind: *expected_kind,
             }),
+            _ => None,
         }
     }
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct UnexpectedNode<T, Nt> {
+    node: CstNodeId,
+    data: CstNodeData<T, Nt>,
+    expected_kind: NodeKind<T, Nt>,
 }
 
 struct DummyTerminalVisitor;
@@ -560,11 +598,21 @@ impl<E> BuiltinTerminalVisitor<E> for DummyTerminalVisitor {
     }
 }
 
+pub trait TerminalHandle {
+    /// Node ID of the terminal.
+    fn node_id(&self) -> CstNodeId;
+    /// Kind of the terminal.
+    fn kind(&self) -> TerminalKind;
+    /// Data of the terminal.
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError>;
+}
+
 /// A trait that all generated non-terminal handles implements.
 pub trait NonTerminalHandle {
     /// The type of the view for this non-terminal.
     type View;
 
+    /// Node ID of the non-terminal.
     fn node_id(&self) -> CstNodeId;
 
     /// Create a new non-terminal handle from a node.

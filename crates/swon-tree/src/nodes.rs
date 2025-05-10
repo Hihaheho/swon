@@ -1,5 +1,8 @@
 #![allow(unused_variables)]
-use super::tree::{NonTerminalHandle, RecursiveView, CstNodeId, ViewConstructionError};
+use super::tree::{
+    TerminalHandle, NonTerminalHandle, RecursiveView, CstNodeId, ViewConstructionError,
+    TerminalData,
+};
 use super::visitor::BuiltinTerminalVisitor;
 use crate::{Cst, CstConstructError};
 use super::node_kind::{TerminalKind, NonTerminalKind, NodeKind};
@@ -621,16 +624,11 @@ impl NonTerminalHandle for BindingRhsHandle {
             NodeKind::NonTerminal(NonTerminalKind::TextBinding) => {
                 BindingRhsView::TextBinding(TextBindingHandle(child))
             }
-            NodeKind::Terminal(kind) => {
-                return Err(ViewConstructionError::UnexpectedTerminal {
+            _ => {
+                return Err(ViewConstructionError::UnexpectedNode {
                     node: child,
-                    terminal: kind,
-                });
-            }
-            NodeKind::NonTerminal(kind) => {
-                return Err(ViewConstructionError::UnexpectedNonTerminal {
-                    node: child,
-                    non_terminal: kind,
+                    data: child_data,
+                    expected_kind: child_data.node_kind(),
                 });
             }
         };
@@ -696,16 +694,11 @@ impl NonTerminalHandle for BooleanHandle {
             NodeKind::NonTerminal(NonTerminalKind::False) => {
                 BooleanView::False(FalseHandle(child))
             }
-            NodeKind::Terminal(kind) => {
-                return Err(ViewConstructionError::UnexpectedTerminal {
+            _ => {
+                return Err(ViewConstructionError::UnexpectedNode {
                     node: child,
-                    terminal: kind,
-                });
-            }
-            NodeKind::NonTerminal(kind) => {
-                return Err(ViewConstructionError::UnexpectedNonTerminal {
-                    node: child,
-                    non_terminal: kind,
+                    data: child_data,
+                    expected_kind: child_data.node_kind(),
                 });
             }
         };
@@ -1731,16 +1724,11 @@ impl NonTerminalHandle for KeyBaseHandle {
             NodeKind::NonTerminal(NonTerminalKind::Integer) => {
                 KeyBaseView::Integer(IntegerHandle(child))
             }
-            NodeKind::Terminal(kind) => {
-                return Err(ViewConstructionError::UnexpectedTerminal {
+            _ => {
+                return Err(ViewConstructionError::UnexpectedNode {
                     node: child,
-                    terminal: kind,
-                });
-            }
-            NodeKind::NonTerminal(kind) => {
-                return Err(ViewConstructionError::UnexpectedNonTerminal {
-                    node: child,
-                    non_terminal: kind,
+                    data: child_data,
+                    expected_kind: child_data.node_kind(),
                 });
             }
         };
@@ -2595,16 +2583,11 @@ impl NonTerminalHandle for SectionBodyHandle {
             NodeKind::NonTerminal(NonTerminalKind::SectionBinding) => {
                 SectionBodyView::SectionBinding(SectionBindingHandle(child))
             }
-            NodeKind::Terminal(kind) => {
-                return Err(ViewConstructionError::UnexpectedTerminal {
+            _ => {
+                return Err(ViewConstructionError::UnexpectedNode {
                     node: child,
-                    terminal: kind,
-                });
-            }
-            NodeKind::NonTerminal(kind) => {
-                return Err(ViewConstructionError::UnexpectedNonTerminal {
-                    node: child,
-                    non_terminal: kind,
+                    data: child_data,
+                    expected_kind: child_data.node_kind(),
                 });
             }
         };
@@ -3534,16 +3517,11 @@ impl NonTerminalHandle for ValueHandle {
             NodeKind::NonTerminal(NonTerminalKind::Code) => {
                 ValueView::Code(CodeHandle(child))
             }
-            NodeKind::Terminal(kind) => {
-                return Err(ViewConstructionError::UnexpectedTerminal {
+            _ => {
+                return Err(ViewConstructionError::UnexpectedNode {
                     node: child,
-                    terminal: kind,
-                });
-            }
-            NodeKind::NonTerminal(kind) => {
-                return Err(ViewConstructionError::UnexpectedNonTerminal {
-                    node: child,
-                    non_terminal: kind,
+                    data: child_data,
+                    expected_kind: child_data.node_kind(),
                 });
             }
         };
@@ -3710,226 +3688,418 @@ pub struct RootView {
 }
 impl RootView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct NewLine(pub super::tree::CstNodeId);
-impl NewLine {
-    pub fn kind(&self) -> TerminalKind {
+pub struct NewLine(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for NewLine {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::NewLine
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::NewLine)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Whitespace(pub super::tree::CstNodeId);
-impl Whitespace {
-    pub fn kind(&self) -> TerminalKind {
+pub struct Whitespace(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for Whitespace {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::Whitespace
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::Whitespace)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct LineComment(pub super::tree::CstNodeId);
-impl LineComment {
-    pub fn kind(&self) -> TerminalKind {
+pub struct LineComment(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for LineComment {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::LineComment
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::LineComment)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct BlockComment(pub super::tree::CstNodeId);
-impl BlockComment {
-    pub fn kind(&self) -> TerminalKind {
+pub struct BlockComment(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for BlockComment {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::BlockComment
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::BlockComment)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Integer(pub super::tree::CstNodeId);
-impl Integer {
-    pub fn kind(&self) -> TerminalKind {
+pub struct Integer(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for Integer {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::Integer
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::Integer)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct True(pub super::tree::CstNodeId);
-impl True {
-    pub fn kind(&self) -> TerminalKind {
+pub struct True(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for True {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::True
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::True)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct False(pub super::tree::CstNodeId);
-impl False {
-    pub fn kind(&self) -> TerminalKind {
+pub struct False(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for False {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::False
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::False)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Null(pub super::tree::CstNodeId);
-impl Null {
-    pub fn kind(&self) -> TerminalKind {
+pub struct Null(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for Null {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::Null
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::Null)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Hole(pub super::tree::CstNodeId);
-impl Hole {
-    pub fn kind(&self) -> TerminalKind {
+pub struct Hole(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for Hole {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::Hole
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::Hole)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Quote(pub super::tree::CstNodeId);
-impl Quote {
-    pub fn kind(&self) -> TerminalKind {
+pub struct Quote(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for Quote {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::Quote
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::Quote)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct TypedQuote(pub super::tree::CstNodeId);
-impl TypedQuote {
-    pub fn kind(&self) -> TerminalKind {
+pub struct TypedQuote(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for TypedQuote {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::TypedQuote
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::TypedQuote)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct InStr(pub super::tree::CstNodeId);
-impl InStr {
-    pub fn kind(&self) -> TerminalKind {
+pub struct InStr(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for InStr {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::InStr
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::InStr)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Text(pub super::tree::CstNodeId);
-impl Text {
-    pub fn kind(&self) -> TerminalKind {
+pub struct Text(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for Text {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::Text
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::Text)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct NamedCode(pub super::tree::CstNodeId);
-impl NamedCode {
-    pub fn kind(&self) -> TerminalKind {
+pub struct NamedCode(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for NamedCode {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::NamedCode
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::NamedCode)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Code(pub super::tree::CstNodeId);
-impl Code {
-    pub fn kind(&self) -> TerminalKind {
+pub struct Code(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for Code {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::Code
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::Code)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Newline(pub super::tree::CstNodeId);
-impl Newline {
-    pub fn kind(&self) -> TerminalKind {
+pub struct Newline(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for Newline {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::Newline
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::Newline)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Ws(pub super::tree::CstNodeId);
-impl Ws {
-    pub fn kind(&self) -> TerminalKind {
+pub struct Ws(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for Ws {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::Ws
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::Ws)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct At(pub super::tree::CstNodeId);
-impl At {
-    pub fn kind(&self) -> TerminalKind {
+pub struct At(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for At {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::At
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::At)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Dollar(pub super::tree::CstNodeId);
-impl Dollar {
-    pub fn kind(&self) -> TerminalKind {
+pub struct Dollar(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for Dollar {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::Dollar
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::Dollar)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Dot(pub super::tree::CstNodeId);
-impl Dot {
-    pub fn kind(&self) -> TerminalKind {
+pub struct Dot(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for Dot {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::Dot
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::Dot)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct LBrace(pub super::tree::CstNodeId);
-impl LBrace {
-    pub fn kind(&self) -> TerminalKind {
+pub struct LBrace(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for LBrace {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::LBrace
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::LBrace)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct RBrace(pub super::tree::CstNodeId);
-impl RBrace {
-    pub fn kind(&self) -> TerminalKind {
+pub struct RBrace(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for RBrace {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::RBrace
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::RBrace)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct LBracket(pub super::tree::CstNodeId);
-impl LBracket {
-    pub fn kind(&self) -> TerminalKind {
+pub struct LBracket(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for LBracket {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::LBracket
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::LBracket)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct RBracket(pub super::tree::CstNodeId);
-impl RBracket {
-    pub fn kind(&self) -> TerminalKind {
+pub struct RBracket(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for RBracket {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::RBracket
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::RBracket)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Bind(pub super::tree::CstNodeId);
-impl Bind {
-    pub fn kind(&self) -> TerminalKind {
+pub struct Bind(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for Bind {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::Bind
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::Bind)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Comma(pub super::tree::CstNodeId);
-impl Comma {
-    pub fn kind(&self) -> TerminalKind {
+pub struct Comma(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for Comma {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::Comma
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::Comma)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Esc(pub super::tree::CstNodeId);
-impl Esc {
-    pub fn kind(&self) -> TerminalKind {
+pub struct Esc(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for Esc {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::Esc
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::Esc)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct TextStart(pub super::tree::CstNodeId);
-impl TextStart {
-    pub fn kind(&self) -> TerminalKind {
+pub struct TextStart(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for TextStart {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::TextStart
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::TextStart)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Ident(pub super::tree::CstNodeId);
-impl Ident {
-    pub fn kind(&self) -> TerminalKind {
+pub struct Ident(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for Ident {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::Ident
     }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::Ident)
+    }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct NamedCodeBlockBegin(pub super::tree::CstNodeId);
-impl NamedCodeBlockBegin {
-    pub fn kind(&self) -> TerminalKind {
+pub struct NamedCodeBlockBegin(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for NamedCodeBlockBegin {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::NamedCodeBlockBegin
     }
-}
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct CodeBlockDelimiter(pub super::tree::CstNodeId);
-impl CodeBlockDelimiter {
-    pub fn kind(&self) -> TerminalKind {
-        TerminalKind::CodeBlockDelimiter
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::NamedCodeBlockBegin)
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct CodeBlockLine(pub super::tree::CstNodeId);
-impl CodeBlockLine {
-    pub fn kind(&self) -> TerminalKind {
+pub struct CodeBlockDelimiter(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for CodeBlockDelimiter {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
+        TerminalKind::CodeBlockDelimiter
+    }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::CodeBlockDelimiter)
+    }
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct CodeBlockLine(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for CodeBlockLine {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
         TerminalKind::CodeBlockLine
+    }
+    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.0, TerminalKind::CodeBlockLine)
     }
 }
