@@ -1,7 +1,9 @@
 use lsp_types::{SemanticTokenModifier, SemanticTokenType, SemanticTokens, SemanticTokensLegend};
-use swon_parol::Cst;
-use swon_parol::nodes::TerminalKind;
-use swon_parol::tree::{CstNodeData, CstNodeId, InputSpan, LineNumbers, TerminalData};
+use swon_tree::{
+    Cst,
+    nodes::TerminalKind,
+    tree::{CstNodeData, CstNodeId, InputSpan, LineNumbers, TerminalData},
+};
 
 /// Define the token types we'll use for Swon syntax highlighting
 const TOKEN_TYPES: &[SemanticTokenType] = &[

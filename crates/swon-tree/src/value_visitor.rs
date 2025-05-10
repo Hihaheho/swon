@@ -1,5 +1,5 @@
 use ahash::AHashMap;
-use swon_value::value::{PathSegment, Value};
+use swon_value::value::PathSegment;
 use thiserror::Error;
 
 use crate::{

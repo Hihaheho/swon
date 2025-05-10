@@ -58,7 +58,7 @@ impl VisitorGenerator {
     fn generate_imports(&self) -> TokenStream {
         quote! {
             use crate::{
-                Cst, CstConstructError, NodeKind, CstNode, CstNodeData,
+                Cst, CstConstructError, NodeKind, CstNode,
                 ast::*,
                 nodes::{TerminalKind, NonTerminalKind},
                 tree::{NonTerminalHandle as _, TerminalData, NonTerminalData, CstNodeId},
@@ -503,12 +503,12 @@ impl VisitorGenerator {
         quote! {
             fn visit_any(&mut self, id: CstNodeId, node: CstNode, tree: &Cst) -> Result<(), V::Error> {
                 match node {
-                    CstNodeData::NonTerminal { kind, .. } => {
+                    CstNode::NonTerminal { kind, .. } => {
                         match kind {
                             #(#non_terminal_arms)*
                         }
                     }
-                    CstNodeData::Terminal { kind, data } => {
+                    CstNode::Terminal { kind, data } => {
                         match kind {
                             #(#terminal_arms)*
                         }

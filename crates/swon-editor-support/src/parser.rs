@@ -1,6 +1,7 @@
 use swon_parol::parol_runtime::ParolError;
 use swon_parol::tree::CstBuilder;
-use swon_parol::{Cst, TreeConstruct, parser};
+use swon_parol::{TreeConstruct, parser};
+use swon_tree::Cst;
 
 pub enum ParseResult {
     Ok(Cst),

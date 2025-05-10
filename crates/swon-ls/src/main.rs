@@ -10,7 +10,7 @@ use lsp_types::{
     SemanticTokensLegend, SemanticTokensOptions, SemanticTokensResult, ServerCapabilities, Uri,
 };
 use swon_editor_support::{diagnostics, parser, semantic_tokens};
-use swon_parol::Cst;
+use swon_tree::Cst;
 
 use lsp_server::{
     Connection, ErrorCode, ExtractError, Message, Notification, Request, Response, ResponseError,
@@ -264,7 +264,7 @@ impl ServerContext {
             Err(ExtractError::JsonError { method, error }) => {
                 return Err(anyhow::anyhow!(
                     "failed to parse request: {method}: {error}"
-                ))
+                ));
             }
         };
 

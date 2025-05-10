@@ -4722,6 +4722,7 @@ version = "0.1.0"
 dependencies = [
  "lsp-types",
  "swon-parol",
+ "swon-tree",
 ]
 
 [[package]]
@@ -4729,7 +4730,7 @@ name = "swon-fmt"
 version = "0.1.0"
 dependencies = [
  "lsp-types",
- "swon-parol",
+ "swon-tree",
 ]
 
 [[package]]
@@ -4757,14 +4758,13 @@ dependencies = [
  "serde",
  "serde_json",
  "swon-editor-support",
- "swon-parol",
+ "swon-tree",
 ]
 
 [[package]]
 name = "swon-parol"
 version = "0.1.0"
 dependencies = [
- "ahash",
  "parol_runtime",
  "petgraph 0.8.1",
  "pretty_assertions",
@@ -4802,6 +4802,7 @@ version = "0.1.0"
 name = "swon-tree"
 version = "0.1.0"
 dependencies = [
+ "ahash",
  "petgraph 0.8.1",
  "swon-value",
  "thiserror 2.0.12",

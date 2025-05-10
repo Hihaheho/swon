@@ -9,5 +9,5 @@ repository = "https://github.com/Hihaheho/swon"
 readme = "README.md"
 
 [dependencies]
-swon-parol = { workspace = true }
+swon-tree = { workspace = true }
 lsp-types = { workspace = true }

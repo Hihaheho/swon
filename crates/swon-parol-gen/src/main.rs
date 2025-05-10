@@ -1,12 +1,13 @@
 mod ast_type_generator;
 mod visitor_generator;
 
-use std::path::Path;
+use std::{path::Path, process::Command};
 
 use ast_type_generator::AstTypeGenerator;
 use convert_case::{Case, Casing as _};
 use parol::generators::export_node_types::{NodeName, NodeTypesInfo};
 use quote::format_ident;
+use syn::parse_quote;
 use visitor_generator::VisitorGenerator;
 
 fn main() {
@@ -14,8 +15,8 @@ fn main() {
         .grammar_file("crates/swon-parol/swon.par")
         .parser_output_file("src/parser.rs")
         .actions_output_file("src/grammar_trait.rs")
-        .typed_nodes()
-        .typed_nodes_output_file("../swon-tree/src/nodes.rs")
+        .node_kind_enums()
+        .node_kind_enums_output_file("../swon-tree/src/nodes.rs")
         .expanded_grammar_output_file("swon-expanded.par")
         .user_type_name("Grammar")
         .user_trait_module_name("grammar")
@@ -35,6 +36,12 @@ fn main() {
     let visitor_generator =
         VisitorGenerator::new(Path::new("crates/swon-tree/src/visitor.rs").into());
     visitor_generator.generate(&node_info);
+    generate_node_kind("crates/swon-tree/src/nodes.rs");
+
+    Command::new("cargo")
+        .args(["fmt", "-p", "crates/swon-tree"])
+        .output()
+        .unwrap();
 }
 
 fn format_node_info(node_info: &NodeTypesInfo) {
@@ -81,4 +88,18 @@ fn rename_non_terminal_names(info: &mut NodeTypesInfo) {
             }
         }
     }
+}
+
+fn generate_node_kind(path: &str) {
+    use std::io::Write;
+    let mut file = std::fs::OpenOptions::new().append(true).open(path).unwrap();
+    let content: syn::File = parse_quote! {
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+        pub enum NodeKind<T, Nt> {
+            Terminal(T),
+            NonTerminal(Nt),
+        }
+    };
+
+    write!(file, "{}", prettyplease::unparse(&content)).unwrap();
 }

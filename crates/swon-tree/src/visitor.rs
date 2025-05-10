@@ -1,5 +1,5 @@
 use crate::{
-    Cst, CstConstructError, NodeKind, CstNode, CstNodeData, ast::*,
+    Cst, CstConstructError, NodeKind, CstNode, ast::*,
     nodes::{TerminalKind, NonTerminalKind},
     tree::{NonTerminalHandle as _, TerminalData, NonTerminalData, CstNodeId},
 };
@@ -7285,7 +7285,7 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
         tree: &Cst,
     ) -> Result<(), V::Error> {
         match node {
-            CstNodeData::NonTerminal { kind, .. } => {
+            CstNode::NonTerminal { kind, .. } => {
                 match kind {
                     NonTerminalKind::Array => {
                         let handle = ArrayHandle(id);
@@ -7553,7 +7553,7 @@ impl<V: CstVisitor> CstHandleSuper<V::Error> for V {
                     }
                 }
             }
-            CstNodeData::Terminal { kind, data } => {
+            CstNode::Terminal { kind, data } => {
                 match kind {
                     TerminalKind::NewLine => {
                         let terminal = NewLine(id);

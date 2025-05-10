@@ -1,6 +1,6 @@
 use std::convert::Infallible;
 
-use swon_parol::{
+use swon_tree::{
     Cst,
     action::CstCommands,
     tree::CstNodeId,
@@ -45,10 +45,10 @@ impl CstVisitor for Formatter {
 
     fn then_construct_error(
         &mut self,
-        node_data: Option<swon_parol::CstNode>,
-        parent: swon_parol::tree::CstNodeId,
-        kind: swon_parol::NodeKind,
-        _error: swon_parol::CstConstructError,
+        node_data: Option<swon_tree::CstNode>,
+        parent: swon_tree::tree::CstNodeId,
+        kind: swon_tree::NodeKind,
+        _error: swon_tree::CstConstructError,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.recover_error(node_data, parent, kind, tree)
@@ -56,8 +56,8 @@ impl CstVisitor for Formatter {
 
     fn visit_array(
         &mut self,
-        handle: swon_parol::ast::ArrayHandle,
-        view: swon_parol::ast::ArrayView,
+        handle: swon_tree::ast::ArrayHandle,
+        view: swon_tree::ast::ArrayView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -66,8 +66,8 @@ impl CstVisitor for Formatter {
 
     fn visit_array_begin(
         &mut self,
-        handle: swon_parol::ast::ArrayBeginHandle,
-        view: swon_parol::ast::ArrayBeginView,
+        handle: swon_tree::ast::ArrayBeginHandle,
+        view: swon_tree::ast::ArrayBeginView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -76,8 +76,8 @@ impl CstVisitor for Formatter {
 
     fn visit_array_end(
         &mut self,
-        handle: swon_parol::ast::ArrayEndHandle,
-        view: swon_parol::ast::ArrayEndView,
+        handle: swon_tree::ast::ArrayEndHandle,
+        view: swon_tree::ast::ArrayEndView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -86,8 +86,8 @@ impl CstVisitor for Formatter {
 
     fn visit_array_list(
         &mut self,
-        handle: swon_parol::ast::ArrayListHandle,
-        view: swon_parol::ast::ArrayListView,
+        handle: swon_tree::ast::ArrayListHandle,
+        view: swon_tree::ast::ArrayListView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -96,8 +96,8 @@ impl CstVisitor for Formatter {
 
     fn visit_array_marker(
         &mut self,
-        handle: swon_parol::ast::ArrayMarkerHandle,
-        view: swon_parol::ast::ArrayMarkerView,
+        handle: swon_tree::ast::ArrayMarkerHandle,
+        view: swon_tree::ast::ArrayMarkerView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -106,8 +106,8 @@ impl CstVisitor for Formatter {
 
     fn visit_array_marker_opt(
         &mut self,
-        handle: swon_parol::ast::ArrayMarkerOptHandle,
-        view: swon_parol::ast::IntegerHandle,
+        handle: swon_tree::ast::ArrayMarkerOptHandle,
+        view: swon_tree::ast::IntegerHandle,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -116,8 +116,8 @@ impl CstVisitor for Formatter {
 
     fn visit_array_opt(
         &mut self,
-        handle: swon_parol::ast::ArrayOptHandle,
-        view: swon_parol::ast::CommaHandle,
+        handle: swon_tree::ast::ArrayOptHandle,
+        view: swon_tree::ast::CommaHandle,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -126,8 +126,8 @@ impl CstVisitor for Formatter {
 
     fn visit_at(
         &mut self,
-        handle: swon_parol::ast::AtHandle,
-        view: swon_parol::ast::AtView,
+        handle: swon_tree::ast::AtHandle,
+        view: swon_tree::ast::AtView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -136,8 +136,8 @@ impl CstVisitor for Formatter {
 
     fn visit_begin(
         &mut self,
-        handle: swon_parol::ast::BeginHandle,
-        view: swon_parol::ast::BeginView,
+        handle: swon_tree::ast::BeginHandle,
+        view: swon_tree::ast::BeginView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -146,8 +146,8 @@ impl CstVisitor for Formatter {
 
     fn visit_bind(
         &mut self,
-        handle: swon_parol::ast::BindHandle,
-        view: swon_parol::ast::BindView,
+        handle: swon_tree::ast::BindHandle,
+        view: swon_tree::ast::BindView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -156,8 +156,8 @@ impl CstVisitor for Formatter {
 
     fn visit_binding(
         &mut self,
-        handle: swon_parol::ast::BindingHandle,
-        view: swon_parol::ast::BindingView,
+        handle: swon_tree::ast::BindingHandle,
+        view: swon_tree::ast::BindingView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -166,8 +166,8 @@ impl CstVisitor for Formatter {
 
     fn visit_binding_rhs(
         &mut self,
-        handle: swon_parol::ast::BindingRhsHandle,
-        view: swon_parol::ast::BindingRhsView,
+        handle: swon_tree::ast::BindingRhsHandle,
+        view: swon_tree::ast::BindingRhsView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -176,8 +176,8 @@ impl CstVisitor for Formatter {
 
     fn visit_boolean(
         &mut self,
-        handle: swon_parol::ast::BooleanHandle,
-        view: swon_parol::ast::BooleanView,
+        handle: swon_tree::ast::BooleanHandle,
+        view: swon_tree::ast::BooleanView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -186,8 +186,8 @@ impl CstVisitor for Formatter {
 
     fn visit_code(
         &mut self,
-        handle: swon_parol::ast::CodeHandle,
-        view: swon_parol::ast::CodeView,
+        handle: swon_tree::ast::CodeHandle,
+        view: swon_tree::ast::CodeView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -196,8 +196,8 @@ impl CstVisitor for Formatter {
 
     fn visit_code_block(
         &mut self,
-        handle: swon_parol::ast::CodeBlockHandle,
-        view: swon_parol::ast::CodeBlockView,
+        handle: swon_tree::ast::CodeBlockHandle,
+        view: swon_tree::ast::CodeBlockView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -206,8 +206,8 @@ impl CstVisitor for Formatter {
 
     fn visit_code_block_delimiter(
         &mut self,
-        handle: swon_parol::ast::CodeBlockDelimiterHandle,
-        view: swon_parol::ast::CodeBlockDelimiterView,
+        handle: swon_tree::ast::CodeBlockDelimiterHandle,
+        view: swon_tree::ast::CodeBlockDelimiterView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -216,8 +216,8 @@ impl CstVisitor for Formatter {
 
     fn visit_code_block_line(
         &mut self,
-        handle: swon_parol::ast::CodeBlockLineHandle,
-        view: swon_parol::ast::CodeBlockLineView,
+        handle: swon_tree::ast::CodeBlockLineHandle,
+        view: swon_tree::ast::CodeBlockLineView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -226,8 +226,8 @@ impl CstVisitor for Formatter {
 
     fn visit_code_block_tail_common(
         &mut self,
-        handle: swon_parol::ast::CodeBlockTailCommonHandle,
-        view: swon_parol::ast::CodeBlockTailCommonView,
+        handle: swon_tree::ast::CodeBlockTailCommonHandle,
+        view: swon_tree::ast::CodeBlockTailCommonView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -236,8 +236,8 @@ impl CstVisitor for Formatter {
 
     fn visit_code_block_tail_common_list(
         &mut self,
-        handle: swon_parol::ast::CodeBlockTailCommonListHandle,
-        view: swon_parol::ast::CodeBlockTailCommonListView,
+        handle: swon_tree::ast::CodeBlockTailCommonListHandle,
+        view: swon_tree::ast::CodeBlockTailCommonListView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -246,8 +246,8 @@ impl CstVisitor for Formatter {
 
     fn visit_code_block_tail_common_opt(
         &mut self,
-        handle: swon_parol::ast::CodeBlockTailCommonOptHandle,
-        view: swon_parol::ast::WsHandle,
+        handle: swon_tree::ast::CodeBlockTailCommonOptHandle,
+        view: swon_tree::ast::WsHandle,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -256,8 +256,8 @@ impl CstVisitor for Formatter {
 
     fn visit_comma(
         &mut self,
-        handle: swon_parol::ast::CommaHandle,
-        view: swon_parol::ast::CommaView,
+        handle: swon_tree::ast::CommaHandle,
+        view: swon_tree::ast::CommaView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -266,8 +266,8 @@ impl CstVisitor for Formatter {
 
     fn visit_continue(
         &mut self,
-        handle: swon_parol::ast::ContinueHandle,
-        view: swon_parol::ast::ContinueView,
+        handle: swon_tree::ast::ContinueHandle,
+        view: swon_tree::ast::ContinueView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -276,8 +276,8 @@ impl CstVisitor for Formatter {
 
     fn visit_dot(
         &mut self,
-        handle: swon_parol::ast::DotHandle,
-        view: swon_parol::ast::DotView,
+        handle: swon_tree::ast::DotHandle,
+        view: swon_tree::ast::DotView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -286,8 +286,8 @@ impl CstVisitor for Formatter {
 
     fn visit_end(
         &mut self,
-        handle: swon_parol::ast::EndHandle,
-        view: swon_parol::ast::EndView,
+        handle: swon_tree::ast::EndHandle,
+        view: swon_tree::ast::EndView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -296,8 +296,8 @@ impl CstVisitor for Formatter {
 
     fn visit_ext(
         &mut self,
-        handle: swon_parol::ast::ExtHandle,
-        view: swon_parol::ast::ExtView,
+        handle: swon_tree::ast::ExtHandle,
+        view: swon_tree::ast::ExtView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -306,8 +306,8 @@ impl CstVisitor for Formatter {
 
     fn visit_extension_name_space(
         &mut self,
-        handle: swon_parol::ast::ExtensionNameSpaceHandle,
-        view: swon_parol::ast::ExtensionNameSpaceView,
+        handle: swon_tree::ast::ExtensionNameSpaceHandle,
+        view: swon_tree::ast::ExtensionNameSpaceView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -316,8 +316,8 @@ impl CstVisitor for Formatter {
 
     fn visit_false(
         &mut self,
-        handle: swon_parol::ast::FalseHandle,
-        view: swon_parol::ast::FalseView,
+        handle: swon_tree::ast::FalseHandle,
+        view: swon_tree::ast::FalseView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -326,8 +326,8 @@ impl CstVisitor for Formatter {
 
     fn visit_hole(
         &mut self,
-        handle: swon_parol::ast::HoleHandle,
-        view: swon_parol::ast::HoleView,
+        handle: swon_tree::ast::HoleHandle,
+        view: swon_tree::ast::HoleView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -336,8 +336,8 @@ impl CstVisitor for Formatter {
 
     fn visit_ident(
         &mut self,
-        handle: swon_parol::ast::IdentHandle,
-        view: swon_parol::ast::IdentView,
+        handle: swon_tree::ast::IdentHandle,
+        view: swon_tree::ast::IdentView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -346,8 +346,8 @@ impl CstVisitor for Formatter {
 
     fn visit_in_str(
         &mut self,
-        handle: swon_parol::ast::InStrHandle,
-        view: swon_parol::ast::InStrView,
+        handle: swon_tree::ast::InStrHandle,
+        view: swon_tree::ast::InStrView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -356,8 +356,8 @@ impl CstVisitor for Formatter {
 
     fn visit_integer(
         &mut self,
-        handle: swon_parol::ast::IntegerHandle,
-        view: swon_parol::ast::IntegerView,
+        handle: swon_tree::ast::IntegerHandle,
+        view: swon_tree::ast::IntegerView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -366,8 +366,8 @@ impl CstVisitor for Formatter {
 
     fn visit_key(
         &mut self,
-        handle: swon_parol::ast::KeyHandle,
-        view: swon_parol::ast::KeyView,
+        handle: swon_tree::ast::KeyHandle,
+        view: swon_tree::ast::KeyView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -376,8 +376,8 @@ impl CstVisitor for Formatter {
 
     fn visit_key_base(
         &mut self,
-        handle: swon_parol::ast::KeyBaseHandle,
-        view: swon_parol::ast::KeyBaseView,
+        handle: swon_tree::ast::KeyBaseHandle,
+        view: swon_tree::ast::KeyBaseView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -386,8 +386,8 @@ impl CstVisitor for Formatter {
 
     fn visit_key_opt(
         &mut self,
-        handle: swon_parol::ast::KeyOptHandle,
-        view: swon_parol::ast::ArrayMarkerHandle,
+        handle: swon_tree::ast::KeyOptHandle,
+        view: swon_tree::ast::ArrayMarkerHandle,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -396,8 +396,8 @@ impl CstVisitor for Formatter {
 
     fn visit_keys(
         &mut self,
-        handle: swon_parol::ast::KeysHandle,
-        view: swon_parol::ast::KeysView,
+        handle: swon_tree::ast::KeysHandle,
+        view: swon_tree::ast::KeysView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -406,8 +406,8 @@ impl CstVisitor for Formatter {
 
     fn visit_keys_list(
         &mut self,
-        handle: swon_parol::ast::KeysListHandle,
-        view: swon_parol::ast::KeysListView,
+        handle: swon_tree::ast::KeysListHandle,
+        view: swon_tree::ast::KeysListView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -416,8 +416,8 @@ impl CstVisitor for Formatter {
 
     fn visit_named_code(
         &mut self,
-        handle: swon_parol::ast::NamedCodeHandle,
-        view: swon_parol::ast::NamedCodeView,
+        handle: swon_tree::ast::NamedCodeHandle,
+        view: swon_tree::ast::NamedCodeView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -426,8 +426,8 @@ impl CstVisitor for Formatter {
 
     fn visit_named_code_block(
         &mut self,
-        handle: swon_parol::ast::NamedCodeBlockHandle,
-        view: swon_parol::ast::NamedCodeBlockView,
+        handle: swon_tree::ast::NamedCodeBlockHandle,
+        view: swon_tree::ast::NamedCodeBlockView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -436,8 +436,8 @@ impl CstVisitor for Formatter {
 
     fn visit_named_code_block_begin(
         &mut self,
-        handle: swon_parol::ast::NamedCodeBlockBeginHandle,
-        view: swon_parol::ast::NamedCodeBlockBeginView,
+        handle: swon_tree::ast::NamedCodeBlockBeginHandle,
+        view: swon_tree::ast::NamedCodeBlockBeginView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -446,8 +446,8 @@ impl CstVisitor for Formatter {
 
     fn visit_newline(
         &mut self,
-        handle: swon_parol::ast::NewlineHandle,
-        view: swon_parol::ast::NewlineView,
+        handle: swon_tree::ast::NewlineHandle,
+        view: swon_tree::ast::NewlineView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -456,8 +456,8 @@ impl CstVisitor for Formatter {
 
     fn visit_null(
         &mut self,
-        handle: swon_parol::ast::NullHandle,
-        view: swon_parol::ast::NullView,
+        handle: swon_tree::ast::NullHandle,
+        view: swon_tree::ast::NullView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -466,8 +466,8 @@ impl CstVisitor for Formatter {
 
     fn visit_object(
         &mut self,
-        handle: swon_parol::ast::ObjectHandle,
-        view: swon_parol::ast::ObjectView,
+        handle: swon_tree::ast::ObjectHandle,
+        view: swon_tree::ast::ObjectView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -476,8 +476,8 @@ impl CstVisitor for Formatter {
 
     fn visit_object_list(
         &mut self,
-        handle: swon_parol::ast::ObjectListHandle,
-        view: swon_parol::ast::ObjectListView,
+        handle: swon_tree::ast::ObjectListHandle,
+        view: swon_tree::ast::ObjectListView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -486,8 +486,8 @@ impl CstVisitor for Formatter {
 
     fn visit_object_opt(
         &mut self,
-        handle: swon_parol::ast::ObjectOptHandle,
-        view: swon_parol::ast::CommaHandle,
+        handle: swon_tree::ast::ObjectOptHandle,
+        view: swon_tree::ast::CommaHandle,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -496,8 +496,8 @@ impl CstVisitor for Formatter {
 
     fn visit_quote(
         &mut self,
-        handle: swon_parol::ast::QuoteHandle,
-        view: swon_parol::ast::QuoteView,
+        handle: swon_tree::ast::QuoteHandle,
+        view: swon_tree::ast::QuoteView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -506,8 +506,8 @@ impl CstVisitor for Formatter {
 
     fn visit_section(
         &mut self,
-        handle: swon_parol::ast::SectionHandle,
-        view: swon_parol::ast::SectionView,
+        handle: swon_tree::ast::SectionHandle,
+        view: swon_tree::ast::SectionView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -516,8 +516,8 @@ impl CstVisitor for Formatter {
 
     fn visit_section_binding(
         &mut self,
-        handle: swon_parol::ast::SectionBindingHandle,
-        view: swon_parol::ast::SectionBindingView,
+        handle: swon_tree::ast::SectionBindingHandle,
+        view: swon_tree::ast::SectionBindingView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -526,8 +526,8 @@ impl CstVisitor for Formatter {
 
     fn visit_section_body(
         &mut self,
-        handle: swon_parol::ast::SectionBodyHandle,
-        view: swon_parol::ast::SectionBodyView,
+        handle: swon_tree::ast::SectionBodyHandle,
+        view: swon_tree::ast::SectionBodyView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -536,8 +536,8 @@ impl CstVisitor for Formatter {
 
     fn visit_section_body_list(
         &mut self,
-        handle: swon_parol::ast::SectionBodyListHandle,
-        view: swon_parol::ast::SectionBodyListView,
+        handle: swon_tree::ast::SectionBodyListHandle,
+        view: swon_tree::ast::SectionBodyListView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -546,8 +546,8 @@ impl CstVisitor for Formatter {
 
     fn visit_str(
         &mut self,
-        handle: swon_parol::ast::StrHandle,
-        view: swon_parol::ast::StrView,
+        handle: swon_tree::ast::StrHandle,
+        view: swon_tree::ast::StrView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -556,8 +556,8 @@ impl CstVisitor for Formatter {
 
     fn visit_str_continues(
         &mut self,
-        handle: swon_parol::ast::StrContinuesHandle,
-        view: swon_parol::ast::StrContinuesView,
+        handle: swon_tree::ast::StrContinuesHandle,
+        view: swon_tree::ast::StrContinuesView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -566,8 +566,8 @@ impl CstVisitor for Formatter {
 
     fn visit_str_continues_list(
         &mut self,
-        handle: swon_parol::ast::StrContinuesListHandle,
-        view: swon_parol::ast::StrContinuesListView,
+        handle: swon_tree::ast::StrContinuesListHandle,
+        view: swon_tree::ast::StrContinuesListView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -576,8 +576,8 @@ impl CstVisitor for Formatter {
 
     fn visit_swon(
         &mut self,
-        handle: swon_parol::ast::SwonHandle,
-        view: swon_parol::ast::SwonView,
+        handle: swon_tree::ast::SwonHandle,
+        view: swon_tree::ast::SwonView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -586,8 +586,8 @@ impl CstVisitor for Formatter {
 
     fn visit_swon_bindings(
         &mut self,
-        handle: swon_parol::ast::SwonBindingsHandle,
-        view: swon_parol::ast::SwonBindingsView,
+        handle: swon_tree::ast::SwonBindingsHandle,
+        view: swon_tree::ast::SwonBindingsView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -596,8 +596,8 @@ impl CstVisitor for Formatter {
 
     fn visit_swon_sections(
         &mut self,
-        handle: swon_parol::ast::SwonSectionsHandle,
-        view: swon_parol::ast::SwonSectionsView,
+        handle: swon_tree::ast::SwonSectionsHandle,
+        view: swon_tree::ast::SwonSectionsView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -606,8 +606,8 @@ impl CstVisitor for Formatter {
 
     fn visit_text(
         &mut self,
-        handle: swon_parol::ast::TextHandle,
-        view: swon_parol::ast::TextView,
+        handle: swon_tree::ast::TextHandle,
+        view: swon_tree::ast::TextView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -616,8 +616,8 @@ impl CstVisitor for Formatter {
 
     fn visit_text_binding(
         &mut self,
-        handle: swon_parol::ast::TextBindingHandle,
-        view: swon_parol::ast::TextBindingView,
+        handle: swon_tree::ast::TextBindingHandle,
+        view: swon_tree::ast::TextBindingView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -626,8 +626,8 @@ impl CstVisitor for Formatter {
 
     fn visit_text_binding_opt(
         &mut self,
-        handle: swon_parol::ast::TextBindingOptHandle,
-        view: swon_parol::ast::WsHandle,
+        handle: swon_tree::ast::TextBindingOptHandle,
+        view: swon_tree::ast::WsHandle,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -636,8 +636,8 @@ impl CstVisitor for Formatter {
 
     fn visit_text_start(
         &mut self,
-        handle: swon_parol::ast::TextStartHandle,
-        view: swon_parol::ast::TextStartView,
+        handle: swon_tree::ast::TextStartHandle,
+        view: swon_tree::ast::TextStartView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -646,8 +646,8 @@ impl CstVisitor for Formatter {
 
     fn visit_true(
         &mut self,
-        handle: swon_parol::ast::TrueHandle,
-        view: swon_parol::ast::TrueView,
+        handle: swon_tree::ast::TrueHandle,
+        view: swon_tree::ast::TrueView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -656,8 +656,8 @@ impl CstVisitor for Formatter {
 
     fn visit_typed_quote(
         &mut self,
-        handle: swon_parol::ast::TypedQuoteHandle,
-        view: swon_parol::ast::TypedQuoteView,
+        handle: swon_tree::ast::TypedQuoteHandle,
+        view: swon_tree::ast::TypedQuoteView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -666,8 +666,8 @@ impl CstVisitor for Formatter {
 
     fn visit_typed_str(
         &mut self,
-        handle: swon_parol::ast::TypedStrHandle,
-        view: swon_parol::ast::TypedStrView,
+        handle: swon_tree::ast::TypedStrHandle,
+        view: swon_tree::ast::TypedStrView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -676,8 +676,8 @@ impl CstVisitor for Formatter {
 
     fn visit_value(
         &mut self,
-        handle: swon_parol::ast::ValueHandle,
-        view: swon_parol::ast::ValueView,
+        handle: swon_tree::ast::ValueHandle,
+        view: swon_tree::ast::ValueView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -686,8 +686,8 @@ impl CstVisitor for Formatter {
 
     fn visit_value_binding(
         &mut self,
-        handle: swon_parol::ast::ValueBindingHandle,
-        view: swon_parol::ast::ValueBindingView,
+        handle: swon_tree::ast::ValueBindingHandle,
+        view: swon_tree::ast::ValueBindingView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -696,8 +696,8 @@ impl CstVisitor for Formatter {
 
     fn visit_ws(
         &mut self,
-        handle: swon_parol::ast::WsHandle,
-        view: swon_parol::ast::WsView,
+        handle: swon_tree::ast::WsHandle,
+        view: swon_tree::ast::WsView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -706,8 +706,8 @@ impl CstVisitor for Formatter {
 
     fn visit_root(
         &mut self,
-        handle: swon_parol::ast::RootHandle,
-        view: swon_parol::ast::RootView,
+        handle: swon_tree::ast::RootHandle,
+        view: swon_tree::ast::RootView,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         let _handle = handle;
@@ -716,8 +716,8 @@ impl CstVisitor for Formatter {
 
     fn visit_new_line_terminal(
         &mut self,
-        terminal: swon_parol::ast::NewLine,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::NewLine,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_new_line_terminal_super(terminal, data, tree)
@@ -725,8 +725,8 @@ impl CstVisitor for Formatter {
 
     fn visit_whitespace_terminal(
         &mut self,
-        terminal: swon_parol::ast::Whitespace,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::Whitespace,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_whitespace_terminal_super(terminal, data, tree)
@@ -734,8 +734,8 @@ impl CstVisitor for Formatter {
 
     fn visit_line_comment_terminal(
         &mut self,
-        terminal: swon_parol::ast::LineComment,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::LineComment,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_line_comment_terminal_super(terminal, data, tree)
@@ -743,8 +743,8 @@ impl CstVisitor for Formatter {
 
     fn visit_block_comment_terminal(
         &mut self,
-        terminal: swon_parol::ast::BlockComment,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::BlockComment,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_block_comment_terminal_super(terminal, data, tree)
@@ -752,8 +752,8 @@ impl CstVisitor for Formatter {
 
     fn visit_integer_terminal(
         &mut self,
-        terminal: swon_parol::ast::Integer,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::Integer,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_integer_terminal_super(terminal, data, tree)
@@ -761,8 +761,8 @@ impl CstVisitor for Formatter {
 
     fn visit_true_terminal(
         &mut self,
-        terminal: swon_parol::ast::True,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::True,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_true_terminal_super(terminal, data, tree)
@@ -770,8 +770,8 @@ impl CstVisitor for Formatter {
 
     fn visit_false_terminal(
         &mut self,
-        terminal: swon_parol::ast::False,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::False,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_false_terminal_super(terminal, data, tree)
@@ -779,8 +779,8 @@ impl CstVisitor for Formatter {
 
     fn visit_null_terminal(
         &mut self,
-        terminal: swon_parol::ast::Null,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::Null,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_null_terminal_super(terminal, data, tree)
@@ -788,8 +788,8 @@ impl CstVisitor for Formatter {
 
     fn visit_hole_terminal(
         &mut self,
-        terminal: swon_parol::ast::Hole,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::Hole,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_hole_terminal_super(terminal, data, tree)
@@ -797,8 +797,8 @@ impl CstVisitor for Formatter {
 
     fn visit_quote_terminal(
         &mut self,
-        terminal: swon_parol::ast::Quote,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::Quote,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_quote_terminal_super(terminal, data, tree)
@@ -806,8 +806,8 @@ impl CstVisitor for Formatter {
 
     fn visit_typed_quote_terminal(
         &mut self,
-        terminal: swon_parol::ast::TypedQuote,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::TypedQuote,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_typed_quote_terminal_super(terminal, data, tree)
@@ -815,8 +815,8 @@ impl CstVisitor for Formatter {
 
     fn visit_in_str_terminal(
         &mut self,
-        terminal: swon_parol::ast::InStr,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::InStr,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_in_str_terminal_super(terminal, data, tree)
@@ -824,8 +824,8 @@ impl CstVisitor for Formatter {
 
     fn visit_text_terminal(
         &mut self,
-        terminal: swon_parol::ast::Text,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::Text,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_text_terminal_super(terminal, data, tree)
@@ -833,8 +833,8 @@ impl CstVisitor for Formatter {
 
     fn visit_named_code_terminal(
         &mut self,
-        terminal: swon_parol::ast::NamedCode,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::NamedCode,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_named_code_terminal_super(terminal, data, tree)
@@ -842,8 +842,8 @@ impl CstVisitor for Formatter {
 
     fn visit_code_terminal(
         &mut self,
-        terminal: swon_parol::ast::Code,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::Code,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_code_terminal_super(terminal, data, tree)
@@ -851,8 +851,8 @@ impl CstVisitor for Formatter {
 
     fn visit_newline_terminal(
         &mut self,
-        terminal: swon_parol::ast::Newline,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::Newline,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_newline_terminal_super(terminal, data, tree)
@@ -860,8 +860,8 @@ impl CstVisitor for Formatter {
 
     fn visit_ws_terminal(
         &mut self,
-        terminal: swon_parol::ast::Ws,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::Ws,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_ws_terminal_super(terminal, data, tree)
@@ -869,8 +869,8 @@ impl CstVisitor for Formatter {
 
     fn visit_at_terminal(
         &mut self,
-        terminal: swon_parol::ast::At,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::At,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_at_terminal_super(terminal, data, tree)
@@ -878,8 +878,8 @@ impl CstVisitor for Formatter {
 
     fn visit_dollar_terminal(
         &mut self,
-        terminal: swon_parol::ast::Dollar,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::Dollar,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_dollar_terminal_super(terminal, data, tree)
@@ -887,8 +887,8 @@ impl CstVisitor for Formatter {
 
     fn visit_dot_terminal(
         &mut self,
-        terminal: swon_parol::ast::Dot,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::Dot,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_dot_terminal_super(terminal, data, tree)
@@ -896,8 +896,8 @@ impl CstVisitor for Formatter {
 
     fn visit_l_brace_terminal(
         &mut self,
-        terminal: swon_parol::ast::LBrace,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::LBrace,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_l_brace_terminal_super(terminal, data, tree)
@@ -905,8 +905,8 @@ impl CstVisitor for Formatter {
 
     fn visit_r_brace_terminal(
         &mut self,
-        terminal: swon_parol::ast::RBrace,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::RBrace,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_r_brace_terminal_super(terminal, data, tree)
@@ -914,8 +914,8 @@ impl CstVisitor for Formatter {
 
     fn visit_l_bracket_terminal(
         &mut self,
-        terminal: swon_parol::ast::LBracket,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::LBracket,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_l_bracket_terminal_super(terminal, data, tree)
@@ -923,8 +923,8 @@ impl CstVisitor for Formatter {
 
     fn visit_r_bracket_terminal(
         &mut self,
-        terminal: swon_parol::ast::RBracket,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::RBracket,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_r_bracket_terminal_super(terminal, data, tree)
@@ -932,8 +932,8 @@ impl CstVisitor for Formatter {
 
     fn visit_bind_terminal(
         &mut self,
-        terminal: swon_parol::ast::Bind,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::Bind,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_bind_terminal_super(terminal, data, tree)
@@ -941,8 +941,8 @@ impl CstVisitor for Formatter {
 
     fn visit_comma_terminal(
         &mut self,
-        terminal: swon_parol::ast::Comma,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::Comma,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_comma_terminal_super(terminal, data, tree)
@@ -950,8 +950,8 @@ impl CstVisitor for Formatter {
 
     fn visit_esc_terminal(
         &mut self,
-        terminal: swon_parol::ast::Esc,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::Esc,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_esc_terminal_super(terminal, data, tree)
@@ -959,8 +959,8 @@ impl CstVisitor for Formatter {
 
     fn visit_text_start_terminal(
         &mut self,
-        terminal: swon_parol::ast::TextStart,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::TextStart,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_text_start_terminal_super(terminal, data, tree)
@@ -968,8 +968,8 @@ impl CstVisitor for Formatter {
 
     fn visit_ident_terminal(
         &mut self,
-        terminal: swon_parol::ast::Ident,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::Ident,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_ident_terminal_super(terminal, data, tree)
@@ -977,8 +977,8 @@ impl CstVisitor for Formatter {
 
     fn visit_named_code_block_begin_terminal(
         &mut self,
-        terminal: swon_parol::ast::NamedCodeBlockBegin,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::NamedCodeBlockBegin,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_named_code_block_begin_terminal_super(terminal, data, tree)
@@ -986,8 +986,8 @@ impl CstVisitor for Formatter {
 
     fn visit_code_block_delimiter_terminal(
         &mut self,
-        terminal: swon_parol::ast::CodeBlockDelimiter,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::CodeBlockDelimiter,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_code_block_delimiter_terminal_super(terminal, data, tree)
@@ -995,8 +995,8 @@ impl CstVisitor for Formatter {
 
     fn visit_code_block_line_terminal(
         &mut self,
-        terminal: swon_parol::ast::CodeBlockLine,
-        data: swon_parol::tree::TerminalData,
+        terminal: swon_tree::ast::CodeBlockLine,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_code_block_line_terminal_super(terminal, data, tree)
@@ -1004,9 +1004,9 @@ impl CstVisitor for Formatter {
 
     fn visit_non_terminal(
         &mut self,
-        id: swon_parol::tree::CstNodeId,
-        kind: swon_parol::nodes::NonTerminalKind,
-        data: swon_parol::tree::NonTerminalData,
+        id: swon_tree::tree::CstNodeId,
+        kind: swon_tree::nodes::NonTerminalKind,
+        data: swon_tree::tree::NonTerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_non_terminal_super(id, kind, data, tree)
@@ -1014,9 +1014,9 @@ impl CstVisitor for Formatter {
 
     fn visit_non_terminal_close(
         &mut self,
-        id: swon_parol::tree::CstNodeId,
-        kind: swon_parol::nodes::NonTerminalKind,
-        data: swon_parol::tree::NonTerminalData,
+        id: swon_tree::tree::CstNodeId,
+        kind: swon_tree::nodes::NonTerminalKind,
+        data: swon_tree::tree::NonTerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_non_terminal_close_super(id, kind, data, tree)
@@ -1024,9 +1024,9 @@ impl CstVisitor for Formatter {
 
     fn visit_terminal(
         &mut self,
-        id: swon_parol::tree::CstNodeId,
-        kind: swon_parol::nodes::TerminalKind,
-        data: swon_parol::tree::TerminalData,
+        id: swon_tree::tree::CstNodeId,
+        kind: swon_tree::nodes::TerminalKind,
+        data: swon_tree::tree::TerminalData,
         tree: &Cst,
     ) -> Result<(), Self::Error> {
         self.visit_terminal_super(id, kind, data, tree)
