@@ -10,4 +10,3 @@ readme = "README.md"
 
 [dependencies]
 swon-tree = { workspace = true }
-lsp-types = { workspace = true }
