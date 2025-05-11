@@ -4816,6 +4816,8 @@ name = "swon-value"
 version = "0.1.0"
 dependencies = [
  "ahash",
+ "regex",
+ "thiserror 2.0.12",
  "thisisplural",
 ]
 
@@ -5040,9 +5042,9 @@ dependencies = [
 
 [[package]]
 name = "thisisplural"
-version = "0.4.0"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "74275c61fc921726d2b9dd0bb40e7242974064c47ac51c4af28fe853e8d92511"
+checksum = "9b165c4d9b4f84ac7700f8c02295a591aed2f28859e88cc4fa06b95b9ed562fa"
 dependencies = [
  "proc-macro2",
  "quote",

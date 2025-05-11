@@ -1,3 +1,5 @@
+use alloc::string::String;
+use alloc::vec::Vec;
 use thisisplural::Plural;
 
 /// A data structure for representing a Swon document without any span information.
@@ -47,6 +49,6 @@ pub enum SwonValue {
     Boolean(bool),
     Array(Vec<SwonValue>),
     Tuple(Vec<SwonValue>),
-    Map(ahash::HashMap<SwonValue, SwonValue>),
+    Map(Vec<(SwonValue, SwonValue)>),
     Swon(SwonDocument),
 }

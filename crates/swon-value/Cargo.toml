@@ -8,6 +8,12 @@ homepage = "https://swon.dev"
 repository = "https://github.com/Hihaheho/swon"
 readme = "README.md"
 
+[features]
+default = ["std"]
+std = ["dep:ahash", "regex/perf"]
+
 [dependencies]
-ahash = { workspace = true }
+ahash = { workspace = true, optional = true }
 thisisplural = { workspace = true }
+regex = { version = "1.11", default-features = false, features = ["unicode"] }
+thiserror = { workspace = true }
