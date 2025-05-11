@@ -1,13 +1,18 @@
 use ahash::AHashMap;
-use swon_value::value::{Identifier, PathSegment};
+use swon_value::{identifier::Identifier, value::PathSegment};
 use thiserror::Error;
 
 use crate::prelude::*;
 
-pub struct ValueVisitor {
+pub struct Values {
     ident_handles: AHashMap<IdentHandle, Identifier>,
     key_handles: AHashMap<KeyHandle, PathSegment>,
     keys_handles: AHashMap<KeysHandle, Vec<KeyHandle>>,
+}
+
+pub struct ValueVisitor<'a> {
+    input: &'a str,
+    values: &'a mut Values,
     current_keys: Vec<KeyHandle>,
 }
 
@@ -17,7 +22,7 @@ pub enum ValueVisitorError {
     CstError(#[from] CstConstructError),
 }
 
-impl CstVisitor for ValueVisitor {
+impl CstVisitor for ValueVisitor<'_> {
     type Error = ValueVisitorError;
 
     fn visit_keys(
@@ -28,7 +33,8 @@ impl CstVisitor for ValueVisitor {
     ) -> Result<(), Self::Error> {
         assert_eq!(self.current_keys.len(), 0);
         self.visit_keys_super(handle, view, tree)?;
-        self.keys_handles
+        self.values
+            .keys_handles
             .insert(handle, std::mem::take(&mut self.current_keys));
         Ok(())
     }
@@ -59,16 +65,10 @@ impl CstVisitor for ValueVisitor {
         view: IdentView,
         tree: &crate::Cst,
     ) -> Result<(), Self::Error> {
-        self.visit_ident_super(handle, view, tree)
-    }
-
-    fn visit_ident_terminal(
-        &mut self,
-        terminal: Ident,
-        data: crate::tree::TerminalData,
-        tree: &crate::Cst,
-    ) -> Result<(), Self::Error> {
-        self.visit_ident_terminal_super(terminal, data, tree)
+        let data = view.ident.get_data(tree)?;
+        let text = tree.get_str(data, self.input).unwrap();
+        self.values.ident_handles.insert(handle, todo!());
+        Ok(())
     }
 
     fn visit_key_opt(

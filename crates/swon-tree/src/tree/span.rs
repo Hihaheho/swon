@@ -94,6 +94,10 @@ impl InputSpan {
     pub fn merge_many(self, others: impl IntoIterator<Item = Self>) -> Self {
         others.into_iter().fold(self, |acc, other| acc.merge(other))
     }
+
+    pub fn as_str<'a>(&self, input: &'a str) -> &'a str {
+        &input[self.start as usize..self.end as usize]
+    }
 }
 
 #[cfg(test)]

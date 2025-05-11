@@ -189,6 +189,17 @@ impl<T, Nt> ConcreteSyntaxTree<T, Nt> {
             .map(|edge| CstNodeId(edge.source()))
     }
 
+    pub fn get_str<'a: 'c, 'b: 'c, 'c>(
+        &'a self,
+        terminal: TerminalData,
+        input: &'b str,
+    ) -> Option<&'c str> {
+        match terminal {
+            TerminalData::Input(span) => Some(span.as_str(input)),
+            TerminalData::Dynamic(id) => self.dynamic_token(id),
+        }
+    }
+
     pub fn dynamic_token(&self, id: DynamicTokenId) -> Option<&str> {
         self.dynamic_tokens.get(&id).map(|s| s.as_str())
     }

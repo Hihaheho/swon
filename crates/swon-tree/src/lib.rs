@@ -21,7 +21,10 @@ pub mod prelude {
     pub use crate::action::CstCommands;
     pub use crate::node_kind::{NonTerminalKind, TerminalKind};
     pub use crate::nodes::*;
-    pub use crate::tree::{CstNodeId, DynamicTokenId, NonTerminalData, TerminalData};
+    pub use crate::tree::{
+        CstNodeId, DynamicTokenId, NonTerminalData, NonTerminalHandle as _, TerminalData,
+        TerminalHandle as _,
+    };
     pub use crate::visitor::{CstVisitor, CstVisitorSuper as _};
     pub use crate::{Cst, CstConstructError, CstNode, NodeKind};
 }
