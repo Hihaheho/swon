@@ -38,7 +38,7 @@ Notation as type: `"string"`
 Notation as value: `url"https://example.com"`
 Notation as type: `url"string"`
 
-## Code
+## Code Block
 
 Notation as value:
 
@@ -49,6 +49,11 @@ fn main() {
 }
 ```
 ````
+
+- Newline character is **not inserted at the head** of the code unless you manually insert a blank line.
+- Newline character is **always inserted at the tail** of the last line of the code.
+
+## Inline Code
 
 Notation as type: `rust"code"` or `"code"`
 
