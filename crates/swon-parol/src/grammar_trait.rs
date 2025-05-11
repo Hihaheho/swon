@@ -1162,7 +1162,7 @@ impl ToSpan for Hole<'_> {
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct Ident<'t> {
-    pub ident: Token<'t>, /* [a-zA-Z_\-0-9]+ */
+    pub ident: Token<'t>, /* \p{XID_Start}[\p{XID_Continue}-]* */
 }
 
 impl ToSpan for Ident<'_> {
@@ -3754,7 +3754,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 93:
     ///
-    /// `Ident: /[a-zA-Z_\-0-9]+/;`
+    /// `Ident: /\p{XID_Start}[\p{XID_Continue}-]*/;`
     ///
     #[parol_runtime::function_name::named]
     fn ident(&mut self, ident: &ParseTreeType<'t>) -> Result<()> {

@@ -61,7 +61,8 @@ TypedStr: TypedQuote InStr Quote ;
   TypedQuote: <INITIAL>/[a-zA-Z0-9-_]+"/ ;
 
 InStr: <Str>/(\\[nrt\\"0]|[^\\"\r\n])*/ ;
-Text: <Text>/[^\\"\r\n]*/ ;
+// No escape character in text
+Text: <Text>/[^\r\n]*/ ;
 
 
 NamedCodeBlock: NamedCodeBlockBegin CodeBlockTailCommon ;
@@ -84,7 +85,7 @@ Bind: '=' ;
 Comma: ',' ;
 Continue: '\\' ;
 TextStart: ":" ;
-Ident: /[a-zA-Z_\-0-9]+/ ;
+Ident: /\p{XID_Start}[\p{XID_Continue}-]*/ ;
 NamedCodeBlockBegin: /```[a-zA-Z0-9-_]+/ ;
 CodeBlockDelimiter: <INITIAL, CodeBlockState>/```/ ;
 CodeBlockLine: <CodeBlockState>/[^\n]*/;

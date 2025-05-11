@@ -348,7 +348,7 @@ impl VisitorGenerator {
                 GenField {
                     field_name_ident: crate::format_snake_case(name_str_ref),
                     is_non_terminal: is_nt,
-                    original_name: name_str_ref.clone(),
+                    original_name: name_str_ref.to_string(),
                 }
             })
             .collect::<Vec<_>>();

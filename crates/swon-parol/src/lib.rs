@@ -116,6 +116,17 @@ fn test_node_handlers() {
     let rhs = swon_binding1_view.binding_rhs.get_view(&tree).unwrap();
 }
 
+#[test]
+fn test_zenkaku_space() {
+    let input = "
+    @\u{3000}エー.ビー.シー
+    漢字\u{3000}:\u{3000}白鳥
+    ";
+    let tree = parse(input).unwrap();
+    let mut visitor = InspectVisitor { indent: 0, input };
+    visitor.visit_node_id(tree.root(), &tree).unwrap();
+}
+
 pub struct InspectVisitor<'a> {
     indent: usize,
     input: &'a str,
