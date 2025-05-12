@@ -33,7 +33,7 @@ pub const TERMINALS: &[(&str, Option<(bool, &str)>); 34] = &[
     /* 10 */ (r#"""#, None),
     /* 11 */ (r#"[a-zA-Z0-9-_]+""#, None),
     /* 12 */ (r#"(\\[nrt\\"0]|[^\\"\r\n])*"#, None),
-    /* 13 */ (r#"[^\\"\r\n]*"#, None),
+    /* 13 */ (r"[^\r\n]*", None),
     /* 14 */ (r"[a-zA-Z0-9-_]+`([^`\r\n]|\\`)*`", None),
     /* 15 */ (r"`([^`\r\n]|\\`)*`", None),
     /* 16 */ (r"\r\n|\r|\n", None),
@@ -1134,7 +1134,7 @@ pub const PRODUCTIONS: &[Production; 97] = &[
         lhs: 29,
         production: &[ParseType::T(12)],
     },
-    // 70 - Text: /[^\\"\r\n]*/;
+    // 70 - Text: /[^\r\n]*/;
     Production {
         lhs: 55,
         production: &[ParseType::T(13)],

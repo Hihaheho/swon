@@ -58,9 +58,6 @@ impl AstTypeGenerator {
                 fn kind(&self) -> TerminalKind {
                     TerminalKind::#variant_name
                 }
-                fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError> {
-                    tree.get_terminal(self.0, TerminalKind::#variant_name)
-                }
             }
         }
     }
@@ -76,9 +73,9 @@ impl AstTypeGenerator {
     pub fn generate_imports(&self) -> proc_macro2::TokenStream {
         quote! {
             #![allow(unused_variables)]
-            use super::tree::{TerminalHandle, NonTerminalHandle, RecursiveView, CstNodeId, ViewConstructionError, TerminalData};
+            use super::tree::{TerminalHandle, NonTerminalHandle, RecursiveView, CstNodeId, ViewConstructionError, CstFacade};
             use super::visitor::BuiltinTerminalVisitor;
-            use crate::{Cst, CstConstructError};
+            use crate::CstConstructError;
             use super::node_kind::{TerminalKind, NonTerminalKind, NodeKind};
         }
     }
@@ -148,9 +145,9 @@ impl AstTypeGenerator {
                 }
                 #new_method
                 #kind_method
-                fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
+                fn get_view_with_visit<'v, F: CstFacade, V: BuiltinTerminalVisitor<E, F>, O, E>(
                     &self,
-                    tree: &Cst,
+                    tree: &F,
                     mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
                     visit_ignored: &'v mut V,
                 ) -> Result<O, CstConstructError<E>> {
@@ -303,9 +300,9 @@ impl AstTypeGenerator {
                 }
                 #new_method
                 #kind_method
-                fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
+                fn get_view_with_visit<'v, F: CstFacade, V: BuiltinTerminalVisitor<E, F>, O, E>(
                     &self,
-                    tree: &Cst,
+                    tree: &F,
                     mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
                     visit_ignored: &'v mut V,
                 ) -> Result<O, CstConstructError<E>> {
@@ -386,9 +383,9 @@ impl AstTypeGenerator {
                 }
                 #new_method
                 #kind_method
-                fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
+                fn get_view_with_visit<'v, F: CstFacade, V: BuiltinTerminalVisitor<E, F>, O, E>(
                     &self,
-                    tree: &Cst,
+                    tree: &F,
                     mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
                     visit_ignored: &'v mut V,
                 ) -> Result<O, CstConstructError<E>> {
@@ -426,9 +423,9 @@ impl AstTypeGenerator {
             None
         };
         let view_impl: syn::ItemImpl = parse_quote! {
-            impl RecursiveView<TerminalKind, NonTerminalKind> for #view_name {
+            impl<F: CstFacade> RecursiveView<F> for #view_name {
                 type Item = #item_name;
-                fn get_all_with_visit<E>(&self, tree: &Cst, visit_ignored: &mut impl BuiltinTerminalVisitor<E>) -> Result<Vec<Self::Item>, CstConstructError<E>> {
+                fn get_all_with_visit<E>(&self, tree: &F, visit_ignored: &mut impl BuiltinTerminalVisitor<E, F>) -> Result<Vec<Self::Item>, CstConstructError<E>> {
                     let mut items = Vec::new();
                     let mut current_view = Some(*self);
                     while let Some(item) = current_view {
@@ -514,9 +511,9 @@ impl AstTypeGenerator {
                 }
                 #new_method
                 #kind_method
-                fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
+                fn get_view_with_visit<'v, F: CstFacade, V: BuiltinTerminalVisitor<E, F>, O, E>(
                     &self,
-                    tree: &Cst,
+                    tree: &F,
                     mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
                     visit_ignored: &'v mut V,
                 ) -> Result<O, CstConstructError<E>> {
@@ -536,7 +533,7 @@ impl AstTypeGenerator {
 
     fn generate_handle_new_method(&self, node_kind: TokenStream) -> proc_macro2::TokenStream {
         parse_quote! {
-            fn new_with_visit<E>(index: CstNodeId, tree: &Cst, visit_ignored: &mut impl BuiltinTerminalVisitor<E>) -> Result<Self, CstConstructError<E>> {
+            fn new_with_visit<F: CstFacade, E>(index: CstNodeId, tree: &F, visit_ignored: &mut impl BuiltinTerminalVisitor<E, F>) -> Result<Self, CstConstructError<E>> {
                 tree.collect_nodes(index, [#node_kind], |[index], visit| Ok((Self(index), visit)), visit_ignored)
             }
         }

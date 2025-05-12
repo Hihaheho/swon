@@ -11,11 +11,11 @@ use thiserror::Error;
 pub use span::*;
 
 use crate::{
-    Cst, CstConstructError,
+    CstConstructError,
     common_visitors::{FormatVisitor, FormatVisitorError, InspectVisitor},
     node_kind::{NodeKind, NonTerminalKind, TerminalKind},
     nodes::{BlockComment, LineComment, NewLine, RootHandle, Whitespace},
-    visitor::{BuiltinTerminalVisitor, CstVisitorSuper as _},
+    visitor::{BuiltinTerminalVisitor, CstVisitor, CstVisitorSuper as _},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -282,8 +282,17 @@ impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
         Ok(data)
     }
 
-    pub fn collect_nodes<'v, const N: usize, V: BuiltinTerminalVisitor<E>, O, E>(
+    pub fn collect_nodes<
+        'v,
+        const N: usize,
+        V: BuiltinTerminalVisitor<E, F>,
+        O,
+        E,
+        F: CstFacade,
+    >(
         &self,
+        // This is important to pass a wrapper of Cst field
+        facade: &F,
         parent: CstNodeId,
         nodes: [NodeKind<TerminalKind, NonTerminalKind>; N],
         mut visitor: impl FnMut(
@@ -349,20 +358,20 @@ impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
                 TerminalKind::Whitespace => visit_ignored.visit_builtin_whitespace_terminal(
                     Whitespace(child),
                     data,
-                    self,
+                    facade,
                 )?,
                 TerminalKind::NewLine => {
-                    visit_ignored.visit_builtin_new_line_terminal(NewLine(child), data, self)?
+                    visit_ignored.visit_builtin_new_line_terminal(NewLine(child), data, facade)?
                 }
                 TerminalKind::LineComment => visit_ignored.visit_builtin_line_comment_terminal(
                     LineComment(child),
                     data,
-                    self,
+                    facade,
                 )?,
                 TerminalKind::BlockComment => visit_ignored.visit_builtin_block_comment_terminal(
                     BlockComment(child),
                     data,
-                    self,
+                    facade,
                 )?,
                 _ => unreachable!(),
             }
@@ -382,20 +391,24 @@ impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
                     if kind.is_builtin_terminal() {
                         match kind {
                             TerminalKind::Whitespace => visit_ignored
-                                .visit_builtin_whitespace_terminal(Whitespace(child), data, self)?,
+                                .visit_builtin_whitespace_terminal(
+                                    Whitespace(child),
+                                    data,
+                                    facade,
+                                )?,
                             TerminalKind::NewLine => visit_ignored
-                                .visit_builtin_new_line_terminal(NewLine(child), data, self)?,
+                                .visit_builtin_new_line_terminal(NewLine(child), data, facade)?,
                             TerminalKind::LineComment => visit_ignored
                                 .visit_builtin_line_comment_terminal(
                                     LineComment(child),
                                     data,
-                                    self,
+                                    facade,
                                 )?,
                             TerminalKind::BlockComment => visit_ignored
                                 .visit_builtin_block_comment_terminal(
                                     BlockComment(child),
                                     data,
-                                    self,
+                                    facade,
                                 )?,
                             _ => unreachable!(),
                         }
@@ -441,6 +454,94 @@ impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
         let mut visitor = InspectVisitor::new(input, w);
         visitor.visit_root_handle(self.root_handle(), self)?;
         Ok(())
+    }
+}
+
+pub trait CstFacade: Sized {
+    fn get_str<'a: 'c, 'b: 'c, 'c>(
+        &'a self,
+        terminal: TerminalData,
+        input: &'b str,
+    ) -> Option<&'c str>;
+
+    fn node_data(&self, node: CstNodeId) -> Option<CstNodeData<TerminalKind, NonTerminalKind>>;
+
+    fn has_no_children(&self, node: CstNodeId) -> bool;
+
+    fn children(&self, node: CstNodeId) -> impl Iterator<Item = CstNodeId>;
+
+    fn get_terminal(
+        &self,
+        node: CstNodeId,
+        kind: TerminalKind,
+    ) -> Result<TerminalData, CstConstructError>;
+
+    fn get_non_terminal(
+        &self,
+        node: CstNodeId,
+        kind: NonTerminalKind,
+    ) -> Result<NonTerminalData, CstConstructError>;
+
+    fn collect_nodes<'v, const N: usize, V: BuiltinTerminalVisitor<E, Self>, O, E>(
+        &self,
+        parent: CstNodeId,
+        nodes: [NodeKind<TerminalKind, NonTerminalKind>; N],
+        visitor: impl FnMut([CstNodeId; N], &'v mut V) -> Result<(O, &'v mut V), CstConstructError<E>>,
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>>;
+
+    fn dynamic_token(&self, id: DynamicTokenId) -> Option<&str>;
+}
+
+impl CstFacade for ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
+    fn get_str<'a: 'c, 'b: 'c, 'c>(
+        &'a self,
+        terminal: TerminalData,
+        input: &'b str,
+    ) -> Option<&'c str> {
+        ConcreteSyntaxTree::get_str(self, terminal, input)
+    }
+
+    fn node_data(&self, node: CstNodeId) -> Option<CstNodeData<TerminalKind, NonTerminalKind>> {
+        ConcreteSyntaxTree::node_data(self, node)
+    }
+
+    fn has_no_children(&self, node: CstNodeId) -> bool {
+        ConcreteSyntaxTree::has_no_children(self, node)
+    }
+
+    fn children(&self, node: CstNodeId) -> impl Iterator<Item = CstNodeId> {
+        ConcreteSyntaxTree::children(self, node)
+    }
+
+    fn get_terminal(
+        &self,
+        node: CstNodeId,
+        kind: TerminalKind,
+    ) -> Result<TerminalData, CstConstructError> {
+        ConcreteSyntaxTree::get_terminal(self, node, kind)
+    }
+
+    fn get_non_terminal(
+        &self,
+        node: CstNodeId,
+        kind: NonTerminalKind,
+    ) -> Result<NonTerminalData, CstConstructError> {
+        ConcreteSyntaxTree::get_non_terminal(self, node, kind)
+    }
+
+    fn collect_nodes<'v, const N: usize, V: BuiltinTerminalVisitor<E, Self>, O, E>(
+        &self,
+        parent: CstNodeId,
+        nodes: [NodeKind<TerminalKind, NonTerminalKind>; N],
+        visitor: impl FnMut([CstNodeId; N], &'v mut V) -> Result<(O, &'v mut V), CstConstructError<E>>,
+        visit_ignored: &'v mut V,
+    ) -> Result<O, CstConstructError<E>> {
+        ConcreteSyntaxTree::collect_nodes(self, self, parent, nodes, visitor, visit_ignored)
+    }
+
+    fn dynamic_token(&self, id: DynamicTokenId) -> Option<&str> {
+        ConcreteSyntaxTree::dynamic_token(self, id)
     }
 }
 
@@ -571,40 +672,41 @@ pub struct UnexpectedNode<T, Nt> {
 
 struct DummyTerminalVisitor;
 
-impl<E> BuiltinTerminalVisitor<E> for DummyTerminalVisitor {
-    fn visit_builtin_new_line_terminal(
+impl<F: CstFacade> CstVisitor<F> for DummyTerminalVisitor {
+    type Error = Infallible;
+    fn visit_new_line_terminal(
         &mut self,
         _terminal: crate::nodes::NewLine,
         _data: TerminalData,
-        _tree: &crate::Cst,
-    ) -> Result<(), E> {
+        _tree: &F,
+    ) -> Result<(), Self::Error> {
         Ok(())
     }
 
-    fn visit_builtin_whitespace_terminal(
+    fn visit_whitespace_terminal(
         &mut self,
         _terminal: crate::nodes::Whitespace,
         _data: TerminalData,
-        _tree: &crate::Cst,
-    ) -> Result<(), E> {
+        _tree: &F,
+    ) -> Result<(), Self::Error> {
         Ok(())
     }
 
-    fn visit_builtin_line_comment_terminal(
+    fn visit_line_comment_terminal(
         &mut self,
         _terminal: crate::nodes::LineComment,
         _data: TerminalData,
-        _tree: &crate::Cst,
-    ) -> Result<(), E> {
+        _tree: &F,
+    ) -> Result<(), Self::Error> {
         Ok(())
     }
 
-    fn visit_builtin_block_comment_terminal(
+    fn visit_block_comment_terminal(
         &mut self,
         _terminal: crate::nodes::BlockComment,
         _data: TerminalData,
-        _tree: &crate::Cst,
-    ) -> Result<(), E> {
+        _tree: &F,
+    ) -> Result<(), Self::Error> {
         Ok(())
     }
 }
@@ -615,11 +717,13 @@ pub trait TerminalHandle {
     /// Kind of the terminal.
     fn kind(&self) -> TerminalKind;
     /// Data of the terminal.
-    fn get_data(&self, tree: &Cst) -> Result<TerminalData, CstConstructError>;
+    fn get_data<F: CstFacade>(&self, tree: &F) -> Result<TerminalData, CstConstructError> {
+        tree.get_terminal(self.node_id(), self.kind())
+    }
 }
 
 /// A trait that all generated non-terminal handles implements.
-pub trait NonTerminalHandle {
+pub trait NonTerminalHandle: Sized {
     /// The type of the view for this non-terminal.
     type View;
 
@@ -627,23 +731,18 @@ pub trait NonTerminalHandle {
     fn node_id(&self) -> CstNodeId;
 
     /// Create a new non-terminal handle from a node.
-    fn new(index: CstNodeId, tree: &Cst) -> Result<Self, CstConstructError>
-    where
-        Self: Sized,
-    {
+    fn new<F: CstFacade>(index: CstNodeId, tree: &F) -> Result<Self, CstConstructError> {
         Self::new_with_visit(index, tree, &mut DummyTerminalVisitor)
     }
 
-    fn new_with_visit<E>(
+    fn new_with_visit<F: CstFacade, E>(
         index: CstNodeId,
-        tree: &Cst,
-        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
-    ) -> Result<Self, CstConstructError<E>>
-    where
-        Self: Sized;
+        tree: &F,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E, F>,
+    ) -> Result<Self, CstConstructError<E>>;
 
     /// Get the view of the non-terminal.
-    fn get_view(&self, tree: &Cst) -> Result<Self::View, CstConstructError> {
+    fn get_view<C: CstFacade>(&self, tree: &C) -> Result<Self::View, CstConstructError> {
         self.get_view_with_visit(
             tree,
             |view, visit_ignored| (view, visit_ignored),
@@ -652,9 +751,9 @@ pub trait NonTerminalHandle {
     }
 
     /// Get the view of the non-terminal.
-    fn get_view_with_visit<'v, V: BuiltinTerminalVisitor<E>, O, E>(
+    fn get_view_with_visit<'v, F: CstFacade, V: BuiltinTerminalVisitor<E, F>, O, E>(
         &self,
-        tree: &Cst,
+        tree: &F,
         visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
         visit_ignored: &'v mut V,
     ) -> Result<O, CstConstructError<E>>;
@@ -664,19 +763,16 @@ pub trait NonTerminalHandle {
 }
 
 /// A trait that generated recursive views implements.
-pub trait RecursiveView<T, Nt> {
+pub trait RecursiveView<F: CstFacade> {
     /// The type of the item in the view.
     type Item;
-    fn get_all(
-        &self,
-        tree: &ConcreteSyntaxTree<T, Nt>,
-    ) -> Result<Vec<Self::Item>, ViewConstructionError<T, Nt>> {
+    fn get_all(&self, tree: &F) -> Result<Vec<Self::Item>, CstConstructError> {
         self.get_all_with_visit(tree, &mut DummyTerminalVisitor)
     }
 
     fn get_all_with_visit<E>(
         &self,
-        tree: &ConcreteSyntaxTree<T, Nt>,
-        visit_ignored: &mut impl BuiltinTerminalVisitor<E>,
-    ) -> Result<Vec<Self::Item>, ViewConstructionError<T, Nt, E>>;
+        tree: &F,
+        visit_ignored: &mut impl BuiltinTerminalVisitor<E, F>,
+    ) -> Result<Vec<Self::Item>, CstConstructError<E>>;
 }

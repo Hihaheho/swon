@@ -3,16 +3,16 @@ use crate::{
     node_kind::{TerminalKind, NonTerminalKind},
     tree::{
         TerminalHandle as _, NonTerminalHandle as _, TerminalData, NonTerminalData,
-        CstNodeId,
+        CstNodeId, CstFacade,
     },
 };
-pub trait CstVisitor: CstVisitorSuper<Self::Error> {
+pub trait CstVisitor<F: CstFacade>: CstVisitorSuper<F, Self::Error> {
     type Error;
     fn visit_array(
         &mut self,
         handle: ArrayHandle,
         view: ArrayView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_array_super(handle, view, tree)
     }
@@ -20,7 +20,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: ArrayBeginHandle,
         view: ArrayBeginView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_array_begin_super(handle, view, tree)
     }
@@ -28,7 +28,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: ArrayEndHandle,
         view: ArrayEndView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_array_end_super(handle, view, tree)
     }
@@ -36,7 +36,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: ArrayListHandle,
         view: ArrayListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_array_list_super(handle, view, tree)
     }
@@ -44,7 +44,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: ArrayMarkerHandle,
         view: ArrayMarkerView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_array_marker_super(handle, view, tree)
     }
@@ -52,7 +52,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: ArrayMarkerOptHandle,
         view: IntegerHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_array_marker_opt_super(handle, view, tree)
     }
@@ -60,7 +60,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: ArrayOptHandle,
         view: CommaHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_array_opt_super(handle, view, tree)
     }
@@ -68,7 +68,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: AtHandle,
         view: AtView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_at_super(handle, view, tree)
     }
@@ -76,7 +76,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: BeginHandle,
         view: BeginView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_begin_super(handle, view, tree)
     }
@@ -84,7 +84,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: BindHandle,
         view: BindView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_bind_super(handle, view, tree)
     }
@@ -92,7 +92,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: BindingHandle,
         view: BindingView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_binding_super(handle, view, tree)
     }
@@ -100,7 +100,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: BindingRhsHandle,
         view: BindingRhsView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_binding_rhs_super(handle, view, tree)
     }
@@ -108,7 +108,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: BooleanHandle,
         view: BooleanView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_boolean_super(handle, view, tree)
     }
@@ -116,7 +116,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: CodeHandle,
         view: CodeView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_code_super(handle, view, tree)
     }
@@ -124,7 +124,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: CodeBlockHandle,
         view: CodeBlockView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_code_block_super(handle, view, tree)
     }
@@ -132,7 +132,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: CodeBlockDelimiterHandle,
         view: CodeBlockDelimiterView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_code_block_delimiter_super(handle, view, tree)
     }
@@ -140,7 +140,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: CodeBlockLineHandle,
         view: CodeBlockLineView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_code_block_line_super(handle, view, tree)
     }
@@ -148,7 +148,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: CodeBlockTailCommonHandle,
         view: CodeBlockTailCommonView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_code_block_tail_common_super(handle, view, tree)
     }
@@ -156,7 +156,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: CodeBlockTailCommonListHandle,
         view: CodeBlockTailCommonListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_code_block_tail_common_list_super(handle, view, tree)
     }
@@ -164,7 +164,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: CodeBlockTailCommonOptHandle,
         view: WsHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_code_block_tail_common_opt_super(handle, view, tree)
     }
@@ -172,7 +172,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: CommaHandle,
         view: CommaView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_comma_super(handle, view, tree)
     }
@@ -180,7 +180,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: ContinueHandle,
         view: ContinueView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_continue_super(handle, view, tree)
     }
@@ -188,7 +188,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: DotHandle,
         view: DotView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_dot_super(handle, view, tree)
     }
@@ -196,7 +196,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: EndHandle,
         view: EndView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_end_super(handle, view, tree)
     }
@@ -204,7 +204,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: ExtHandle,
         view: ExtView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_ext_super(handle, view, tree)
     }
@@ -212,7 +212,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: ExtensionNameSpaceHandle,
         view: ExtensionNameSpaceView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_extension_name_space_super(handle, view, tree)
     }
@@ -220,7 +220,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: FalseHandle,
         view: FalseView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_false_super(handle, view, tree)
     }
@@ -228,7 +228,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: HoleHandle,
         view: HoleView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_hole_super(handle, view, tree)
     }
@@ -236,7 +236,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: IdentHandle,
         view: IdentView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_ident_super(handle, view, tree)
     }
@@ -244,7 +244,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: InStrHandle,
         view: InStrView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_in_str_super(handle, view, tree)
     }
@@ -252,7 +252,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: IntegerHandle,
         view: IntegerView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_integer_super(handle, view, tree)
     }
@@ -260,7 +260,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: KeyHandle,
         view: KeyView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_key_super(handle, view, tree)
     }
@@ -268,7 +268,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: KeyBaseHandle,
         view: KeyBaseView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_key_base_super(handle, view, tree)
     }
@@ -276,7 +276,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: KeyOptHandle,
         view: ArrayMarkerHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_key_opt_super(handle, view, tree)
     }
@@ -284,7 +284,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: KeysHandle,
         view: KeysView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_keys_super(handle, view, tree)
     }
@@ -292,7 +292,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: KeysListHandle,
         view: KeysListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_keys_list_super(handle, view, tree)
     }
@@ -300,7 +300,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: NamedCodeHandle,
         view: NamedCodeView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_named_code_super(handle, view, tree)
     }
@@ -308,7 +308,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: NamedCodeBlockHandle,
         view: NamedCodeBlockView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_named_code_block_super(handle, view, tree)
     }
@@ -316,7 +316,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: NamedCodeBlockBeginHandle,
         view: NamedCodeBlockBeginView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_named_code_block_begin_super(handle, view, tree)
     }
@@ -324,7 +324,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: NewlineHandle,
         view: NewlineView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_newline_super(handle, view, tree)
     }
@@ -332,7 +332,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: NullHandle,
         view: NullView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_null_super(handle, view, tree)
     }
@@ -340,7 +340,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: ObjectHandle,
         view: ObjectView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_object_super(handle, view, tree)
     }
@@ -348,7 +348,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: ObjectListHandle,
         view: ObjectListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_object_list_super(handle, view, tree)
     }
@@ -356,7 +356,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: ObjectOptHandle,
         view: CommaHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_object_opt_super(handle, view, tree)
     }
@@ -364,7 +364,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: QuoteHandle,
         view: QuoteView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_quote_super(handle, view, tree)
     }
@@ -372,7 +372,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: SectionHandle,
         view: SectionView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_section_super(handle, view, tree)
     }
@@ -380,7 +380,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: SectionBindingHandle,
         view: SectionBindingView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_section_binding_super(handle, view, tree)
     }
@@ -388,7 +388,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: SectionBodyHandle,
         view: SectionBodyView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_section_body_super(handle, view, tree)
     }
@@ -396,7 +396,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: SectionBodyListHandle,
         view: SectionBodyListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_section_body_list_super(handle, view, tree)
     }
@@ -404,7 +404,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: StrHandle,
         view: StrView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_str_super(handle, view, tree)
     }
@@ -412,7 +412,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: StrContinuesHandle,
         view: StrContinuesView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_str_continues_super(handle, view, tree)
     }
@@ -420,7 +420,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: StrContinuesListHandle,
         view: StrContinuesListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_str_continues_list_super(handle, view, tree)
     }
@@ -428,7 +428,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: SwonHandle,
         view: SwonView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_swon_super(handle, view, tree)
     }
@@ -436,7 +436,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: SwonBindingsHandle,
         view: SwonBindingsView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_swon_bindings_super(handle, view, tree)
     }
@@ -444,7 +444,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: SwonSectionsHandle,
         view: SwonSectionsView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_swon_sections_super(handle, view, tree)
     }
@@ -452,7 +452,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: TextHandle,
         view: TextView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_text_super(handle, view, tree)
     }
@@ -460,7 +460,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: TextBindingHandle,
         view: TextBindingView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_text_binding_super(handle, view, tree)
     }
@@ -468,7 +468,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: TextBindingOptHandle,
         view: WsHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_text_binding_opt_super(handle, view, tree)
     }
@@ -476,7 +476,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: TextStartHandle,
         view: TextStartView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_text_start_super(handle, view, tree)
     }
@@ -484,7 +484,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: TrueHandle,
         view: TrueView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_true_super(handle, view, tree)
     }
@@ -492,7 +492,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: TypedQuoteHandle,
         view: TypedQuoteView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_typed_quote_super(handle, view, tree)
     }
@@ -500,7 +500,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: TypedStrHandle,
         view: TypedStrView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_typed_str_super(handle, view, tree)
     }
@@ -508,7 +508,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: ValueHandle,
         view: ValueView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_value_super(handle, view, tree)
     }
@@ -516,7 +516,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: ValueBindingHandle,
         view: ValueBindingView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_value_binding_super(handle, view, tree)
     }
@@ -524,7 +524,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: WsHandle,
         view: WsView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_ws_super(handle, view, tree)
     }
@@ -532,7 +532,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         handle: RootHandle,
         view: RootView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_root_super(handle, view, tree)
     }
@@ -540,7 +540,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: NewLine,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_new_line_terminal_super(terminal, data, tree)
     }
@@ -548,7 +548,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: Whitespace,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_whitespace_terminal_super(terminal, data, tree)
     }
@@ -556,7 +556,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: LineComment,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_line_comment_terminal_super(terminal, data, tree)
     }
@@ -564,7 +564,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: BlockComment,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_block_comment_terminal_super(terminal, data, tree)
     }
@@ -572,7 +572,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: Integer,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_integer_terminal_super(terminal, data, tree)
     }
@@ -580,7 +580,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: True,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_true_terminal_super(terminal, data, tree)
     }
@@ -588,7 +588,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: False,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_false_terminal_super(terminal, data, tree)
     }
@@ -596,7 +596,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: Null,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_null_terminal_super(terminal, data, tree)
     }
@@ -604,7 +604,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: Hole,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_hole_terminal_super(terminal, data, tree)
     }
@@ -612,7 +612,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: Quote,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_quote_terminal_super(terminal, data, tree)
     }
@@ -620,7 +620,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: TypedQuote,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_typed_quote_terminal_super(terminal, data, tree)
     }
@@ -628,7 +628,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: InStr,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_in_str_terminal_super(terminal, data, tree)
     }
@@ -636,7 +636,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: Text,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_text_terminal_super(terminal, data, tree)
     }
@@ -644,7 +644,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: NamedCode,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_named_code_terminal_super(terminal, data, tree)
     }
@@ -652,7 +652,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: Code,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_code_terminal_super(terminal, data, tree)
     }
@@ -660,7 +660,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: Newline,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_newline_terminal_super(terminal, data, tree)
     }
@@ -668,7 +668,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: Ws,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_ws_terminal_super(terminal, data, tree)
     }
@@ -676,7 +676,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: At,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_at_terminal_super(terminal, data, tree)
     }
@@ -684,7 +684,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: Dollar,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_dollar_terminal_super(terminal, data, tree)
     }
@@ -692,7 +692,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: Dot,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_dot_terminal_super(terminal, data, tree)
     }
@@ -700,7 +700,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: LBrace,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_l_brace_terminal_super(terminal, data, tree)
     }
@@ -708,7 +708,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: RBrace,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_r_brace_terminal_super(terminal, data, tree)
     }
@@ -716,7 +716,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: LBracket,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_l_bracket_terminal_super(terminal, data, tree)
     }
@@ -724,7 +724,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: RBracket,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_r_bracket_terminal_super(terminal, data, tree)
     }
@@ -732,7 +732,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: Bind,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_bind_terminal_super(terminal, data, tree)
     }
@@ -740,7 +740,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: Comma,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_comma_terminal_super(terminal, data, tree)
     }
@@ -748,7 +748,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: Esc,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_esc_terminal_super(terminal, data, tree)
     }
@@ -756,7 +756,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: TextStart,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_text_start_terminal_super(terminal, data, tree)
     }
@@ -764,7 +764,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: Ident,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_ident_terminal_super(terminal, data, tree)
     }
@@ -772,7 +772,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: NamedCodeBlockBegin,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_named_code_block_begin_terminal_super(terminal, data, tree)
     }
@@ -780,7 +780,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: CodeBlockDelimiter,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_code_block_delimiter_terminal_super(terminal, data, tree)
     }
@@ -788,7 +788,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         &mut self,
         terminal: CodeBlockLine,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_code_block_line_terminal_super(terminal, data, tree)
     }
@@ -797,7 +797,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         id: CstNodeId,
         kind: NonTerminalKind,
         data: NonTerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_non_terminal_super(id, kind, data, tree)
     }
@@ -806,7 +806,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         id: CstNodeId,
         kind: NonTerminalKind,
         data: NonTerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_non_terminal_close_super(id, kind, data, tree)
     }
@@ -815,7 +815,7 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         id: CstNodeId,
         kind: TerminalKind,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_terminal_super(id, kind, data, tree)
     }
@@ -827,871 +827,847 @@ pub trait CstVisitor: CstVisitorSuper<Self::Error> {
         parent: CstNodeId,
         kind: NodeKind,
         error: CstConstructError,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         let _error = error;
         self.recover_error(node_data, parent, kind, tree)
     }
 }
 mod private {
-    pub trait Sealed {}
+    pub trait Sealed<F> {}
 }
-pub trait CstVisitorSuper<E>: private::Sealed {
-    fn visit_array_handle(&mut self, handle: ArrayHandle, tree: &Cst) -> Result<(), E>;
+pub trait CstVisitorSuper<F: CstFacade, E>: private::Sealed<F> {
+    fn visit_array_handle(&mut self, handle: ArrayHandle, tree: &F) -> Result<(), E>;
     fn visit_array_super(
         &mut self,
         handle: ArrayHandle,
         view: ArrayView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_array_begin_handle(
         &mut self,
         handle: ArrayBeginHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_array_begin_super(
         &mut self,
         handle: ArrayBeginHandle,
         view: ArrayBeginView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_array_end_handle(
         &mut self,
         handle: ArrayEndHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_array_end_super(
         &mut self,
         handle: ArrayEndHandle,
         view: ArrayEndView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_array_list_handle(
         &mut self,
         handle: ArrayListHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_array_list_super(
         &mut self,
         handle: ArrayListHandle,
         view: ArrayListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_array_marker_handle(
         &mut self,
         handle: ArrayMarkerHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_array_marker_super(
         &mut self,
         handle: ArrayMarkerHandle,
         view: ArrayMarkerView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_array_marker_opt_handle(
         &mut self,
         handle: ArrayMarkerOptHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_array_marker_opt_super(
         &mut self,
         handle: ArrayMarkerOptHandle,
         view: IntegerHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_array_opt_handle(
         &mut self,
         handle: ArrayOptHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_array_opt_super(
         &mut self,
         handle: ArrayOptHandle,
         view: CommaHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_at_handle(&mut self, handle: AtHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_at_handle(&mut self, handle: AtHandle, tree: &F) -> Result<(), E>;
     fn visit_at_super(
         &mut self,
         handle: AtHandle,
         view: AtView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_begin_handle(&mut self, handle: BeginHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_begin_handle(&mut self, handle: BeginHandle, tree: &F) -> Result<(), E>;
     fn visit_begin_super(
         &mut self,
         handle: BeginHandle,
         view: BeginView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_bind_handle(&mut self, handle: BindHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_bind_handle(&mut self, handle: BindHandle, tree: &F) -> Result<(), E>;
     fn visit_bind_super(
         &mut self,
         handle: BindHandle,
         view: BindView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_binding_handle(
-        &mut self,
-        handle: BindingHandle,
-        tree: &Cst,
-    ) -> Result<(), E>;
+    fn visit_binding_handle(&mut self, handle: BindingHandle, tree: &F) -> Result<(), E>;
     fn visit_binding_super(
         &mut self,
         handle: BindingHandle,
         view: BindingView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_binding_rhs_handle(
         &mut self,
         handle: BindingRhsHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_binding_rhs_super(
         &mut self,
         handle: BindingRhsHandle,
         view: BindingRhsView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_boolean_handle(
-        &mut self,
-        handle: BooleanHandle,
-        tree: &Cst,
-    ) -> Result<(), E>;
+    fn visit_boolean_handle(&mut self, handle: BooleanHandle, tree: &F) -> Result<(), E>;
     fn visit_boolean_super(
         &mut self,
         handle: BooleanHandle,
         view: BooleanView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_code_handle(&mut self, handle: CodeHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_code_handle(&mut self, handle: CodeHandle, tree: &F) -> Result<(), E>;
     fn visit_code_super(
         &mut self,
         handle: CodeHandle,
         view: CodeView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_code_block_handle(
         &mut self,
         handle: CodeBlockHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_code_block_super(
         &mut self,
         handle: CodeBlockHandle,
         view: CodeBlockView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_code_block_delimiter_handle(
         &mut self,
         handle: CodeBlockDelimiterHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_code_block_delimiter_super(
         &mut self,
         handle: CodeBlockDelimiterHandle,
         view: CodeBlockDelimiterView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_code_block_line_handle(
         &mut self,
         handle: CodeBlockLineHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_code_block_line_super(
         &mut self,
         handle: CodeBlockLineHandle,
         view: CodeBlockLineView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_code_block_tail_common_handle(
         &mut self,
         handle: CodeBlockTailCommonHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_code_block_tail_common_super(
         &mut self,
         handle: CodeBlockTailCommonHandle,
         view: CodeBlockTailCommonView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_code_block_tail_common_list_handle(
         &mut self,
         handle: CodeBlockTailCommonListHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_code_block_tail_common_list_super(
         &mut self,
         handle: CodeBlockTailCommonListHandle,
         view: CodeBlockTailCommonListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_code_block_tail_common_opt_handle(
         &mut self,
         handle: CodeBlockTailCommonOptHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_code_block_tail_common_opt_super(
         &mut self,
         handle: CodeBlockTailCommonOptHandle,
         view: WsHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_comma_handle(&mut self, handle: CommaHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_comma_handle(&mut self, handle: CommaHandle, tree: &F) -> Result<(), E>;
     fn visit_comma_super(
         &mut self,
         handle: CommaHandle,
         view: CommaView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_continue_handle(
         &mut self,
         handle: ContinueHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_continue_super(
         &mut self,
         handle: ContinueHandle,
         view: ContinueView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_dot_handle(&mut self, handle: DotHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_dot_handle(&mut self, handle: DotHandle, tree: &F) -> Result<(), E>;
     fn visit_dot_super(
         &mut self,
         handle: DotHandle,
         view: DotView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_end_handle(&mut self, handle: EndHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_end_handle(&mut self, handle: EndHandle, tree: &F) -> Result<(), E>;
     fn visit_end_super(
         &mut self,
         handle: EndHandle,
         view: EndView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_ext_handle(&mut self, handle: ExtHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_ext_handle(&mut self, handle: ExtHandle, tree: &F) -> Result<(), E>;
     fn visit_ext_super(
         &mut self,
         handle: ExtHandle,
         view: ExtView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_extension_name_space_handle(
         &mut self,
         handle: ExtensionNameSpaceHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_extension_name_space_super(
         &mut self,
         handle: ExtensionNameSpaceHandle,
         view: ExtensionNameSpaceView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_false_handle(&mut self, handle: FalseHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_false_handle(&mut self, handle: FalseHandle, tree: &F) -> Result<(), E>;
     fn visit_false_super(
         &mut self,
         handle: FalseHandle,
         view: FalseView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_hole_handle(&mut self, handle: HoleHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_hole_handle(&mut self, handle: HoleHandle, tree: &F) -> Result<(), E>;
     fn visit_hole_super(
         &mut self,
         handle: HoleHandle,
         view: HoleView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_ident_handle(&mut self, handle: IdentHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_ident_handle(&mut self, handle: IdentHandle, tree: &F) -> Result<(), E>;
     fn visit_ident_super(
         &mut self,
         handle: IdentHandle,
         view: IdentView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_in_str_handle(&mut self, handle: InStrHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_in_str_handle(&mut self, handle: InStrHandle, tree: &F) -> Result<(), E>;
     fn visit_in_str_super(
         &mut self,
         handle: InStrHandle,
         view: InStrView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_integer_handle(
-        &mut self,
-        handle: IntegerHandle,
-        tree: &Cst,
-    ) -> Result<(), E>;
+    fn visit_integer_handle(&mut self, handle: IntegerHandle, tree: &F) -> Result<(), E>;
     fn visit_integer_super(
         &mut self,
         handle: IntegerHandle,
         view: IntegerView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_key_handle(&mut self, handle: KeyHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_key_handle(&mut self, handle: KeyHandle, tree: &F) -> Result<(), E>;
     fn visit_key_super(
         &mut self,
         handle: KeyHandle,
         view: KeyView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_key_base_handle(
         &mut self,
         handle: KeyBaseHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_key_base_super(
         &mut self,
         handle: KeyBaseHandle,
         view: KeyBaseView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_key_opt_handle(
-        &mut self,
-        handle: KeyOptHandle,
-        tree: &Cst,
-    ) -> Result<(), E>;
+    fn visit_key_opt_handle(&mut self, handle: KeyOptHandle, tree: &F) -> Result<(), E>;
     fn visit_key_opt_super(
         &mut self,
         handle: KeyOptHandle,
         view: ArrayMarkerHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_keys_handle(&mut self, handle: KeysHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_keys_handle(&mut self, handle: KeysHandle, tree: &F) -> Result<(), E>;
     fn visit_keys_super(
         &mut self,
         handle: KeysHandle,
         view: KeysView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_keys_list_handle(
         &mut self,
         handle: KeysListHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_keys_list_super(
         &mut self,
         handle: KeysListHandle,
         view: KeysListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_named_code_handle(
         &mut self,
         handle: NamedCodeHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_named_code_super(
         &mut self,
         handle: NamedCodeHandle,
         view: NamedCodeView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_named_code_block_handle(
         &mut self,
         handle: NamedCodeBlockHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_named_code_block_super(
         &mut self,
         handle: NamedCodeBlockHandle,
         view: NamedCodeBlockView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_named_code_block_begin_handle(
         &mut self,
         handle: NamedCodeBlockBeginHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_named_code_block_begin_super(
         &mut self,
         handle: NamedCodeBlockBeginHandle,
         view: NamedCodeBlockBeginView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_newline_handle(
-        &mut self,
-        handle: NewlineHandle,
-        tree: &Cst,
-    ) -> Result<(), E>;
+    fn visit_newline_handle(&mut self, handle: NewlineHandle, tree: &F) -> Result<(), E>;
     fn visit_newline_super(
         &mut self,
         handle: NewlineHandle,
         view: NewlineView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_null_handle(&mut self, handle: NullHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_null_handle(&mut self, handle: NullHandle, tree: &F) -> Result<(), E>;
     fn visit_null_super(
         &mut self,
         handle: NullHandle,
         view: NullView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_object_handle(&mut self, handle: ObjectHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_object_handle(&mut self, handle: ObjectHandle, tree: &F) -> Result<(), E>;
     fn visit_object_super(
         &mut self,
         handle: ObjectHandle,
         view: ObjectView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_object_list_handle(
         &mut self,
         handle: ObjectListHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_object_list_super(
         &mut self,
         handle: ObjectListHandle,
         view: ObjectListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_object_opt_handle(
         &mut self,
         handle: ObjectOptHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_object_opt_super(
         &mut self,
         handle: ObjectOptHandle,
         view: CommaHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_quote_handle(&mut self, handle: QuoteHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_quote_handle(&mut self, handle: QuoteHandle, tree: &F) -> Result<(), E>;
     fn visit_quote_super(
         &mut self,
         handle: QuoteHandle,
         view: QuoteView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_section_handle(
-        &mut self,
-        handle: SectionHandle,
-        tree: &Cst,
-    ) -> Result<(), E>;
+    fn visit_section_handle(&mut self, handle: SectionHandle, tree: &F) -> Result<(), E>;
     fn visit_section_super(
         &mut self,
         handle: SectionHandle,
         view: SectionView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_section_binding_handle(
         &mut self,
         handle: SectionBindingHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_section_binding_super(
         &mut self,
         handle: SectionBindingHandle,
         view: SectionBindingView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_section_body_handle(
         &mut self,
         handle: SectionBodyHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_section_body_super(
         &mut self,
         handle: SectionBodyHandle,
         view: SectionBodyView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_section_body_list_handle(
         &mut self,
         handle: SectionBodyListHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_section_body_list_super(
         &mut self,
         handle: SectionBodyListHandle,
         view: SectionBodyListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_str_handle(&mut self, handle: StrHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_str_handle(&mut self, handle: StrHandle, tree: &F) -> Result<(), E>;
     fn visit_str_super(
         &mut self,
         handle: StrHandle,
         view: StrView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_str_continues_handle(
         &mut self,
         handle: StrContinuesHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_str_continues_super(
         &mut self,
         handle: StrContinuesHandle,
         view: StrContinuesView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_str_continues_list_handle(
         &mut self,
         handle: StrContinuesListHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_str_continues_list_super(
         &mut self,
         handle: StrContinuesListHandle,
         view: StrContinuesListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_swon_handle(&mut self, handle: SwonHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_swon_handle(&mut self, handle: SwonHandle, tree: &F) -> Result<(), E>;
     fn visit_swon_super(
         &mut self,
         handle: SwonHandle,
         view: SwonView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_swon_bindings_handle(
         &mut self,
         handle: SwonBindingsHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_swon_bindings_super(
         &mut self,
         handle: SwonBindingsHandle,
         view: SwonBindingsView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_swon_sections_handle(
         &mut self,
         handle: SwonSectionsHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_swon_sections_super(
         &mut self,
         handle: SwonSectionsHandle,
         view: SwonSectionsView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_text_handle(&mut self, handle: TextHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_text_handle(&mut self, handle: TextHandle, tree: &F) -> Result<(), E>;
     fn visit_text_super(
         &mut self,
         handle: TextHandle,
         view: TextView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_text_binding_handle(
         &mut self,
         handle: TextBindingHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_text_binding_super(
         &mut self,
         handle: TextBindingHandle,
         view: TextBindingView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_text_binding_opt_handle(
         &mut self,
         handle: TextBindingOptHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_text_binding_opt_super(
         &mut self,
         handle: TextBindingOptHandle,
         view: WsHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_text_start_handle(
         &mut self,
         handle: TextStartHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_text_start_super(
         &mut self,
         handle: TextStartHandle,
         view: TextStartView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_true_handle(&mut self, handle: TrueHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_true_handle(&mut self, handle: TrueHandle, tree: &F) -> Result<(), E>;
     fn visit_true_super(
         &mut self,
         handle: TrueHandle,
         view: TrueView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_typed_quote_handle(
         &mut self,
         handle: TypedQuoteHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_typed_quote_super(
         &mut self,
         handle: TypedQuoteHandle,
         view: TypedQuoteView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_typed_str_handle(
         &mut self,
         handle: TypedStrHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_typed_str_super(
         &mut self,
         handle: TypedStrHandle,
         view: TypedStrView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_value_handle(&mut self, handle: ValueHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_value_handle(&mut self, handle: ValueHandle, tree: &F) -> Result<(), E>;
     fn visit_value_super(
         &mut self,
         handle: ValueHandle,
         view: ValueView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_value_binding_handle(
         &mut self,
         handle: ValueBindingHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_value_binding_super(
         &mut self,
         handle: ValueBindingHandle,
         view: ValueBindingView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_ws_handle(&mut self, handle: WsHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_ws_handle(&mut self, handle: WsHandle, tree: &F) -> Result<(), E>;
     fn visit_ws_super(
         &mut self,
         handle: WsHandle,
         view: WsView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_root_handle(&mut self, handle: RootHandle, tree: &Cst) -> Result<(), E>;
+    fn visit_root_handle(&mut self, handle: RootHandle, tree: &F) -> Result<(), E>;
     fn visit_root_super(
         &mut self,
         handle: RootHandle,
         view: RootView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_new_line_terminal_super(
         &mut self,
         terminal: NewLine,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_whitespace_terminal_super(
         &mut self,
         terminal: Whitespace,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_line_comment_terminal_super(
         &mut self,
         terminal: LineComment,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_block_comment_terminal_super(
         &mut self,
         terminal: BlockComment,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_integer_terminal_super(
         &mut self,
         terminal: Integer,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_true_terminal_super(
         &mut self,
         terminal: True,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_false_terminal_super(
         &mut self,
         terminal: False,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_null_terminal_super(
         &mut self,
         terminal: Null,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_hole_terminal_super(
         &mut self,
         terminal: Hole,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_quote_terminal_super(
         &mut self,
         terminal: Quote,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_typed_quote_terminal_super(
         &mut self,
         terminal: TypedQuote,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_in_str_terminal_super(
         &mut self,
         terminal: InStr,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_text_terminal_super(
         &mut self,
         terminal: Text,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_named_code_terminal_super(
         &mut self,
         terminal: NamedCode,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_code_terminal_super(
         &mut self,
         terminal: Code,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_newline_terminal_super(
         &mut self,
         terminal: Newline,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_ws_terminal_super(
         &mut self,
         terminal: Ws,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_at_terminal_super(
         &mut self,
         terminal: At,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_dollar_terminal_super(
         &mut self,
         terminal: Dollar,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_dot_terminal_super(
         &mut self,
         terminal: Dot,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_l_brace_terminal_super(
         &mut self,
         terminal: LBrace,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_r_brace_terminal_super(
         &mut self,
         terminal: RBrace,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_l_bracket_terminal_super(
         &mut self,
         terminal: LBracket,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_r_bracket_terminal_super(
         &mut self,
         terminal: RBracket,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_bind_terminal_super(
         &mut self,
         terminal: Bind,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_comma_terminal_super(
         &mut self,
         terminal: Comma,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_esc_terminal_super(
         &mut self,
         terminal: Esc,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_text_start_terminal_super(
         &mut self,
         terminal: TextStart,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_ident_terminal_super(
         &mut self,
         terminal: Ident,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_named_code_block_begin_terminal_super(
         &mut self,
         terminal: NamedCodeBlockBegin,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_code_block_delimiter_terminal_super(
         &mut self,
         terminal: CodeBlockDelimiter,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_code_block_line_terminal_super(
         &mut self,
         terminal: CodeBlockLine,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_non_terminal_super(
         &mut self,
         id: CstNodeId,
         kind: NonTerminalKind,
         data: NonTerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_non_terminal_close_super(
         &mut self,
         id: CstNodeId,
         kind: NonTerminalKind,
         data: NonTerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_terminal_super(
         &mut self,
         id: CstNodeId,
         kind: TerminalKind,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
-    fn visit_any(&mut self, id: CstNodeId, node: CstNode, tree: &Cst) -> Result<(), E>;
+    fn visit_any(&mut self, id: CstNodeId, node: CstNode, tree: &F) -> Result<(), E>;
     /// Recover from a construct error. This eagerly visits the children of the node.
     fn recover_error(
         &mut self,
         node_data: Option<CstNode>,
         id: CstNodeId,
         kind: NodeKind,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
 }
-impl<V: CstVisitor> private::Sealed for V {}
-impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
+impl<V: CstVisitor<F>, F: CstFacade> private::Sealed<F> for V {}
+impl<V: CstVisitor<F>, F: CstFacade> CstVisitorSuper<F, V::Error> for V {
     fn visit_array_handle(
         &mut self,
         handle: ArrayHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -1734,7 +1710,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_array_begin_handle(
         &mut self,
         handle: ArrayBeginHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -1780,7 +1756,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_array_end_handle(
         &mut self,
         handle: ArrayEndHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -1826,7 +1802,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_array_list_handle(
         &mut self,
         handle: ArrayListHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -1876,7 +1852,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_array_marker_handle(
         &mut self,
         handle: ArrayMarkerHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -1922,7 +1898,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_array_marker_opt_handle(
         &mut self,
         handle: ArrayMarkerOptHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -1972,7 +1948,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_array_opt_handle(
         &mut self,
         handle: ArrayOptHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -2019,7 +1995,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         self.visit_non_terminal_close(handle.node_id(), handle.kind(), nt_data, tree)?;
         result
     }
-    fn visit_at_handle(&mut self, handle: AtHandle, tree: &Cst) -> Result<(), V::Error> {
+    fn visit_at_handle(&mut self, handle: AtHandle, tree: &F) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
             Err(error) => {
@@ -2061,7 +2037,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_begin_handle(
         &mut self,
         handle: BeginHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -2104,7 +2080,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_bind_handle(
         &mut self,
         handle: BindHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -2147,7 +2123,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_binding_handle(
         &mut self,
         handle: BindingHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -2193,7 +2169,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_binding_rhs_handle(
         &mut self,
         handle: BindingRhsHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -2239,7 +2215,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_boolean_handle(
         &mut self,
         handle: BooleanHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -2285,7 +2261,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_code_handle(
         &mut self,
         handle: CodeHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -2328,7 +2304,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_code_block_handle(
         &mut self,
         handle: CodeBlockHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -2374,7 +2350,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_code_block_delimiter_handle(
         &mut self,
         handle: CodeBlockDelimiterHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -2420,7 +2396,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_code_block_line_handle(
         &mut self,
         handle: CodeBlockLineHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -2466,7 +2442,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_code_block_tail_common_handle(
         &mut self,
         handle: CodeBlockTailCommonHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -2512,7 +2488,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_code_block_tail_common_list_handle(
         &mut self,
         handle: CodeBlockTailCommonListHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -2562,7 +2538,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_code_block_tail_common_opt_handle(
         &mut self,
         handle: CodeBlockTailCommonOptHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -2612,7 +2588,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_comma_handle(
         &mut self,
         handle: CommaHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -2655,7 +2631,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_continue_handle(
         &mut self,
         handle: ContinueHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -2698,11 +2674,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         self.visit_non_terminal_close(handle.node_id(), handle.kind(), nt_data, tree)?;
         result
     }
-    fn visit_dot_handle(
-        &mut self,
-        handle: DotHandle,
-        tree: &Cst,
-    ) -> Result<(), V::Error> {
+    fn visit_dot_handle(&mut self, handle: DotHandle, tree: &F) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
             Err(error) => {
@@ -2741,11 +2713,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         self.visit_non_terminal_close(handle.node_id(), handle.kind(), nt_data, tree)?;
         result
     }
-    fn visit_end_handle(
-        &mut self,
-        handle: EndHandle,
-        tree: &Cst,
-    ) -> Result<(), V::Error> {
+    fn visit_end_handle(&mut self, handle: EndHandle, tree: &F) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
             Err(error) => {
@@ -2784,11 +2752,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         self.visit_non_terminal_close(handle.node_id(), handle.kind(), nt_data, tree)?;
         result
     }
-    fn visit_ext_handle(
-        &mut self,
-        handle: ExtHandle,
-        tree: &Cst,
-    ) -> Result<(), V::Error> {
+    fn visit_ext_handle(&mut self, handle: ExtHandle, tree: &F) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
             Err(error) => {
@@ -2830,7 +2794,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_extension_name_space_handle(
         &mut self,
         handle: ExtensionNameSpaceHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -2876,7 +2840,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_false_handle(
         &mut self,
         handle: FalseHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -2919,7 +2883,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_hole_handle(
         &mut self,
         handle: HoleHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -2962,7 +2926,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_ident_handle(
         &mut self,
         handle: IdentHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -3005,7 +2969,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_in_str_handle(
         &mut self,
         handle: InStrHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -3048,7 +3012,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_integer_handle(
         &mut self,
         handle: IntegerHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -3091,11 +3055,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         self.visit_non_terminal_close(handle.node_id(), handle.kind(), nt_data, tree)?;
         result
     }
-    fn visit_key_handle(
-        &mut self,
-        handle: KeyHandle,
-        tree: &Cst,
-    ) -> Result<(), V::Error> {
+    fn visit_key_handle(&mut self, handle: KeyHandle, tree: &F) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
             Err(error) => {
@@ -3137,7 +3097,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_key_base_handle(
         &mut self,
         handle: KeyBaseHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -3183,7 +3143,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_key_opt_handle(
         &mut self,
         handle: KeyOptHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -3233,7 +3193,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_keys_handle(
         &mut self,
         handle: KeysHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -3276,7 +3236,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_keys_list_handle(
         &mut self,
         handle: KeysListHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -3326,7 +3286,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_named_code_handle(
         &mut self,
         handle: NamedCodeHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -3372,7 +3332,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_named_code_block_handle(
         &mut self,
         handle: NamedCodeBlockHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -3418,7 +3378,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_named_code_block_begin_handle(
         &mut self,
         handle: NamedCodeBlockBeginHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -3464,7 +3424,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_newline_handle(
         &mut self,
         handle: NewlineHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -3510,7 +3470,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_null_handle(
         &mut self,
         handle: NullHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -3553,7 +3513,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_object_handle(
         &mut self,
         handle: ObjectHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -3596,7 +3556,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_object_list_handle(
         &mut self,
         handle: ObjectListHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -3646,7 +3606,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_object_opt_handle(
         &mut self,
         handle: ObjectOptHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -3696,7 +3656,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_quote_handle(
         &mut self,
         handle: QuoteHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -3739,7 +3699,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_section_handle(
         &mut self,
         handle: SectionHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -3785,7 +3745,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_section_binding_handle(
         &mut self,
         handle: SectionBindingHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -3831,7 +3791,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_section_body_handle(
         &mut self,
         handle: SectionBodyHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -3877,7 +3837,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_section_body_list_handle(
         &mut self,
         handle: SectionBodyListHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -3924,11 +3884,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         self.visit_non_terminal_close(handle.node_id(), handle.kind(), nt_data, tree)?;
         result
     }
-    fn visit_str_handle(
-        &mut self,
-        handle: StrHandle,
-        tree: &Cst,
-    ) -> Result<(), V::Error> {
+    fn visit_str_handle(&mut self, handle: StrHandle, tree: &F) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
             Err(error) => {
@@ -3970,7 +3926,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_str_continues_handle(
         &mut self,
         handle: StrContinuesHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -4016,7 +3972,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_str_continues_list_handle(
         &mut self,
         handle: StrContinuesListHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -4066,7 +4022,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_swon_handle(
         &mut self,
         handle: SwonHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -4109,7 +4065,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_swon_bindings_handle(
         &mut self,
         handle: SwonBindingsHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -4159,7 +4115,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_swon_sections_handle(
         &mut self,
         handle: SwonSectionsHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -4209,7 +4165,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_text_handle(
         &mut self,
         handle: TextHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -4252,7 +4208,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_text_binding_handle(
         &mut self,
         handle: TextBindingHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -4298,7 +4254,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_text_binding_opt_handle(
         &mut self,
         handle: TextBindingOptHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -4348,7 +4304,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_text_start_handle(
         &mut self,
         handle: TextStartHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -4394,7 +4350,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_true_handle(
         &mut self,
         handle: TrueHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -4437,7 +4393,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_typed_quote_handle(
         &mut self,
         handle: TypedQuoteHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -4483,7 +4439,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_typed_str_handle(
         &mut self,
         handle: TypedStrHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -4529,7 +4485,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_value_handle(
         &mut self,
         handle: ValueHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -4572,7 +4528,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_value_binding_handle(
         &mut self,
         handle: ValueBindingHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -4615,7 +4571,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         self.visit_non_terminal_close(handle.node_id(), handle.kind(), nt_data, tree)?;
         result
     }
-    fn visit_ws_handle(&mut self, handle: WsHandle, tree: &Cst) -> Result<(), V::Error> {
+    fn visit_ws_handle(&mut self, handle: WsHandle, tree: &F) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
             Err(error) => {
@@ -4657,7 +4613,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
     fn visit_root_handle(
         &mut self,
         handle: RootHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
             Ok(nt_data) => nt_data,
@@ -4701,7 +4657,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: ArrayHandle,
         view_param: ArrayView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let ArrayView { array_begin, array_list, array_end } = view_param;
@@ -4714,7 +4670,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: ArrayBeginHandle,
         view_param: ArrayBeginView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let ArrayBeginView { l_bracket } = view_param;
@@ -4738,7 +4694,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: ArrayEndHandle,
         view_param: ArrayEndView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let ArrayEndView { r_bracket } = view_param;
@@ -4762,7 +4718,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: ArrayListHandle,
         view_param: ArrayListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let ArrayListView { value, array_opt, array_list } = view_param;
@@ -4775,7 +4731,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: ArrayMarkerHandle,
         view_param: ArrayMarkerView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let ArrayMarkerView { array_begin, array_marker_opt, array_end } = view_param;
@@ -4788,7 +4744,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: ArrayMarkerOptHandle,
         view_param: IntegerHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         self.visit_integer_handle(view_param, tree)?;
@@ -4798,7 +4754,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: ArrayOptHandle,
         view_param: CommaHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         self.visit_comma_handle(view_param, tree)?;
@@ -4808,7 +4764,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: AtHandle,
         view_param: AtView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let AtView { at } = view_param;
@@ -4832,7 +4788,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: BeginHandle,
         view_param: BeginView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let BeginView { l_brace } = view_param;
@@ -4856,7 +4812,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: BindHandle,
         view_param: BindView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let BindView { bind } = view_param;
@@ -4880,7 +4836,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: BindingHandle,
         view_param: BindingView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let BindingView { keys, binding_rhs } = view_param;
@@ -4892,7 +4848,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: BindingRhsHandle,
         view_param: BindingRhsView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         match view_param {
@@ -4912,7 +4868,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: BooleanHandle,
         view_param: BooleanView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         match view_param {
@@ -4929,7 +4885,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: CodeHandle,
         view_param: CodeView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let CodeView { code } = view_param;
@@ -4953,7 +4909,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: CodeBlockHandle,
         view_param: CodeBlockView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let CodeBlockView { code_block_delimiter, code_block_tail_common } = view_param;
@@ -4965,7 +4921,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: CodeBlockDelimiterHandle,
         view_param: CodeBlockDelimiterView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let CodeBlockDelimiterView { code_block_delimiter } = view_param;
@@ -4989,7 +4945,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: CodeBlockLineHandle,
         view_param: CodeBlockLineView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let CodeBlockLineView { code_block_line } = view_param;
@@ -5013,7 +4969,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: CodeBlockTailCommonHandle,
         view_param: CodeBlockTailCommonView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let CodeBlockTailCommonView {
@@ -5035,7 +4991,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: CodeBlockTailCommonListHandle,
         view_param: CodeBlockTailCommonListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let CodeBlockTailCommonListView {
@@ -5055,7 +5011,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: CodeBlockTailCommonOptHandle,
         view_param: WsHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         self.visit_ws_handle(view_param, tree)?;
@@ -5065,7 +5021,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: CommaHandle,
         view_param: CommaView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let CommaView { comma } = view_param;
@@ -5089,7 +5045,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: ContinueHandle,
         view_param: ContinueView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let ContinueView { esc } = view_param;
@@ -5113,7 +5069,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: DotHandle,
         view_param: DotView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let DotView { dot } = view_param;
@@ -5137,7 +5093,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: EndHandle,
         view_param: EndView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let EndView { r_brace } = view_param;
@@ -5161,7 +5117,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: ExtHandle,
         view_param: ExtView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let ExtView { dollar } = view_param;
@@ -5185,7 +5141,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: ExtensionNameSpaceHandle,
         view_param: ExtensionNameSpaceView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let ExtensionNameSpaceView { ext, ident } = view_param;
@@ -5197,7 +5153,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: FalseHandle,
         view_param: FalseView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let FalseView { r#false } = view_param;
@@ -5221,7 +5177,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: HoleHandle,
         view_param: HoleView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let HoleView { hole } = view_param;
@@ -5245,7 +5201,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: IdentHandle,
         view_param: IdentView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let IdentView { ident } = view_param;
@@ -5269,7 +5225,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: InStrHandle,
         view_param: InStrView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let InStrView { in_str } = view_param;
@@ -5293,7 +5249,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: IntegerHandle,
         view_param: IntegerView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let IntegerView { integer } = view_param;
@@ -5317,7 +5273,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: KeyHandle,
         view_param: KeyView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let KeyView { key_base, key_opt } = view_param;
@@ -5329,7 +5285,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: KeyBaseHandle,
         view_param: KeyBaseView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         match view_param {
@@ -5352,7 +5308,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: KeyOptHandle,
         view_param: ArrayMarkerHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         self.visit_array_marker_handle(view_param, tree)?;
@@ -5362,7 +5318,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: KeysHandle,
         view_param: KeysView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let KeysView { key, keys_list } = view_param;
@@ -5374,7 +5330,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: KeysListHandle,
         view_param: KeysListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let KeysListView { dot, key, keys_list } = view_param;
@@ -5387,7 +5343,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: NamedCodeHandle,
         view_param: NamedCodeView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let NamedCodeView { named_code } = view_param;
@@ -5411,7 +5367,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: NamedCodeBlockHandle,
         view_param: NamedCodeBlockView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let NamedCodeBlockView { named_code_block_begin, code_block_tail_common } = view_param;
@@ -5423,7 +5379,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: NamedCodeBlockBeginHandle,
         view_param: NamedCodeBlockBeginView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let NamedCodeBlockBeginView { named_code_block_begin } = view_param;
@@ -5447,7 +5403,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: NewlineHandle,
         view_param: NewlineView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let NewlineView { newline } = view_param;
@@ -5471,7 +5427,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: NullHandle,
         view_param: NullView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let NullView { null } = view_param;
@@ -5495,7 +5451,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: ObjectHandle,
         view_param: ObjectView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let ObjectView { begin, object_list, end } = view_param;
@@ -5508,7 +5464,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: ObjectListHandle,
         view_param: ObjectListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let ObjectListView { key, bind, value, object_opt, object_list } = view_param;
@@ -5523,7 +5479,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: ObjectOptHandle,
         view_param: CommaHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         self.visit_comma_handle(view_param, tree)?;
@@ -5533,7 +5489,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: QuoteHandle,
         view_param: QuoteView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let QuoteView { quote } = view_param;
@@ -5557,7 +5513,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: SectionHandle,
         view_param: SectionView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let SectionView { at, keys, section_body } = view_param;
@@ -5570,7 +5526,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: SectionBindingHandle,
         view_param: SectionBindingView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let SectionBindingView { begin, swon, end } = view_param;
@@ -5583,7 +5539,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: SectionBodyHandle,
         view_param: SectionBodyView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         match view_param {
@@ -5600,7 +5556,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: SectionBodyListHandle,
         view_param: SectionBodyListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let SectionBodyListView { binding, section_body_list } = view_param;
@@ -5612,7 +5568,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: StrHandle,
         view_param: StrView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let StrView { quote, in_str, quote2 } = view_param;
@@ -5625,7 +5581,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: StrContinuesHandle,
         view_param: StrContinuesView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let StrContinuesView { str, str_continues_list } = view_param;
@@ -5637,7 +5593,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: StrContinuesListHandle,
         view_param: StrContinuesListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let StrContinuesListView { r#continue, str, str_continues_list } = view_param;
@@ -5650,7 +5606,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: SwonHandle,
         view_param: SwonView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let SwonView { swon_bindings, swon_sections } = view_param;
@@ -5662,7 +5618,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: SwonBindingsHandle,
         view_param: SwonBindingsView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let SwonBindingsView { binding, swon_bindings } = view_param;
@@ -5674,7 +5630,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: SwonSectionsHandle,
         view_param: SwonSectionsView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let SwonSectionsView { section, swon_sections } = view_param;
@@ -5686,7 +5642,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: TextHandle,
         view_param: TextView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let TextView { text } = view_param;
@@ -5710,7 +5666,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: TextBindingHandle,
         view_param: TextBindingView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let TextBindingView { text_start, text_binding_opt, text, newline } = view_param;
@@ -5724,7 +5680,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: TextBindingOptHandle,
         view_param: WsHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         self.visit_ws_handle(view_param, tree)?;
@@ -5734,7 +5690,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: TextStartHandle,
         view_param: TextStartView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let TextStartView { text_start } = view_param;
@@ -5758,7 +5714,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: TrueHandle,
         view_param: TrueView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let TrueView { r#true } = view_param;
@@ -5782,7 +5738,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: TypedQuoteHandle,
         view_param: TypedQuoteView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let TypedQuoteView { typed_quote } = view_param;
@@ -5806,7 +5762,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: TypedStrHandle,
         view_param: TypedStrView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let TypedStrView { typed_quote, in_str, quote } = view_param;
@@ -5819,7 +5775,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: ValueHandle,
         view_param: ValueView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         match view_param {
@@ -5866,7 +5822,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: ValueBindingHandle,
         view_param: ValueBindingView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let ValueBindingView { bind, value } = view_param;
@@ -5878,7 +5834,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: WsHandle,
         view_param: WsView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let WsView { ws } = view_param;
@@ -5902,7 +5858,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         handle: RootHandle,
         view_param: RootView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let _handle = handle;
         let RootView { swon } = view_param;
@@ -5913,7 +5869,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: NewLine,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -5922,7 +5878,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: Whitespace,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -5931,7 +5887,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: LineComment,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -5940,7 +5896,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: BlockComment,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -5949,7 +5905,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: Integer,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -5958,7 +5914,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: True,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -5967,7 +5923,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: False,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -5976,7 +5932,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: Null,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -5985,7 +5941,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: Hole,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -5994,7 +5950,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: Quote,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6003,7 +5959,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: TypedQuote,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6012,7 +5968,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: InStr,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6021,7 +5977,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: Text,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6030,7 +5986,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: NamedCode,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6039,7 +5995,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: Code,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6048,7 +6004,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: Newline,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6057,7 +6013,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: Ws,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6066,7 +6022,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: At,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6075,7 +6031,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: Dollar,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6084,7 +6040,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: Dot,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6093,7 +6049,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: LBrace,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6102,7 +6058,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: RBrace,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6111,7 +6067,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: LBracket,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6120,7 +6076,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: RBracket,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6129,7 +6085,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: Bind,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6138,7 +6094,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: Comma,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6147,7 +6103,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: Esc,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6156,7 +6112,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: TextStart,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6165,7 +6121,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: Ident,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6174,7 +6130,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: NamedCodeBlockBegin,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6183,7 +6139,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: CodeBlockDelimiter,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6192,7 +6148,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         terminal: CodeBlockLine,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
         Ok(())
@@ -6202,7 +6158,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         _id: CstNodeId,
         _kind: NonTerminalKind,
         _data: NonTerminalData,
-        _tree: &Cst,
+        _tree: &F,
     ) -> Result<(), V::Error> {
         Ok(())
     }
@@ -6211,7 +6167,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         _id: CstNodeId,
         _kind: NonTerminalKind,
         _data: NonTerminalData,
-        _tree: &Cst,
+        _tree: &F,
     ) -> Result<(), V::Error> {
         Ok(())
     }
@@ -6220,7 +6176,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         _id: CstNodeId,
         _kind: TerminalKind,
         _data: TerminalData,
-        _tree: &Cst,
+        _tree: &F,
     ) -> Result<(), V::Error> {
         Ok(())
     }
@@ -6229,7 +6185,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         node_data: Option<CstNode>,
         id: CstNodeId,
         kind: NodeKind,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         let Some(node_data) = node_data else {
             return Ok(());
@@ -6249,7 +6205,7 @@ impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
         &mut self,
         id: CstNodeId,
         node: CstNode,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         match node {
             CstNode::NonTerminal { kind, .. } => {
@@ -6704,38 +6660,38 @@ impl<V: NodeVisitor> NodeVisitorSuper<V::Error> for V {
         Ok(())
     }
 }
-pub trait BuiltinTerminalVisitor<E> {
+pub trait BuiltinTerminalVisitor<E, F: CstFacade> {
     fn visit_builtin_new_line_terminal(
         &mut self,
         terminal: NewLine,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_builtin_whitespace_terminal(
         &mut self,
         terminal: Whitespace,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_builtin_line_comment_terminal(
         &mut self,
         terminal: LineComment,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
     fn visit_builtin_block_comment_terminal(
         &mut self,
         terminal: BlockComment,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), E>;
 }
-impl<V: CstVisitor> BuiltinTerminalVisitor<V::Error> for V {
+impl<V: CstVisitor<F>, F: CstFacade> BuiltinTerminalVisitor<V::Error, F> for V {
     fn visit_builtin_new_line_terminal(
         &mut self,
         terminal: NewLine,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_new_line_terminal(terminal, data, tree)
     }
@@ -6743,7 +6699,7 @@ impl<V: CstVisitor> BuiltinTerminalVisitor<V::Error> for V {
         &mut self,
         terminal: Whitespace,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_whitespace_terminal(terminal, data, tree)
     }
@@ -6751,7 +6707,7 @@ impl<V: CstVisitor> BuiltinTerminalVisitor<V::Error> for V {
         &mut self,
         terminal: LineComment,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_line_comment_terminal(terminal, data, tree)
     }
@@ -6759,7 +6715,7 @@ impl<V: CstVisitor> BuiltinTerminalVisitor<V::Error> for V {
         &mut self,
         terminal: BlockComment,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), V::Error> {
         self.visit_block_comment_terminal(terminal, data, tree)
     }

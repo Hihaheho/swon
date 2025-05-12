@@ -61,7 +61,7 @@ impl VisitorGenerator {
                 Cst, CstConstructError, NodeKind, CstNode,
                 nodes::*,
                 node_kind::{TerminalKind, NonTerminalKind},
-                tree::{TerminalHandle as _, NonTerminalHandle as _, TerminalData, NonTerminalData, CstNodeId},
+                tree::{TerminalHandle as _, NonTerminalHandle as _, TerminalData, NonTerminalData, CstNodeId, CstFacade},
             };
         }
     }
@@ -103,7 +103,7 @@ impl VisitorGenerator {
                     &mut self,
                     handle: #handle_type_ident,
                     view: #view_param_type,
-                    tree: &Cst,
+                    tree: &F,
                 ) -> Result<(), Self::Error> {
                     self.#fn_name_super_ident(handle, view, tree)
                 }
@@ -119,7 +119,7 @@ impl VisitorGenerator {
                     &mut self,
                     terminal: #terminal_ident,
                     data: TerminalData,
-                    tree: &Cst,
+                    tree: &F,
                 ) -> Result<(), Self::Error> {
                     self.#fn_name_super_ident(terminal, data, tree)
                 }
@@ -127,22 +127,22 @@ impl VisitorGenerator {
         });
 
         quote! {
-            pub trait CstVisitor: CstVisitorSuper<Self::Error> {
+            pub trait CstVisitor<F: CstFacade>: CstVisitorSuper<F, Self::Error> {
                 type Error;
                 #(#nt_visit_methods)*
                 #(#terminal_visit_methods)*
-                fn visit_non_terminal(&mut self, id: CstNodeId, kind: NonTerminalKind, data: NonTerminalData, tree: &Cst) -> Result<(), Self::Error> {
+                fn visit_non_terminal(&mut self, id: CstNodeId, kind: NonTerminalKind, data: NonTerminalData, tree: &F) -> Result<(), Self::Error> {
                     self.visit_non_terminal_super(id, kind, data, tree)
                 }
-                fn visit_non_terminal_close(&mut self, id: CstNodeId, kind: NonTerminalKind, data: NonTerminalData, tree: &Cst) -> Result<(), Self::Error> {
+                fn visit_non_terminal_close(&mut self, id: CstNodeId, kind: NonTerminalKind, data: NonTerminalData, tree: &F) -> Result<(), Self::Error> {
                     self.visit_non_terminal_close_super(id, kind, data, tree)
                 }
-                fn visit_terminal(&mut self, id: CstNodeId, kind: TerminalKind, data: TerminalData, tree: &Cst) -> Result<(), Self::Error> {
+                fn visit_terminal(&mut self, id: CstNodeId, kind: TerminalKind, data: TerminalData, tree: &F) -> Result<(), Self::Error> {
                     self.visit_terminal_super(id, kind, data, tree)
                 }
                 /// This method is called when a construct view fails.
                 /// If you return Ok(()), the error is not propagated.
-                fn then_construct_error(&mut self, node_data: Option<CstNode>, parent: CstNodeId, kind: NodeKind, error: CstConstructError, tree: &Cst) -> Result<(), Self::Error> {
+                fn then_construct_error(&mut self, node_data: Option<CstNode>, parent: CstNodeId, kind: NodeKind, error: CstConstructError, tree: &F) -> Result<(), Self::Error> {
                     let _error = error;
                     self.recover_error(node_data, parent, kind, tree)
                 }
@@ -166,7 +166,7 @@ impl VisitorGenerator {
                     fn #visit_handle_fn_name(
                         &mut self,
                         handle: #handle_type_ident,
-                        tree: &Cst,
+                        tree: &F,
                     ) -> Result<(), E>;
                 };
 
@@ -175,7 +175,7 @@ impl VisitorGenerator {
                         &mut self,
                         handle: #handle_type_ident,
                         view: #view_param_type,
-                        tree: &Cst,
+                        tree: &F,
                     ) -> Result<(), E>;
                 };
                 vec![visit_handle_method, visit_super_method]
@@ -191,24 +191,24 @@ impl VisitorGenerator {
                     &mut self,
                     terminal: #terminal_ident,
                     data: TerminalData,
-                    tree: &Cst,
+                    tree: &F,
                 ) -> Result<(), E>;
             }
         });
 
         quote! {
             mod private {
-                pub trait Sealed {}
+                pub trait Sealed<F> {}
             }
-            pub trait CstVisitorSuper<E>: private::Sealed {
+            pub trait CstVisitorSuper<F: CstFacade, E>: private::Sealed<F> {
                 #(#methods)*
                 #(#terminal_methods)*
-                fn visit_non_terminal_super(&mut self, id: CstNodeId, kind: NonTerminalKind, data: NonTerminalData, tree: &Cst) -> Result<(), E>;
-                fn visit_non_terminal_close_super(&mut self, id: CstNodeId, kind: NonTerminalKind, data: NonTerminalData, tree: &Cst) -> Result<(), E>;
-                fn visit_terminal_super(&mut self, id: CstNodeId, kind: TerminalKind, data: TerminalData, tree: &Cst) -> Result<(), E>;
-                fn visit_any(&mut self, id: CstNodeId, node: CstNode, tree: &Cst) -> Result<(), E>;
+                fn visit_non_terminal_super(&mut self, id: CstNodeId, kind: NonTerminalKind, data: NonTerminalData, tree: &F) -> Result<(), E>;
+                fn visit_non_terminal_close_super(&mut self, id: CstNodeId, kind: NonTerminalKind, data: NonTerminalData, tree: &F) -> Result<(), E>;
+                fn visit_terminal_super(&mut self, id: CstNodeId, kind: TerminalKind, data: TerminalData, tree: &F) -> Result<(), E>;
+                fn visit_any(&mut self, id: CstNodeId, node: CstNode, tree: &F) -> Result<(), E>;
                 /// Recover from a construct error. This eagerly visits the children of the node.
-                fn recover_error(&mut self, node_data: Option<CstNode>, id: CstNodeId, kind: NodeKind, tree: &Cst) -> Result<(), E>;
+                fn recover_error(&mut self, node_data: Option<CstNode>, id: CstNodeId, kind: NodeKind, tree: &F) -> Result<(), E>;
             }
         }
     }
@@ -231,21 +231,21 @@ impl VisitorGenerator {
         let visit_any_impl = self.generate_visit_any(node_info);
 
         quote! {
-            impl<V: CstVisitor> private::Sealed for V {}
-            impl<V: CstVisitor> CstVisitorSuper<V::Error> for V {
+            impl<V: CstVisitor<F>, F: CstFacade> private::Sealed<F> for V {}
+            impl<V: CstVisitor<F>, F: CstFacade> CstVisitorSuper<F, V::Error> for V {
                 #(#visit_handle_impls)*
                 #(#visit_super_impls)*
                 #(#terminal_visit_super_impls)*
-                fn visit_non_terminal_super(&mut self, _id: CstNodeId, _kind: NonTerminalKind, _data: NonTerminalData, _tree: &Cst) -> Result<(), V::Error> {
+                fn visit_non_terminal_super(&mut self, _id: CstNodeId, _kind: NonTerminalKind, _data: NonTerminalData, _tree: &F) -> Result<(), V::Error> {
                     Ok(())
                 }
-                fn visit_non_terminal_close_super(&mut self, _id: CstNodeId, _kind: NonTerminalKind, _data: NonTerminalData, _tree: &Cst) -> Result<(), V::Error> {
+                fn visit_non_terminal_close_super(&mut self, _id: CstNodeId, _kind: NonTerminalKind, _data: NonTerminalData, _tree: &F) -> Result<(), V::Error> {
                     Ok(())
                 }
-                fn visit_terminal_super(&mut self, _id: CstNodeId, _kind: TerminalKind, _data: TerminalData, _tree: &Cst) -> Result<(), V::Error> {
+                fn visit_terminal_super(&mut self, _id: CstNodeId, _kind: TerminalKind, _data: TerminalData, _tree: &F) -> Result<(), V::Error> {
                     Ok(())
                 }
-                fn recover_error(&mut self, node_data: Option<CstNode>, id: CstNodeId, kind: NodeKind, tree: &Cst) -> Result<(), V::Error> {
+                fn recover_error(&mut self, node_data: Option<CstNode>, id: CstNodeId, kind: NodeKind, tree: &F) -> Result<(), V::Error> {
                     let Some(node_data) = node_data else {
                         return Ok(());
                     };
@@ -292,7 +292,7 @@ impl VisitorGenerator {
             fn #fn_name_handle_ident(
                 &mut self,
                 handle: #handle_type_ident,
-                tree: &Cst,
+                tree: &F,
             ) -> Result<(), V::Error> {
                 let nt_data = match tree.get_non_terminal(handle.node_id(), handle.kind()) {
                     Ok(nt_data) => nt_data,
@@ -328,7 +328,7 @@ impl VisitorGenerator {
                 &mut self,
                 terminal: #terminal_ident,
                 data: TerminalData,
-                tree: &Cst,
+                tree: &F,
             ) -> Result<(), V::Error> {
                 self.visit_terminal(terminal.0, terminal.kind(), data, tree)?;
                 Ok(())
@@ -475,7 +475,7 @@ impl VisitorGenerator {
                 &mut self,
                 handle: #handle_type_ident,
                 #view_ident: #view_param_type,
-                tree: &Cst,
+                tree: &F,
             ) -> Result<(), V::Error> {
                 let _handle = handle;
                 #body
@@ -511,7 +511,7 @@ impl VisitorGenerator {
         });
 
         quote! {
-            fn visit_any(&mut self, id: CstNodeId, node: CstNode, tree: &Cst) -> Result<(), V::Error> {
+            fn visit_any(&mut self, id: CstNodeId, node: CstNode, tree: &F) -> Result<(), V::Error> {
                 match node {
                     CstNode::NonTerminal { kind, .. } => {
                         match kind {
@@ -578,39 +578,39 @@ impl VisitorGenerator {
 
     fn generate_builtin_terminal_visitor(&self) -> TokenStream {
         quote! {
-            pub trait BuiltinTerminalVisitor<E> {
+            pub trait BuiltinTerminalVisitor<E, F: CstFacade> {
                 fn visit_builtin_new_line_terminal(
                     &mut self,
                     terminal: NewLine,
                     data: TerminalData,
-                    tree: &Cst,
+                    tree: &F,
                 ) -> Result<(), E>;
                 fn visit_builtin_whitespace_terminal(
                     &mut self,
                     terminal: Whitespace,
                     data: TerminalData,
-                    tree: &Cst,
+                    tree: &F,
                 ) -> Result<(), E>;
                 fn visit_builtin_line_comment_terminal(
                     &mut self,
                     terminal: LineComment,
                     data: TerminalData,
-                    tree: &Cst,
+                    tree: &F,
                 ) -> Result<(), E>;
                 fn visit_builtin_block_comment_terminal(
                     &mut self,
                     terminal: BlockComment,
                     data: TerminalData,
-                    tree: &Cst,
+                    tree: &F,
                 ) -> Result<(), E>;
             }
 
-            impl<V: CstVisitor> BuiltinTerminalVisitor<V::Error> for V {
+            impl<V: CstVisitor<F>, F: CstFacade> BuiltinTerminalVisitor<V::Error, F> for V {
                 fn visit_builtin_new_line_terminal(
                     &mut self,
                     terminal: NewLine,
                     data: TerminalData,
-                    tree: &Cst,
+                    tree: &F,
                 ) -> Result<(), V::Error> {
                     self.visit_new_line_terminal(terminal, data, tree)
                 }
@@ -619,7 +619,7 @@ impl VisitorGenerator {
                     &mut self,
                     terminal: Whitespace,
                     data: TerminalData,
-                    tree: &Cst,
+                    tree: &F,
                 ) -> Result<(), V::Error> {
                     self.visit_whitespace_terminal(terminal, data, tree)
                 }
@@ -628,7 +628,7 @@ impl VisitorGenerator {
                     &mut self,
                     terminal: LineComment,
                     data: TerminalData,
-                    tree: &Cst,
+                    tree: &F,
                 ) -> Result<(), V::Error> {
                     self.visit_line_comment_terminal(terminal, data, tree)
                 }
@@ -637,7 +637,7 @@ impl VisitorGenerator {
                     &mut self,
                     terminal: BlockComment,
                     data: TerminalData,
-                    tree: &Cst,
+                    tree: &F,
                 ) -> Result<(), V::Error> {
                     self.visit_block_comment_terminal(terminal, data, tree)
                 }

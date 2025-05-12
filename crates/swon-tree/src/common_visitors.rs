@@ -23,7 +23,7 @@ pub enum FormatVisitorError {
     DynamicTokenNotFound { id: DynamicTokenId },
 }
 
-impl CstVisitor for FormatVisitor<'_, '_> {
+impl<F: CstFacade> CstVisitor<F> for FormatVisitor<'_, '_> {
     type Error = FormatVisitorError;
 
     fn then_construct_error(
@@ -32,7 +32,7 @@ impl CstVisitor for FormatVisitor<'_, '_> {
         parent: CstNodeId,
         kind: NodeKind,
         error: CstConstructError,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         eprintln!("Syntax error: {} expected {:?}", error, kind);
         self.recover_error(node_data, parent, kind, tree)
@@ -43,7 +43,7 @@ impl CstVisitor for FormatVisitor<'_, '_> {
         _id: CstNodeId,
         _kind: TerminalKind,
         terminal: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         match terminal {
             TerminalData::Input(input_span) => {
@@ -80,7 +80,7 @@ impl<'f, 't> InspectVisitor<'f, 't> {
     }
 }
 
-impl CstVisitor for InspectVisitor<'_, '_> {
+impl<F: CstFacade> CstVisitor<F> for InspectVisitor<'_, '_> {
     type Error = FormatVisitorError;
     fn then_construct_error(
         &mut self,
@@ -88,7 +88,7 @@ impl CstVisitor for InspectVisitor<'_, '_> {
         parent: CstNodeId,
         kind: NodeKind,
         error: CstConstructError,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         eprintln!("Syntax error: {}", error);
         self.recover_error(node_data, parent, kind, tree)
@@ -98,7 +98,7 @@ impl CstVisitor for InspectVisitor<'_, '_> {
         _id: CstNodeId,
         kind: TerminalKind,
         data: TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         match data {
             TerminalData::Input(input_span) => writeln!(
@@ -127,7 +127,7 @@ impl CstVisitor for InspectVisitor<'_, '_> {
         _id: CstNodeId,
         kind: NonTerminalKind,
         _data: NonTerminalData,
-        _tree: &Cst,
+        _tree: &F,
     ) -> Result<(), Self::Error> {
         writeln!(self.f, "{}{:?}", " ".repeat(self.indent), kind)?;
         self.indent += 2;
@@ -138,7 +138,7 @@ impl CstVisitor for InspectVisitor<'_, '_> {
         _id: CstNodeId,
         _kind: NonTerminalKind,
         _data: NonTerminalData,
-        _tree: &Cst,
+        _tree: &F,
     ) -> Result<(), Self::Error> {
         self.indent -= 2;
         Ok(())

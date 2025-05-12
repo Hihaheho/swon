@@ -1628,7 +1628,7 @@ impl ToSpan for SwonList0<'_> {
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct Text<'t> {
-    pub text: Token<'t>, /* [^\\"\r\n]* */
+    pub text: Token<'t>, /* [^\r\n]* */
 }
 
 impl ToSpan for Text<'_> {
@@ -3321,7 +3321,7 @@ impl<'t, 'u> GrammarAuto<'t, 'u> {
 
     /// Semantic action for production 70:
     ///
-    /// `Text: <Text>/[^\\"\r\n]*/;`
+    /// `Text: <Text>/[^\r\n]*/;`
     ///
     #[parol_runtime::function_name::named]
     fn text(&mut self, text: &ParseTreeType<'t>) -> Result<()> {

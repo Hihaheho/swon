@@ -35,14 +35,14 @@ impl Default for Formatter {
     }
 }
 
-impl CstVisitor for Formatter {
+impl<F: CstFacade> CstVisitor<F> for Formatter {
     type Error = Infallible;
 
     fn visit_array(
         &mut self,
         handle: ArrayHandle,
         view: ArrayView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_array_super(handle, view, tree)
     }
@@ -51,7 +51,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: ArrayBeginHandle,
         view: ArrayBeginView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_array_begin_super(handle, view, tree)
     }
@@ -60,7 +60,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: ArrayEndHandle,
         view: ArrayEndView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_array_end_super(handle, view, tree)
     }
@@ -69,7 +69,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: ArrayListHandle,
         view: ArrayListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_array_list_super(handle, view, tree)
     }
@@ -78,7 +78,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: ArrayMarkerHandle,
         view: ArrayMarkerView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_array_marker_super(handle, view, tree)
     }
@@ -87,7 +87,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: ArrayMarkerOptHandle,
         view: IntegerHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_array_marker_opt_super(handle, view, tree)
     }
@@ -96,12 +96,12 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: ArrayOptHandle,
         view: CommaHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_array_opt_super(handle, view, tree)
     }
 
-    fn visit_at(&mut self, handle: AtHandle, view: AtView, tree: &Cst) -> Result<(), Self::Error> {
+    fn visit_at(&mut self, handle: AtHandle, view: AtView, tree: &F) -> Result<(), Self::Error> {
         self.visit_at_super(handle, view, tree)
     }
 
@@ -109,7 +109,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: BeginHandle,
         view: BeginView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_begin_super(handle, view, tree)
     }
@@ -118,7 +118,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: BindHandle,
         view: BindView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_bind_super(handle, view, tree)
     }
@@ -127,7 +127,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: BindingHandle,
         view: BindingView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_binding_super(handle, view, tree)
     }
@@ -136,7 +136,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: BindingRhsHandle,
         view: BindingRhsView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_binding_rhs_super(handle, view, tree)
     }
@@ -145,7 +145,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: BooleanHandle,
         view: BooleanView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_boolean_super(handle, view, tree)
     }
@@ -154,7 +154,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: CodeHandle,
         view: CodeView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_code_super(handle, view, tree)
     }
@@ -163,7 +163,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: CodeBlockHandle,
         view: CodeBlockView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_code_block_super(handle, view, tree)
     }
@@ -172,7 +172,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: CodeBlockDelimiterHandle,
         view: CodeBlockDelimiterView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_code_block_delimiter_super(handle, view, tree)
     }
@@ -181,7 +181,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: CodeBlockLineHandle,
         view: CodeBlockLineView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_code_block_line_super(handle, view, tree)
     }
@@ -190,7 +190,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: CodeBlockTailCommonHandle,
         view: CodeBlockTailCommonView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_code_block_tail_common_super(handle, view, tree)
     }
@@ -199,7 +199,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: CodeBlockTailCommonListHandle,
         view: CodeBlockTailCommonListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_code_block_tail_common_list_super(handle, view, tree)
     }
@@ -208,7 +208,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: CodeBlockTailCommonOptHandle,
         view: WsHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_code_block_tail_common_opt_super(handle, view, tree)
     }
@@ -217,7 +217,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: CommaHandle,
         view: CommaView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_comma_super(handle, view, tree)
     }
@@ -226,35 +226,20 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: ContinueHandle,
         view: ContinueView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_continue_super(handle, view, tree)
     }
 
-    fn visit_dot(
-        &mut self,
-        handle: DotHandle,
-        view: DotView,
-        tree: &Cst,
-    ) -> Result<(), Self::Error> {
+    fn visit_dot(&mut self, handle: DotHandle, view: DotView, tree: &F) -> Result<(), Self::Error> {
         self.visit_dot_super(handle, view, tree)
     }
 
-    fn visit_end(
-        &mut self,
-        handle: EndHandle,
-        view: EndView,
-        tree: &Cst,
-    ) -> Result<(), Self::Error> {
+    fn visit_end(&mut self, handle: EndHandle, view: EndView, tree: &F) -> Result<(), Self::Error> {
         self.visit_end_super(handle, view, tree)
     }
 
-    fn visit_ext(
-        &mut self,
-        handle: ExtHandle,
-        view: ExtView,
-        tree: &Cst,
-    ) -> Result<(), Self::Error> {
+    fn visit_ext(&mut self, handle: ExtHandle, view: ExtView, tree: &F) -> Result<(), Self::Error> {
         self.visit_ext_super(handle, view, tree)
     }
 
@@ -262,7 +247,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: ExtensionNameSpaceHandle,
         view: ExtensionNameSpaceView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_extension_name_space_super(handle, view, tree)
     }
@@ -271,7 +256,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: FalseHandle,
         view: FalseView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_false_super(handle, view, tree)
     }
@@ -280,7 +265,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: HoleHandle,
         view: HoleView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_hole_super(handle, view, tree)
     }
@@ -289,7 +274,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: IdentHandle,
         view: IdentView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_ident_super(handle, view, tree)
     }
@@ -298,7 +283,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: InStrHandle,
         view: InStrView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_in_str_super(handle, view, tree)
     }
@@ -307,17 +292,12 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: IntegerHandle,
         view: IntegerView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_integer_super(handle, view, tree)
     }
 
-    fn visit_key(
-        &mut self,
-        handle: KeyHandle,
-        view: KeyView,
-        tree: &Cst,
-    ) -> Result<(), Self::Error> {
+    fn visit_key(&mut self, handle: KeyHandle, view: KeyView, tree: &F) -> Result<(), Self::Error> {
         self.visit_key_super(handle, view, tree)
     }
 
@@ -325,7 +305,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: KeyBaseHandle,
         view: KeyBaseView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_key_base_super(handle, view, tree)
     }
@@ -334,7 +314,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: KeyOptHandle,
         view: ArrayMarkerHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_key_opt_super(handle, view, tree)
     }
@@ -343,7 +323,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: KeysHandle,
         view: KeysView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_keys_super(handle, view, tree)
     }
@@ -352,7 +332,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: KeysListHandle,
         view: KeysListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_keys_list_super(handle, view, tree)
     }
@@ -361,7 +341,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: NamedCodeHandle,
         view: NamedCodeView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_named_code_super(handle, view, tree)
     }
@@ -370,7 +350,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: NamedCodeBlockHandle,
         view: NamedCodeBlockView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_named_code_block_super(handle, view, tree)
     }
@@ -379,7 +359,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: NamedCodeBlockBeginHandle,
         view: NamedCodeBlockBeginView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_named_code_block_begin_super(handle, view, tree)
     }
@@ -388,7 +368,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: NewlineHandle,
         view: NewlineView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_newline_super(handle, view, tree)
     }
@@ -397,7 +377,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: NullHandle,
         view: NullView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_null_super(handle, view, tree)
     }
@@ -406,7 +386,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: ObjectHandle,
         view: ObjectView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_object_super(handle, view, tree)
     }
@@ -415,7 +395,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: ObjectListHandle,
         view: ObjectListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_object_list_super(handle, view, tree)
     }
@@ -424,7 +404,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: ObjectOptHandle,
         view: CommaHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_object_opt_super(handle, view, tree)
     }
@@ -433,7 +413,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: QuoteHandle,
         view: QuoteView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_quote_super(handle, view, tree)
     }
@@ -442,7 +422,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: SectionHandle,
         view: SectionView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_section_super(handle, view, tree)
     }
@@ -451,7 +431,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: SectionBindingHandle,
         view: SectionBindingView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_section_binding_super(handle, view, tree)
     }
@@ -460,7 +440,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: SectionBodyHandle,
         view: SectionBodyView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_section_body_super(handle, view, tree)
     }
@@ -469,17 +449,12 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: SectionBodyListHandle,
         view: SectionBodyListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_section_body_list_super(handle, view, tree)
     }
 
-    fn visit_str(
-        &mut self,
-        handle: StrHandle,
-        view: StrView,
-        tree: &Cst,
-    ) -> Result<(), Self::Error> {
+    fn visit_str(&mut self, handle: StrHandle, view: StrView, tree: &F) -> Result<(), Self::Error> {
         self.visit_str_super(handle, view, tree)
     }
 
@@ -487,7 +462,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: StrContinuesHandle,
         view: StrContinuesView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_str_continues_super(handle, view, tree)
     }
@@ -496,7 +471,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: StrContinuesListHandle,
         view: StrContinuesListView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_str_continues_list_super(handle, view, tree)
     }
@@ -505,7 +480,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: SwonHandle,
         view: SwonView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_swon_super(handle, view, tree)
     }
@@ -514,7 +489,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: SwonBindingsHandle,
         view: SwonBindingsView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_swon_bindings_super(handle, view, tree)
     }
@@ -523,7 +498,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: SwonSectionsHandle,
         view: SwonSectionsView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_swon_sections_super(handle, view, tree)
     }
@@ -532,7 +507,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: TextHandle,
         view: TextView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_text_super(handle, view, tree)
     }
@@ -541,7 +516,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: TextBindingHandle,
         view: TextBindingView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_text_binding_super(handle, view, tree)
     }
@@ -550,7 +525,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: TextBindingOptHandle,
         view: WsHandle,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_text_binding_opt_super(handle, view, tree)
     }
@@ -559,7 +534,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: TextStartHandle,
         view: TextStartView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_text_start_super(handle, view, tree)
     }
@@ -568,7 +543,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: TrueHandle,
         view: TrueView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_true_super(handle, view, tree)
     }
@@ -577,7 +552,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: TypedQuoteHandle,
         view: TypedQuoteView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_typed_quote_super(handle, view, tree)
     }
@@ -586,7 +561,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: TypedStrHandle,
         view: TypedStrView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_typed_str_super(handle, view, tree)
     }
@@ -595,7 +570,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: ValueHandle,
         view: ValueView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_value_super(handle, view, tree)
     }
@@ -604,12 +579,12 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: ValueBindingHandle,
         view: ValueBindingView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_value_binding_super(handle, view, tree)
     }
 
-    fn visit_ws(&mut self, handle: WsHandle, view: WsView, tree: &Cst) -> Result<(), Self::Error> {
+    fn visit_ws(&mut self, handle: WsHandle, view: WsView, tree: &F) -> Result<(), Self::Error> {
         self.visit_ws_super(handle, view, tree)
     }
 
@@ -617,7 +592,7 @@ impl CstVisitor for Formatter {
         &mut self,
         handle: RootHandle,
         view: RootView,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_root_super(handle, view, tree)
     }
@@ -626,7 +601,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: NewLine,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_new_line_terminal_super(terminal, data, tree)
     }
@@ -635,7 +610,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: Whitespace,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_whitespace_terminal_super(terminal, data, tree)
     }
@@ -644,7 +619,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: LineComment,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_line_comment_terminal_super(terminal, data, tree)
     }
@@ -653,7 +628,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: BlockComment,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_block_comment_terminal_super(terminal, data, tree)
     }
@@ -662,7 +637,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: Integer,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_integer_terminal_super(terminal, data, tree)
     }
@@ -671,7 +646,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: True,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_true_terminal_super(terminal, data, tree)
     }
@@ -680,7 +655,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: False,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_false_terminal_super(terminal, data, tree)
     }
@@ -689,7 +664,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: Null,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_null_terminal_super(terminal, data, tree)
     }
@@ -698,7 +673,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: Hole,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_hole_terminal_super(terminal, data, tree)
     }
@@ -707,7 +682,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: Quote,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_quote_terminal_super(terminal, data, tree)
     }
@@ -716,7 +691,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: TypedQuote,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_typed_quote_terminal_super(terminal, data, tree)
     }
@@ -725,7 +700,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: InStr,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_in_str_terminal_super(terminal, data, tree)
     }
@@ -734,7 +709,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: Text,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_text_terminal_super(terminal, data, tree)
     }
@@ -743,7 +718,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: NamedCode,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_named_code_terminal_super(terminal, data, tree)
     }
@@ -752,7 +727,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: Code,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_code_terminal_super(terminal, data, tree)
     }
@@ -761,7 +736,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: Newline,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_newline_terminal_super(terminal, data, tree)
     }
@@ -770,7 +745,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: Ws,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_ws_terminal_super(terminal, data, tree)
     }
@@ -779,7 +754,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: At,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_at_terminal_super(terminal, data, tree)
     }
@@ -788,7 +763,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: Dollar,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_dollar_terminal_super(terminal, data, tree)
     }
@@ -797,7 +772,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: Dot,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_dot_terminal_super(terminal, data, tree)
     }
@@ -806,7 +781,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: LBrace,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_l_brace_terminal_super(terminal, data, tree)
     }
@@ -815,7 +790,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: RBrace,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_r_brace_terminal_super(terminal, data, tree)
     }
@@ -824,7 +799,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: LBracket,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_l_bracket_terminal_super(terminal, data, tree)
     }
@@ -833,7 +808,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: RBracket,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_r_bracket_terminal_super(terminal, data, tree)
     }
@@ -842,7 +817,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: Bind,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_bind_terminal_super(terminal, data, tree)
     }
@@ -851,7 +826,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: Comma,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_comma_terminal_super(terminal, data, tree)
     }
@@ -860,7 +835,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: Esc,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_esc_terminal_super(terminal, data, tree)
     }
@@ -869,7 +844,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: TextStart,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_text_start_terminal_super(terminal, data, tree)
     }
@@ -878,7 +853,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: Ident,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_ident_terminal_super(terminal, data, tree)
     }
@@ -887,7 +862,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: NamedCodeBlockBegin,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_named_code_block_begin_terminal_super(terminal, data, tree)
     }
@@ -896,7 +871,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: CodeBlockDelimiter,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_code_block_delimiter_terminal_super(terminal, data, tree)
     }
@@ -905,7 +880,7 @@ impl CstVisitor for Formatter {
         &mut self,
         terminal: CodeBlockLine,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_code_block_line_terminal_super(terminal, data, tree)
     }
@@ -915,7 +890,7 @@ impl CstVisitor for Formatter {
         id: CstNodeId,
         kind: swon_tree::node_kind::NonTerminalKind,
         data: swon_tree::prelude::NonTerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_non_terminal_super(id, kind, data, tree)
     }
@@ -925,7 +900,7 @@ impl CstVisitor for Formatter {
         id: CstNodeId,
         kind: swon_tree::node_kind::NonTerminalKind,
         data: swon_tree::prelude::NonTerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_non_terminal_close_super(id, kind, data, tree)
     }
@@ -935,7 +910,7 @@ impl CstVisitor for Formatter {
         id: CstNodeId,
         kind: swon_tree::node_kind::TerminalKind,
         data: swon_tree::prelude::TerminalData,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_terminal_super(id, kind, data, tree)
     }
@@ -946,7 +921,7 @@ impl CstVisitor for Formatter {
         parent: CstNodeId,
         kind: swon_tree::NodeKind,
         error: swon_tree::CstConstructError,
-        tree: &Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         let _error = error;
         self.recover_error(node_data, parent, kind, tree)

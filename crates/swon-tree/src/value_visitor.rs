@@ -2,7 +2,7 @@ use ahash::AHashMap;
 use swon_value::{identifier::Identifier, value::PathSegment};
 use thiserror::Error;
 
-use crate::prelude::*;
+use crate::{prelude::*, tree::CstFacade};
 
 pub struct Values {
     ident_handles: AHashMap<IdentHandle, Identifier>,
@@ -22,14 +22,14 @@ pub enum ValueVisitorError {
     CstError(#[from] CstConstructError),
 }
 
-impl CstVisitor for ValueVisitor<'_> {
+impl<'a, F: CstFacade> CstVisitor<F> for ValueVisitor<'a> {
     type Error = ValueVisitorError;
 
     fn visit_keys(
         &mut self,
         handle: KeysHandle,
         view: KeysView,
-        tree: &crate::Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         assert_eq!(self.current_keys.len(), 0);
         self.visit_keys_super(handle, view, tree)?;
@@ -39,12 +39,7 @@ impl CstVisitor for ValueVisitor<'_> {
         Ok(())
     }
 
-    fn visit_key(
-        &mut self,
-        handle: KeyHandle,
-        view: KeyView,
-        tree: &crate::Cst,
-    ) -> Result<(), Self::Error> {
+    fn visit_key(&mut self, handle: KeyHandle, view: KeyView, tree: &F) -> Result<(), Self::Error> {
         self.visit_key_super(handle, view, tree)?;
         Ok(())
     }
@@ -53,7 +48,7 @@ impl CstVisitor for ValueVisitor<'_> {
         &mut self,
         handle: KeyBaseHandle,
         view: KeyBaseView,
-        tree: &crate::Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_key_base_super(handle, view, tree)?;
         Ok(())
@@ -63,7 +58,7 @@ impl CstVisitor for ValueVisitor<'_> {
         &mut self,
         handle: IdentHandle,
         view: IdentView,
-        tree: &crate::Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         let data = view.ident.get_data(tree)?;
         let text = tree.get_str(data, self.input).unwrap();
@@ -75,7 +70,7 @@ impl CstVisitor for ValueVisitor<'_> {
         &mut self,
         handle: KeyOptHandle,
         view: ArrayMarkerHandle,
-        tree: &crate::Cst,
+        tree: &F,
     ) -> Result<(), Self::Error> {
         self.visit_key_opt_super(handle, view, tree)?;
         Ok(())
