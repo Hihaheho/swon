@@ -38,6 +38,98 @@ The `swon-parol-gen` tool also generates the core visitor traits:
   * Generic methods like `visit_non_terminal`, `visit_terminal`, and `visit_non_terminal_close`.
 * **`CstVisitorSuper<F: CstFacade, E>`:** This trait defines the default traversal logic. The default implementations of the `visit_*` methods in `CstVisitor` call corresponding `visit_*_super` methods defined in this trait. This allows users to override specific `visit_*` methods in their `CstVisitor` implementation without needing to manually implement the logic for descending into children.
 
+### Error Handling and Recovery
+
+When a view constructor (`get_view_with_visit`) fails (e.g., due to missing children), the generated visitor infrastructure invokes `then_construct_error(...)` on your `CstVisitor` implementation. The default implementation of `then_construct_error` simply calls `self.recover_error(...)`.
+
+The `recover_error` method, defined in the `CstVisitorSuper` trait, attempts to continue traversal by visiting any children found directly under the problematic node (using `tree.children(id)`), even if the expected structure for the `View` was not met. You can customize the behavior upon construction failure by overriding `then_construct_error` in your visitor:
+
+```rust, ignore
+impl MyVisitor { // Assuming `MyVisitor` implements `CstVisitor<Cst>`
+    fn then_construct_error(
+        &mut self,
+        node_data: Option<CstNode>,
+        parent: CstNodeId,
+        kind: NodeKind,
+        error: CstConstructError,
+        tree: &Cst,
+    ) -> Result<(), Self::Error> {
+        eprintln!("CST construction error for {:?} at {:?}: {:?}", kind, parent, error);
+        // Choose to stop traversal by returning the error, or recover:
+        // return Err(error.into()); // Example: Stop traversal
+        // Or call recover_error explicitly or do custom recovery
+        // self.recover_error(node_data, parent, kind, tree) // Default recovery behavior
+        Ok(()) // Example: Log and continue (default effective behavior)
+    }
+}
+```
+
+### Collecting Nodes with `collect_nodes`
+
+The generated `Handle` types internally use the `CstFacade::collect_nodes` method (defined in the `CstFacade` trait) to gather expected child node IDs based on their `NodeKind`. For example, `ArrayHandle` uses it to find the `ArrayBegin`, `ArrayList`, and `ArrayEnd` children needed to construct its `ArrayView`.
+
+```rust, ignore
+// Example internal call within ArrayHandle::get_view_with_visit
+tree.collect_nodes(
+    self.0, // parent node ID
+    [
+        NodeKind::NonTerminal(NonTerminalKind::ArrayBegin),
+        NodeKind::NonTerminal(NonTerminalKind::ArrayList),
+        NodeKind::NonTerminal(NonTerminalKind::ArrayEnd),
+    ], // Expected child kinds in order
+    // Closure to construct the View from found child IDs
+    |[begin_id, list_id, end_id], visitor| {
+        let view = ArrayView {
+            array_begin: ArrayBeginHandle(begin_id),
+            array_list: ArrayListHandle(list_id),
+            array_end: ArrayEndHandle(end_id),
+        };
+        Ok((view, visitor))
+    },
+    visitor, // The visitor being used (passed through)
+)
+```
+
+While typically used indirectly via `Handle` and `View` types, you can call `tree.collect_nodes(...)` directly if you need to implement custom node collection logic or bypass the generated view structures for specific purposes.
+
+### Handling Whitespace, Newlines, and Comment Tokens
+
+The grammar includes explicit terminals for whitespace, newlines, and comments. The visitor API provides methods:
+
+* `visit_ws_terminal(&mut self, terminal: Ws, ...)`
+* `visit_new_line_terminal(&mut self, terminal: NewLine, ...)`
+* `visit_line_comment_terminal(&mut self, terminal: LineComment, ...)`
+* `visit_block_comment_terminal(&mut self, terminal: BlockComment, ...)`
+
+Additionally, if these terminals are wrapped in non-terminal rules (e.g., a rule `OptionalWhitespace: Ws?`), corresponding `visit_optional_whitespace(...)` methods will also exist.
+
+You can override these specific `visit_*` methods in your `CstVisitor` implementation to process, analyze, or ignore these tokens. The default implementations provided via `CstVisitorSuper` generally do nothing besides potentially calling the generic `visit_terminal_super` or `visit_non_terminal_super`, effectively skipping them unless you provide an override.
+
+```rust, ignore
+impl MyVisitor {
+    fn visit_line_comment_terminal(
+        &mut self,
+        comment: LineComment,
+        data: TerminalData,
+        tree: &Cst,
+    ) -> Result<(), Self::Error> {
+        let full_text = tree.text(comment.node_id()); // e.g., "# This is a comment\n"
+        let content = full_text.trim_start_matches('#').trim_end();
+        println!("Found comment: {}", content);
+        // No need to call _super if you don't want default behavior (which is usually none)
+        Ok(())
+    }
+
+    fn visit_ws(&mut self, handle: WsHandle, view: WsView, tree: &Cst) -> Result<(), Self::Error> {
+        // Example: Completely ignore Ws non-terminals by doing nothing
+        // Do not call self.visit_ws_super(handle, view, tree)
+        Ok(())
+    }
+}
+```
+
+This allows fine-grained control over how syntactically-present but often semantically-ignored tokens are handled during traversal.
+
 ## API Design and Capabilities
 
 The visitor pattern implemented in `swon-tree` allows for robust and type-safe traversal of the Swon CST.
@@ -107,3 +199,9 @@ fn visit(cst: &Cst) -> Result<(), CstConstructError> {
 * **Linting/Formatting:** Implement custom linting rules or code formatting logic by analyzing node positions and content.
 
 The combination of auto-generated, type-safe node access (`Handle` and `View`) and the flexible `CstVisitor` trait provides a powerful foundation for interacting with Swon CSTs.
+
+### Advanced Use Case: Custom Facade and Dependency Graphs
+
+The `CstVisitor` trait is generic over `F: CstFacade`. While `Cst` is typically used, you can implement `CstFacade` on your own type for advanced scenarios, like building a dependency graph during traversal.
+
+Since visitor methods receive `&F` (immutable) but the visitor is `&mut self`, direct mutation of facade state isn't possible. However, using interior mutability (e.g., `RefCell`) within the custom facade allows indirect mutation.
