@@ -205,3 +205,59 @@ The combination of auto-generated, type-safe node access (`Handle` and `View`) a
 The `CstVisitor` trait is generic over `F: CstFacade`. While `Cst` is typically used, you can implement `CstFacade` on your own type for advanced scenarios, like building a dependency graph during traversal.
 
 Since visitor methods receive `&F` (immutable) but the visitor is `&mut self`, direct mutation of facade state isn't possible. However, using interior mutability (e.g., `RefCell`) within the custom facade allows indirect mutation.
+
+## Modifying the CST with the Action Module
+
+The `action` module in `swon-tree` provides a command pattern for modifying the Concrete Syntax Tree. This allows you to collect a series of modifications and apply them all at once, which can be useful for complex transformations or when you need to track and potentially revert changes.
+
+### Key Components
+
+* **`NodeTarget`:** An enum that can target either a CST node (`CstNodeId`) or a command node (`CommandNodeId`).
+* **`CommandNodeId`:** A struct representing a node ID created by a command but not yet applied to the CST.
+* **`CstCommands`:** A struct that collects commands to be applied to a CST.
+* **`Command`:** An enum representing different operations that can be performed on the CST.
+
+### How to Use
+
+1. **Create a `CstCommands` instance:** This will collect the commands you want to apply.
+2. **Add commands:** Use methods like `delete_node`, `insert_node`, and `update_node` to build up a set of changes.
+3. **Apply the commands:** Call `apply_to` with a mutable reference to your CST to apply all the collected commands at once.
+
+```rust, ignore
+use swon_tree::prelude::*;
+use swon_tree::action::{CstCommands, Command};
+use swon_tree::{Cst, CstNode};
+
+fn modify_cst(cst: &mut Cst) {
+    // Create a new CstCommands instance
+    let mut commands = CstCommands::new();
+    
+    // Get a node ID to modify (e.g., from a visitor)
+    let node_id = /* ... */;
+    
+    // Delete a node
+    commands.delete_node(node_id);
+    
+    // Insert a new node under a parent
+    let parent_id = /* ... */;
+    let new_node_data = /* ... */;
+    let new_node_id = commands.insert_node(parent_id, new_node_data);
+    
+    // Update a node's data
+    let node_to_update = /* ... */;
+    let updated_data = /* ... */;
+    commands.update_node(node_to_update, updated_data);
+    
+    // Apply all commands to the CST
+    commands.apply_to(cst);
+}
+```
+
+### Available Commands
+
+* **`delete_node(id)`:** Delete a single node.
+* **`delete_recursive(id)`:** Delete a node and all its descendants.
+* **`insert_node(parent, data)`:** Insert a new node under a parent, returning a `CommandNodeId` that can be used in subsequent commands.
+* **`update_node(id, data)`:** Update a node's data.
+
+The command pattern allows for complex transformations to be built up and applied atomically, making it easier to reason about and potentially revert changes to the CST.
