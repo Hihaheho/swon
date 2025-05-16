@@ -790,19 +790,11 @@ impl NonTerminalHandle for CodeBlockHandle {
     ) -> Result<O, CstConstructError<E>> {
         tree.collect_nodes(
             self.0,
-            [
-                NodeKind::NonTerminal(NonTerminalKind::CodeBlockDelimiter),
-                NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommon),
-            ],
-            |[code_block_delimiter, code_block_tail_common], visit_ignored| Ok(
+            [NodeKind::Terminal(TerminalKind::CodeBlock)],
+            |[code_block], visit_ignored| Ok(
                 visit(
                     CodeBlockView {
-                        code_block_delimiter: CodeBlockDelimiterHandle(
-                            code_block_delimiter,
-                        ),
-                        code_block_tail_common: CodeBlockTailCommonHandle(
-                            code_block_tail_common,
-                        ),
+                        code_block: CodeBlock(code_block),
                     },
                     visit_ignored,
                 ),
@@ -813,316 +805,9 @@ impl NonTerminalHandle for CodeBlockHandle {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CodeBlockView {
-    pub code_block_delimiter: CodeBlockDelimiterHandle,
-    pub code_block_tail_common: CodeBlockTailCommonHandle,
+    pub code_block: CodeBlock,
 }
 impl CodeBlockView {}
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct CodeBlockDelimiterHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle for CodeBlockDelimiterHandle {
-    type View = CodeBlockDelimiterView;
-    fn node_id(&self) -> CstNodeId {
-        self.0
-    }
-    fn new_with_visit<F: CstFacade, E>(
-        index: CstNodeId,
-        tree: &F,
-        visit_ignored: &mut impl BuiltinTerminalVisitor<E, F>,
-    ) -> Result<Self, CstConstructError<E>> {
-        tree.collect_nodes(
-            index,
-            [NodeKind::NonTerminal(NonTerminalKind::CodeBlockDelimiter)],
-            |[index], visit| Ok((Self(index), visit)),
-            visit_ignored,
-        )
-    }
-    fn kind(&self) -> NonTerminalKind {
-        NonTerminalKind::CodeBlockDelimiter
-    }
-    fn get_view_with_visit<'v, F: CstFacade, V: BuiltinTerminalVisitor<E, F>, O, E>(
-        &self,
-        tree: &F,
-        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
-        visit_ignored: &'v mut V,
-    ) -> Result<O, CstConstructError<E>> {
-        tree.collect_nodes(
-            self.0,
-            [NodeKind::Terminal(TerminalKind::CodeBlockDelimiter)],
-            |[code_block_delimiter], visit_ignored| Ok(
-                visit(
-                    CodeBlockDelimiterView {
-                        code_block_delimiter: CodeBlockDelimiter(code_block_delimiter),
-                    },
-                    visit_ignored,
-                ),
-            ),
-            visit_ignored,
-        )
-    }
-}
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CodeBlockDelimiterView {
-    pub code_block_delimiter: CodeBlockDelimiter,
-}
-impl CodeBlockDelimiterView {}
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct CodeBlockLineHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle for CodeBlockLineHandle {
-    type View = CodeBlockLineView;
-    fn node_id(&self) -> CstNodeId {
-        self.0
-    }
-    fn new_with_visit<F: CstFacade, E>(
-        index: CstNodeId,
-        tree: &F,
-        visit_ignored: &mut impl BuiltinTerminalVisitor<E, F>,
-    ) -> Result<Self, CstConstructError<E>> {
-        tree.collect_nodes(
-            index,
-            [NodeKind::NonTerminal(NonTerminalKind::CodeBlockLine)],
-            |[index], visit| Ok((Self(index), visit)),
-            visit_ignored,
-        )
-    }
-    fn kind(&self) -> NonTerminalKind {
-        NonTerminalKind::CodeBlockLine
-    }
-    fn get_view_with_visit<'v, F: CstFacade, V: BuiltinTerminalVisitor<E, F>, O, E>(
-        &self,
-        tree: &F,
-        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
-        visit_ignored: &'v mut V,
-    ) -> Result<O, CstConstructError<E>> {
-        tree.collect_nodes(
-            self.0,
-            [NodeKind::Terminal(TerminalKind::CodeBlockLine)],
-            |[code_block_line], visit_ignored| Ok(
-                visit(
-                    CodeBlockLineView {
-                        code_block_line: CodeBlockLine(code_block_line),
-                    },
-                    visit_ignored,
-                ),
-            ),
-            visit_ignored,
-        )
-    }
-}
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CodeBlockLineView {
-    pub code_block_line: CodeBlockLine,
-}
-impl CodeBlockLineView {}
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct CodeBlockTailCommonHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle for CodeBlockTailCommonHandle {
-    type View = CodeBlockTailCommonView;
-    fn node_id(&self) -> CstNodeId {
-        self.0
-    }
-    fn new_with_visit<F: CstFacade, E>(
-        index: CstNodeId,
-        tree: &F,
-        visit_ignored: &mut impl BuiltinTerminalVisitor<E, F>,
-    ) -> Result<Self, CstConstructError<E>> {
-        tree.collect_nodes(
-            index,
-            [NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommon)],
-            |[index], visit| Ok((Self(index), visit)),
-            visit_ignored,
-        )
-    }
-    fn kind(&self) -> NonTerminalKind {
-        NonTerminalKind::CodeBlockTailCommon
-    }
-    fn get_view_with_visit<'v, F: CstFacade, V: BuiltinTerminalVisitor<E, F>, O, E>(
-        &self,
-        tree: &F,
-        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
-        visit_ignored: &'v mut V,
-    ) -> Result<O, CstConstructError<E>> {
-        tree.collect_nodes(
-            self.0,
-            [
-                NodeKind::NonTerminal(NonTerminalKind::Newline),
-                NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonList),
-                NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonOpt),
-                NodeKind::NonTerminal(NonTerminalKind::CodeBlockDelimiter),
-            ],
-            |
-                [newline,
-                code_block_tail_common_list,
-                code_block_tail_common_opt,
-                code_block_delimiter,
-                ],
-                visit_ignored|
-            Ok(
-                visit(
-                    CodeBlockTailCommonView {
-                        newline: NewlineHandle(newline),
-                        code_block_tail_common_list: CodeBlockTailCommonListHandle(
-                            code_block_tail_common_list,
-                        ),
-                        code_block_tail_common_opt: CodeBlockTailCommonOptHandle(
-                            code_block_tail_common_opt,
-                        ),
-                        code_block_delimiter: CodeBlockDelimiterHandle(
-                            code_block_delimiter,
-                        ),
-                    },
-                    visit_ignored,
-                ),
-            ),
-            visit_ignored,
-        )
-    }
-}
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CodeBlockTailCommonView {
-    pub newline: NewlineHandle,
-    pub code_block_tail_common_list: CodeBlockTailCommonListHandle,
-    pub code_block_tail_common_opt: CodeBlockTailCommonOptHandle,
-    pub code_block_delimiter: CodeBlockDelimiterHandle,
-}
-impl CodeBlockTailCommonView {}
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct CodeBlockTailCommonListHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle for CodeBlockTailCommonListHandle {
-    type View = Option<CodeBlockTailCommonListView>;
-    fn node_id(&self) -> CstNodeId {
-        self.0
-    }
-    fn new_with_visit<F: CstFacade, E>(
-        index: CstNodeId,
-        tree: &F,
-        visit_ignored: &mut impl BuiltinTerminalVisitor<E, F>,
-    ) -> Result<Self, CstConstructError<E>> {
-        tree.collect_nodes(
-            index,
-            [NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonList)],
-            |[index], visit| Ok((Self(index), visit)),
-            visit_ignored,
-        )
-    }
-    fn kind(&self) -> NonTerminalKind {
-        NonTerminalKind::CodeBlockTailCommonList
-    }
-    fn get_view_with_visit<'v, F: CstFacade, V: BuiltinTerminalVisitor<E, F>, O, E>(
-        &self,
-        tree: &F,
-        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
-        visit_ignored: &'v mut V,
-    ) -> Result<O, CstConstructError<E>> {
-        if tree.has_no_children(self.0) {
-            return Ok(visit(None, visit_ignored).0);
-        }
-        tree.collect_nodes(
-            self.0,
-            [
-                NodeKind::NonTerminal(NonTerminalKind::CodeBlockLine),
-                NodeKind::NonTerminal(NonTerminalKind::Newline),
-                NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonList),
-            ],
-            |[code_block_line, newline, code_block_tail_common_list], visit_ignored| Ok(
-                visit(
-                    Some(CodeBlockTailCommonListView {
-                        code_block_line: CodeBlockLineHandle(code_block_line),
-                        newline: NewlineHandle(newline),
-                        code_block_tail_common_list: CodeBlockTailCommonListHandle(
-                            code_block_tail_common_list,
-                        ),
-                    }),
-                    visit_ignored,
-                ),
-            ),
-            visit_ignored,
-        )
-    }
-}
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CodeBlockTailCommonListView {
-    pub code_block_line: CodeBlockLineHandle,
-    pub newline: NewlineHandle,
-    pub code_block_tail_common_list: CodeBlockTailCommonListHandle,
-}
-impl<F: CstFacade> RecursiveView<F> for CodeBlockTailCommonListView {
-    type Item = CodeBlockTailCommonListItem;
-    fn get_all_with_visit<E>(
-        &self,
-        tree: &F,
-        visit_ignored: &mut impl BuiltinTerminalVisitor<E, F>,
-    ) -> Result<Vec<Self::Item>, CstConstructError<E>> {
-        let mut items = Vec::new();
-        let mut current_view = Some(*self);
-        while let Some(item) = current_view {
-            let Self { code_block_line, newline, .. } = item;
-            items
-                .push(CodeBlockTailCommonListItem {
-                    code_block_line,
-                    newline,
-                });
-            item.code_block_tail_common_list
-                .get_view_with_visit(
-                    tree,
-                    |view, visit_ignored| {
-                        current_view = view;
-                        ((), visit_ignored)
-                    },
-                    visit_ignored,
-                )?;
-        }
-        Ok(items)
-    }
-}
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CodeBlockTailCommonListItem {
-    pub code_block_line: CodeBlockLineHandle,
-    pub newline: NewlineHandle,
-}
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct CodeBlockTailCommonOptHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle for CodeBlockTailCommonOptHandle {
-    type View = Option<WsHandle>;
-    fn node_id(&self) -> CstNodeId {
-        self.0
-    }
-    fn new_with_visit<F: CstFacade, E>(
-        index: CstNodeId,
-        tree: &F,
-        visit_ignored: &mut impl BuiltinTerminalVisitor<E, F>,
-    ) -> Result<Self, CstConstructError<E>> {
-        tree.collect_nodes(
-            index,
-            [NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommonOpt)],
-            |[index], visit| Ok((Self(index), visit)),
-            visit_ignored,
-        )
-    }
-    fn kind(&self) -> NonTerminalKind {
-        NonTerminalKind::CodeBlockTailCommonOpt
-    }
-    fn get_view_with_visit<'v, F: CstFacade, V: BuiltinTerminalVisitor<E, F>, O, E>(
-        &self,
-        tree: &F,
-        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
-        visit_ignored: &'v mut V,
-    ) -> Result<O, CstConstructError<E>> {
-        if tree.has_no_children(self.0) {
-            return Ok(visit(None, visit_ignored).0);
-        }
-        tree.collect_nodes(
-            self.0,
-            [NodeKind::NonTerminal(NonTerminalKind::Ws)],
-            |[child], visit_ignored| Ok(
-                visit(
-                    Some(WsHandle::new_with_visit(child, tree, visit_ignored)?),
-                    visit_ignored,
-                ),
-            ),
-            visit_ignored,
-        )
-    }
-}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CommaHandle(pub(crate) super::tree::CstNodeId);
 impl NonTerminalHandle for CommaHandle {
@@ -1982,113 +1667,6 @@ pub struct NamedCodeView {
     pub named_code: NamedCode,
 }
 impl NamedCodeView {}
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct NamedCodeBlockHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle for NamedCodeBlockHandle {
-    type View = NamedCodeBlockView;
-    fn node_id(&self) -> CstNodeId {
-        self.0
-    }
-    fn new_with_visit<F: CstFacade, E>(
-        index: CstNodeId,
-        tree: &F,
-        visit_ignored: &mut impl BuiltinTerminalVisitor<E, F>,
-    ) -> Result<Self, CstConstructError<E>> {
-        tree.collect_nodes(
-            index,
-            [NodeKind::NonTerminal(NonTerminalKind::NamedCodeBlock)],
-            |[index], visit| Ok((Self(index), visit)),
-            visit_ignored,
-        )
-    }
-    fn kind(&self) -> NonTerminalKind {
-        NonTerminalKind::NamedCodeBlock
-    }
-    fn get_view_with_visit<'v, F: CstFacade, V: BuiltinTerminalVisitor<E, F>, O, E>(
-        &self,
-        tree: &F,
-        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
-        visit_ignored: &'v mut V,
-    ) -> Result<O, CstConstructError<E>> {
-        tree.collect_nodes(
-            self.0,
-            [
-                NodeKind::NonTerminal(NonTerminalKind::NamedCodeBlockBegin),
-                NodeKind::NonTerminal(NonTerminalKind::CodeBlockTailCommon),
-            ],
-            |[named_code_block_begin, code_block_tail_common], visit_ignored| Ok(
-                visit(
-                    NamedCodeBlockView {
-                        named_code_block_begin: NamedCodeBlockBeginHandle(
-                            named_code_block_begin,
-                        ),
-                        code_block_tail_common: CodeBlockTailCommonHandle(
-                            code_block_tail_common,
-                        ),
-                    },
-                    visit_ignored,
-                ),
-            ),
-            visit_ignored,
-        )
-    }
-}
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct NamedCodeBlockView {
-    pub named_code_block_begin: NamedCodeBlockBeginHandle,
-    pub code_block_tail_common: CodeBlockTailCommonHandle,
-}
-impl NamedCodeBlockView {}
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct NamedCodeBlockBeginHandle(pub(crate) super::tree::CstNodeId);
-impl NonTerminalHandle for NamedCodeBlockBeginHandle {
-    type View = NamedCodeBlockBeginView;
-    fn node_id(&self) -> CstNodeId {
-        self.0
-    }
-    fn new_with_visit<F: CstFacade, E>(
-        index: CstNodeId,
-        tree: &F,
-        visit_ignored: &mut impl BuiltinTerminalVisitor<E, F>,
-    ) -> Result<Self, CstConstructError<E>> {
-        tree.collect_nodes(
-            index,
-            [NodeKind::NonTerminal(NonTerminalKind::NamedCodeBlockBegin)],
-            |[index], visit| Ok((Self(index), visit)),
-            visit_ignored,
-        )
-    }
-    fn kind(&self) -> NonTerminalKind {
-        NonTerminalKind::NamedCodeBlockBegin
-    }
-    fn get_view_with_visit<'v, F: CstFacade, V: BuiltinTerminalVisitor<E, F>, O, E>(
-        &self,
-        tree: &F,
-        mut visit: impl FnMut(Self::View, &'v mut V) -> (O, &'v mut V),
-        visit_ignored: &'v mut V,
-    ) -> Result<O, CstConstructError<E>> {
-        tree.collect_nodes(
-            self.0,
-            [NodeKind::Terminal(TerminalKind::NamedCodeBlockBegin)],
-            |[named_code_block_begin], visit_ignored| Ok(
-                visit(
-                    NamedCodeBlockBeginView {
-                        named_code_block_begin: NamedCodeBlockBegin(
-                            named_code_block_begin,
-                        ),
-                    },
-                    visit_ignored,
-                ),
-            ),
-            visit_ignored,
-        )
-    }
-}
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct NamedCodeBlockBeginView {
-    pub named_code_block_begin: NamedCodeBlockBegin,
-}
-impl NamedCodeBlockBeginView {}
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct NewlineHandle(pub(crate) super::tree::CstNodeId);
 impl NonTerminalHandle for NewlineHandle {
@@ -3505,9 +3083,6 @@ impl NonTerminalHandle for ValueHandle {
             NodeKind::NonTerminal(NonTerminalKind::Hole) => {
                 ValueView::Hole(HoleHandle(child))
             }
-            NodeKind::NonTerminal(NonTerminalKind::NamedCodeBlock) => {
-                ValueView::NamedCodeBlock(NamedCodeBlockHandle(child))
-            }
             NodeKind::NonTerminal(NonTerminalKind::CodeBlock) => {
                 ValueView::CodeBlock(CodeBlockHandle(child))
             }
@@ -3544,7 +3119,6 @@ pub enum ValueView {
     StrContinues(StrContinuesHandle),
     TypedStr(TypedStrHandle),
     Hole(HoleHandle),
-    NamedCodeBlock(NamedCodeBlockHandle),
     CodeBlock(CodeBlockHandle),
     NamedCode(NamedCodeHandle),
     Code(CodeHandle),
@@ -3818,6 +3392,16 @@ impl TerminalHandle for Text {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct CodeBlock(pub(crate) super::tree::CstNodeId);
+impl TerminalHandle for CodeBlock {
+    fn node_id(&self) -> CstNodeId {
+        self.0
+    }
+    fn kind(&self) -> TerminalKind {
+        TerminalKind::CodeBlock
+    }
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct NamedCode(pub(crate) super::tree::CstNodeId);
 impl TerminalHandle for NamedCode {
     fn node_id(&self) -> CstNodeId {
@@ -3975,35 +3559,5 @@ impl TerminalHandle for Ident {
     }
     fn kind(&self) -> TerminalKind {
         TerminalKind::Ident
-    }
-}
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct NamedCodeBlockBegin(pub(crate) super::tree::CstNodeId);
-impl TerminalHandle for NamedCodeBlockBegin {
-    fn node_id(&self) -> CstNodeId {
-        self.0
-    }
-    fn kind(&self) -> TerminalKind {
-        TerminalKind::NamedCodeBlockBegin
-    }
-}
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct CodeBlockDelimiter(pub(crate) super::tree::CstNodeId);
-impl TerminalHandle for CodeBlockDelimiter {
-    fn node_id(&self) -> CstNodeId {
-        self.0
-    }
-    fn kind(&self) -> TerminalKind {
-        TerminalKind::CodeBlockDelimiter
-    }
-}
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct CodeBlockLine(pub(crate) super::tree::CstNodeId);
-impl TerminalHandle for CodeBlockLine {
-    fn node_id(&self) -> CstNodeId {
-        self.0
-    }
-    fn kind(&self) -> TerminalKind {
-        TerminalKind::CodeBlockLine
     }
 }

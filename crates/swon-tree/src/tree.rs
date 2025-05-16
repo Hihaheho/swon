@@ -122,6 +122,7 @@ impl std::fmt::Display for CstNodeId {
 pub struct ConcreteSyntaxTree<T, Nt> {
     graph: DiGraph<Option<CstNodeData<T, Nt>>, ()>,
     dynamic_tokens: BTreeMap<DynamicTokenId, String>,
+    next_dynamic_token_id: u32,
     root: CstNodeId,
 }
 
@@ -131,6 +132,7 @@ impl<T, Nt> ConcreteSyntaxTree<T, Nt> {
             graph,
             root,
             dynamic_tokens: BTreeMap::new(),
+            next_dynamic_token_id: 0,
         }
     }
 
@@ -215,6 +217,31 @@ impl<T, Nt> ConcreteSyntaxTree<T, Nt> {
             None
         }
     }
+
+    pub fn update_children(
+        &mut self,
+        id: CstNodeId,
+        children: impl IntoIterator<Item = CstNodeId>,
+    ) {
+        for edge in self
+            .graph
+            .edges_directed(id.0, Direction::Outgoing)
+            .map(|edge| edge.id())
+            .collect::<Vec<_>>()
+        {
+            self.graph.remove_edge(edge);
+        }
+        for child in children {
+            self.add_edge(id, child);
+        }
+    }
+
+    pub fn insert_dynamic_terminal(&mut self, data: impl Into<String>) -> DynamicTokenId {
+        let id = DynamicTokenId(self.next_dynamic_token_id);
+        self.dynamic_tokens.insert(id, data.into());
+        self.next_dynamic_token_id += 1;
+        id
+    }
 }
 
 impl<T, Nt> ConcreteSyntaxTree<T, Nt>
@@ -250,7 +277,6 @@ impl TerminalKind {
                     | TerminalKind::Newline
                     | TerminalKind::InStr
                     | TerminalKind::Text
-                    | TerminalKind::CodeBlockLine
                     | TerminalKind::Code,
                 _
             ) | (TerminalKind::Quote, 2)
@@ -454,6 +480,10 @@ impl ConcreteSyntaxTree<TerminalKind, NonTerminalKind> {
         let mut visitor = InspectVisitor::new(input, w);
         visitor.visit_root_handle(self.root_handle(), self)?;
         Ok(())
+    }
+
+    pub fn visit_from_root<V: CstVisitor<Self>>(&self, visitor: &mut V) -> Result<(), V::Error> {
+        visitor.visit_root_handle(self.root_handle(), self)
     }
 }
 

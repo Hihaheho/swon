@@ -5,18 +5,11 @@
 
 %on Quote, TypedQuote %enter Str
 %on TextStart %enter Text
-%on CodeBlockDelimiter, NamedCodeBlockBegin %enter CodeBlockState
 
 %scanner Str {
   %auto_newline_off
   %auto_ws_off
   %on Quote %enter INITIAL
-}
-
-%scanner CodeBlockState {
-  %auto_newline_off
-  %auto_ws_off
-  %on CodeBlockDelimiter %enter INITIAL
 }
 
 %scanner Text {
@@ -44,7 +37,7 @@ Section: At Keys SectionBody ;
   // extension name must always be valid ident, not quoted ident
   ExtensionNameSpace: Ext Ident ;
 
-Value: Object | Array | Integer | Boolean | Null | StrContinues | TypedStr | Hole | NamedCodeBlock | CodeBlock | NamedCode | Code ;
+Value: Object | Array | Integer | Boolean | Null | StrContinues | TypedStr | Hole | CodeBlock | NamedCode | Code ;
   Object: Begin { Key Bind Value [ Comma ] } End ;
   Array: ArrayBegin { Value [ Comma ] } ArrayEnd ;
   Integer: /\d[\d_]*/ ;
@@ -64,16 +57,13 @@ InStr: <Str>/(\\[nrt\\"0]|[^\\"\r\n])*/ ;
 // No escape character in text
 Text: <Text>/[^\r\n]*/ ;
 
-
-NamedCodeBlock: NamedCodeBlockBegin CodeBlockTailCommon ;
-CodeBlock: CodeBlockDelimiter CodeBlockTailCommon ;
-CodeBlockTailCommon: Newline { CodeBlockLine Newline } [ Ws ] CodeBlockDelimiter ;
+CodeBlock: /```[a-zA-Z0-9-_]*(\r\n|\r|\n)([^`]|[`]{1,2})*```/;
 
 NamedCode: /[a-zA-Z0-9-_]+`([^`\r\n]|\\`)*`/ ;
 Code: /`([^`\r\n]|\\`)*`/ ;
 
-Newline: <Text, CodeBlockState>/\r\n|\r|\n/ ;
-Ws: <Str, Text, CodeBlockState>/[\s--\r\n]+/ ;
+Newline: <Text>/\r\n|\r|\n/ ;
+Ws: <Str, Text>/[\s--\r\n]+/ ;
 At: '@' ;
 Ext: '$' ;
 Dot: '.' ;
@@ -86,6 +76,3 @@ Comma: ',' ;
 Continue: '\\' ;
 TextStart: ":" ;
 Ident: /\p{XID_Start}[\p{XID_Continue}-]*/ ;
-NamedCodeBlockBegin: /```[a-zA-Z0-9-_]+/ ;
-CodeBlockDelimiter: <INITIAL, CodeBlockState>/```/ ;
-CodeBlockLine: <CodeBlockState>/[^\n]*/;

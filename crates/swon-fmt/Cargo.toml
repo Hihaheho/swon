@@ -9,5 +9,14 @@ repository = "https://github.com/Hihaheho/swon"
 readme = "README.md"
 keywords = ["swon", "formatter", "pretty-print", "code-style"]
 
+[features]
+default = []
+unformat = ["dep:rand", "dep:rand_chacha"]
+
 [dependencies]
+rand = { version = "0.9.1", optional = true }
+rand_chacha = { version = "0.3.1", optional = true }
 swon-tree = { workspace = true }
+
+[dev-dependencies]
+rand = { version = "0.9.1" }

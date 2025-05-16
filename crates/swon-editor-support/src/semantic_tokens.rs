@@ -130,7 +130,6 @@ fn process_terminal(
         | TerminalKind::TypedQuote
         | TerminalKind::InStr
         | TerminalKind::Text => SemanticTokenType::STRING,
-        TerminalKind::CodeBlockLine => SemanticTokenType::STRING,
         TerminalKind::NamedCode => {
             let code_pos = text[span.start as usize..span.end as usize]
                 .find('`')
@@ -162,8 +161,7 @@ fn process_terminal(
         | TerminalKind::Hole
         | TerminalKind::Comma
         | TerminalKind::TextStart
-        | TerminalKind::CodeBlockDelimiter => SemanticTokenType::OPERATOR,
-        TerminalKind::NamedCodeBlockBegin => {
+        | TerminalKind::CodeBlock => {
             push_multiple_tokens_oneline(
                 legend,
                 tokens,

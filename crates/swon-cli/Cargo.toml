@@ -14,6 +14,9 @@ name = "swon"
 path = "src/main.rs"
 
 [dependencies]
+swon-tree = { workspace = true }
+swon-fmt = { workspace = true, features = ["unformat"] }
+
 clap = { version = "4.0", features = ["derive"] }
 swon-parol = { workspace = true }
 petgraph = "0.8.1"

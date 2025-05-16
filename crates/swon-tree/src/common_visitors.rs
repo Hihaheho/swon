@@ -1,15 +1,20 @@
 use thiserror::Error;
 
-use crate::prelude::*;
+use crate::{prelude::*, tree::LineNumbers};
 
 pub struct FormatVisitor<'f, 't> {
     input: &'t str,
+    line_numbers: LineNumbers<'t>,
     f: &'f mut dyn std::fmt::Write,
 }
 
 impl<'f, 't> FormatVisitor<'f, 't> {
     pub fn new(input: &'t str, f: &'f mut dyn std::fmt::Write) -> Self {
-        Self { input, f }
+        Self {
+            input,
+            line_numbers: LineNumbers::new(input),
+            f,
+        }
     }
 }
 

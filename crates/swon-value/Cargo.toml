@@ -11,7 +11,7 @@ keywords = ["swon", "data-types", "serialization", "value"]
 
 [features]
 default = ["std"]
-std = ["dep:ahash", "regex/perf"]
+std = ["dep:ahash", "regex/perf", "ahash/std", "ahash/runtime-rng"]
 
 [dependencies]
 ahash = { workspace = true, optional = true }
